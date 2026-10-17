@@ -1,0 +1,59 @@
+<UserControl x:Class="ClickToCallForSnom.UI.Pages.DialingPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ClickToCallForSnom.Core">
+    <StackPanel>
+        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Tr Dialing.Title}" />
+
+        <CheckBox Content="{loc:Tr Dialing.ConfirmLinks}" IsChecked="{Binding ConfirmLinkCalls}" />
+        <TextBlock Margin="28,0,0,0" Style="{StaticResource Hint}" Text="{loc:Tr Dialing.ConfirmLinksHint}" />
+
+        <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+            <CheckBox VerticalAlignment="Center" Content="{loc:Tr Dialing.ShowNotification}" IsChecked="{Binding ShowCallNotification}" />
+            <TextBox Width="60"
+                     Margin="12,0,8,0"
+                     IsEnabled="{Binding ShowCallNotification}"
+                     Text="{Binding NotificationSeconds, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock VerticalAlignment="Center" Text="{loc:Tr Dialing.Seconds}" />
+        </StackPanel>
+
+        <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr Dialing.NormalizeTitle}" />
+        <TextBlock Style="{StaticResource Hint}" Text="{loc:Tr Dialing.NormalizeIntro}" />
+
+        <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+            <CheckBox VerticalAlignment="Center" Content="{loc:Tr Dialing.ConvertOwnCountry}" IsChecked="{Binding ConvertOwnCountryCode}" />
+            <TextBlock Margin="12,0,4,0" VerticalAlignment="Center" Text="+" />
+            <TextBox Width="60" IsEnabled="{Binding ConvertOwnCountryCode}" Text="{Binding OwnCountryCode, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+
+        <CheckBox Margin="0,8,0,0" Content="{loc:Tr Dialing.PlusToZeros}" IsChecked="{Binding ConvertPlusToZeros}" />
+
+        <Grid Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Tr Dialing.OutsideLine}" />
+            <TextBox Grid.Column="1" Width="60" Text="{Binding OutsideLinePrefix, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Grid.Column="2" Margin="12,0,8,0" VerticalAlignment="Center" Text="{loc:Tr Dialing.OutsideLineFrom}" />
+            <TextBox Grid.Column="3" Width="60" Text="{Binding OutsideLineMinLength, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Grid.Column="4" Margin="8,0,0,0" VerticalAlignment="Center" Text="{loc:Tr Dialing.Digits}" />
+        </Grid>
+        <TextBlock Margin="170,4,0,0" Style="{StaticResource Hint}" Text="{loc:Tr Dialing.OutsideLineHint}" />
+
+        <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr Dialing.TryIt}" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="TryInput" Text="+49 (0)30 123 456-78" TextChanged="TryInput_TextChanged" />
+            <TextBlock Grid.Column="1" Margin="12,0" VerticalAlignment="Center" FontFamily="{StaticResource IconFont}" Text="&#xE72A;" />
+            <TextBlock x:Name="TryOutput" Grid.Column="2" VerticalAlignment="Center" FontSize="16" FontWeight="SemiBold" />
+        </Grid>
+    </StackPanel>
+</UserControl>

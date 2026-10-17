@@ -1,0 +1,46 @@
+<UserControl x:Class="ClickToCallForSnom.UI.Pages.GeneralPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ClickToCallForSnom.Core">
+    <StackPanel>
+        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Tr General.Title}" />
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170" />
+                <ColumnDefinition Width="220" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Tr General.Language}" />
+            <ComboBox x:Name="LanguageBox"
+                      Grid.Column="1"
+                      HorizontalAlignment="Stretch"
+                      DisplayMemberPath="Value"
+                      SelectedValuePath="Key"
+                      SelectedValue="{Binding Language}" />
+        </Grid>
+        <TextBlock Margin="170,4,0,0" Style="{StaticResource Hint}" Text="{loc:Tr General.LanguageHint}" />
+
+        <CheckBox Margin="0,16,0,0" Content="{loc:Tr General.Autostart}" IsChecked="{Binding Autostart}" />
+
+        <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr General.UpdatesTitle}" />
+        <CheckBox Content="{loc:Tr General.CheckUpdates}" IsChecked="{Binding CheckForUpdates}" />
+        <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+            <Button x:Name="CheckNowButton" Click="CheckNow_Click" Content="{loc:Tr General.CheckNow}" />
+            <TextBlock x:Name="UpdateStatus" Style="{StaticResource Status}" />
+        </StackPanel>
+
+        <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr General.Tools}" />
+        <WrapPanel>
+            <Button Margin="0,0,8,8" Click="Wizard_Click" Content="{loc:Tr General.RunWizard}" />
+            <Button Margin="0,0,8,8" Click="Log_Click" Content="{loc:Tr General.OpenLog}" />
+            <Button Margin="0,0,8,8" Click="Folder_Click" Content="{loc:Tr General.OpenFolder}" />
+        </WrapPanel>
+
+        <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr General.About}" />
+        <TextBlock x:Name="VersionText" />
+        <TextBlock Margin="0,4,0,0">
+            <Hyperlink x:Name="RepoLink" Click="Repo_Click" />
+        </TextBlock>
+        <TextBlock Margin="0,12,0,0" Style="{StaticResource Hint}" Text="{loc:Tr App.Disclaimer}" />
+    </StackPanel>
+</UserControl>

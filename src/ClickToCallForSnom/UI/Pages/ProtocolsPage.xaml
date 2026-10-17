@@ -1,0 +1,38 @@
+<UserControl x:Class="ClickToCallForSnom.UI.Pages.ProtocolsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ClickToCallForSnom.Core">
+    <StackPanel>
+        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Tr Protocols.Title}" />
+        <TextBlock Style="{StaticResource Hint}" Text="{loc:Tr Protocols.Intro}" />
+
+        <Grid Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <CheckBox Content="{loc:Tr Protocols.Tel}" IsChecked="{Binding HandleTel}" />
+            <TextBlock x:Name="TelStatus" Grid.Column="1" Style="{StaticResource Status}" />
+
+            <CheckBox Grid.Row="1" Margin="0,8,0,0" Content="{loc:Tr Protocols.Callto}" IsChecked="{Binding HandleCallto}" />
+            <TextBlock x:Name="CalltoStatus" Grid.Row="1" Grid.Column="1" Style="{StaticResource Status}" />
+
+            <CheckBox Grid.Row="2" Margin="0,8,0,0" Content="{loc:Tr Protocols.Sip}" IsChecked="{Binding HandleSip}" />
+            <TextBlock x:Name="SipStatus" Grid.Row="2" Grid.Column="1" Style="{StaticResource Status}" />
+        </Grid>
+
+        <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr Protocols.DefaultTitle}" />
+        <TextBlock Style="{StaticResource Hint}" Text="{loc:Tr Protocols.DefaultHint}" />
+
+        <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+            <Button Click="OpenDefaultApps_Click" Content="{loc:Tr Protocols.OpenDefaultApps}" Style="{DynamicResource AccentButtonStyle}" />
+            <Button Margin="8,0,0,0" Click="Refresh_Click" Content="{loc:Tr Protocols.Refresh}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

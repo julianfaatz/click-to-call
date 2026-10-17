@@ -1,0 +1,90 @@
+<UserControl x:Class="ClickToCallForSnom.UI.Pages.PhonePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ClickToCallForSnom.Core">
+    <StackPanel>
+        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Tr Phone.Title}" />
+        <TextBlock Style="{StaticResource Hint}" Text="{loc:Tr Phone.Intro}" />
+
+        <Grid Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Tr Phone.Host}" />
+            <TextBox Grid.Column="1" Text="{Binding PhoneHost, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Grid.Row="2" Style="{StaticResource FieldLabel}" Text="{loc:Tr Phone.Connection}" />
+            <WrapPanel Grid.Row="2" Grid.Column="1">
+                <CheckBox Margin="0,0,24,0" Content="{loc:Tr Phone.UseHttps}" IsChecked="{Binding UseHttps}" />
+                <CheckBox Content="{loc:Tr Phone.IgnoreCert}"
+                          IsChecked="{Binding IgnoreCertificateErrors}"
+                          IsEnabled="{Binding UseHttps}" />
+            </WrapPanel>
+
+            <TextBlock Grid.Row="4" Style="{StaticResource FieldLabel}" Text="{loc:Tr Phone.Username}" />
+            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Grid.Row="6" Style="{StaticResource FieldLabel}" Text="{loc:Tr Phone.Password}" />
+            <PasswordBox x:Name="PasswordBox" Grid.Row="6" Grid.Column="1" PasswordChanged="PasswordBox_PasswordChanged" />
+        </Grid>
+
+        <StackPanel Margin="0,16,0,0" Orientation="Horizontal">
+            <Button x:Name="TestButton" Click="Test_Click" Content="{loc:Tr Phone.Test}" />
+            <TextBlock x:Name="TestResult" Style="{StaticResource Status}" />
+        </StackPanel>
+
+        <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr Identity.Title}" />
+        <TextBlock Style="{StaticResource Hint}" Text="{loc:Tr Identity.Intro}" />
+
+        <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+            <Button x:Name="LoadIdentitiesButton" Click="LoadIdentities_Click" Content="{loc:Tr Identity.Load}" />
+            <TextBlock x:Name="IdentityResult" Style="{StaticResource Status}" />
+        </StackPanel>
+
+        <Grid Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Tr Identity.Default}" />
+            <ComboBox x:Name="DefaultIdentityBox"
+                      Grid.Column="1"
+                      HorizontalAlignment="Stretch"
+                      DisplayMemberPath="DisplayName"
+                      SelectionChanged="DefaultIdentityBox_SelectionChanged" />
+            <Button x:Name="RemoveIdentityButton"
+                    Grid.Column="2"
+                    Margin="8,0,0,0"
+                    Click="RemoveIdentity_Click"
+                    Content="{loc:Tr Identity.Remove}" />
+
+            <TextBlock Grid.Row="2" Style="{StaticResource FieldLabel}" Text="{loc:Tr Identity.Manual}" />
+            <TextBox x:Name="ManualIdentityBox" Grid.Row="2" Grid.Column="1" ToolTip="{loc:Tr Identity.ManualHint}" />
+            <Button Grid.Row="2"
+                    Grid.Column="2"
+                    Margin="8,0,0,0"
+                    Click="AddIdentity_Click"
+                    Content="{loc:Tr Identity.Add}" />
+        </Grid>
+
+        <CheckBox Margin="0,12,0,0" Content="{loc:Tr Identity.ShowSelection}" IsChecked="{Binding ShowIdentitySelection}" />
+    </StackPanel>
+</UserControl>

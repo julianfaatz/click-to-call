@@ -1,0 +1,36 @@
+<UserControl x:Class="ClickToCallForSnom.UI.Pages.HotkeyPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ClickToCallForSnom.Core">
+    <StackPanel>
+        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Tr Hotkey.Title}" />
+        <TextBlock Style="{StaticResource Hint}" Text="{loc:Tr Hotkey.Intro}" />
+
+        <CheckBox Margin="0,16,0,0" Content="{loc:Tr Hotkey.Enabled}" IsChecked="{Binding HotkeyEnabled}" />
+
+        <Grid Margin="0,12,0,0" IsEnabled="{Binding HotkeyEnabled}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Tr Hotkey.Combination}" />
+            <TextBox x:Name="HotkeyBox"
+                     Grid.Column="1"
+                     IsReadOnly="True"
+                     IsReadOnlyCaretVisible="False"
+                     FontWeight="SemiBold"
+                     ToolTip="{loc:Tr Hotkey.BoxHint}"
+                     GotKeyboardFocus="HotkeyBox_GotKeyboardFocus"
+                     LostKeyboardFocus="HotkeyBox_LostKeyboardFocus"
+                     PreviewKeyDown="HotkeyBox_PreviewKeyDown" />
+            <Button Grid.Column="2" Margin="8,0,0,0" Click="Reset_Click" Content="{loc:Tr Hotkey.Reset}" />
+        </Grid>
+        <TextBlock x:Name="HotkeyStatus" Margin="170,6,0,0" Style="{StaticResource Hint}" />
+
+        <CheckBox Margin="0,16,0,0"
+                  Content="{loc:Tr Hotkey.ClipboardFallback}"
+                  IsChecked="{Binding HotkeyUseClipboardFallback}"
+                  IsEnabled="{Binding HotkeyEnabled}" />
+    </StackPanel>
+</UserControl>
