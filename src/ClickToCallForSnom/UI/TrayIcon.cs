@@ -24,7 +24,7 @@ public sealed class TrayIcon : IDisposable
         _icon.MouseClick += (_, e) =>
         {
             if (e.Button == Forms.MouseButtons.Left)
-                _services.Calls.ShowDialWindow();
+                MainWindow.ShowSingle();
         };
 
         Rebuild();
@@ -57,8 +57,7 @@ public sealed class TrayIcon : IDisposable
         });
 
         menu.Items.Add(new Forms.ToolStripSeparator());
-        menu.Items.Add(Loc.T("Tray.Settings"), null, (_, _) => SettingsWindow.ShowSingle());
-        menu.Items.Add(Loc.T("Tray.Wizard"), null, (_, _) => SetupWizardWindow.ShowSingle());
+        menu.Items.Add(Loc.T("Tray.Open"), null, (_, _) => MainWindow.ShowSingle(AppPage.Home));
         menu.Items.Add(Loc.T("Tray.CheckUpdates"), null, (_, _) => _ = _services.CheckForUpdatesAsync(manual: true));
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add(Loc.T("Tray.Exit"), null, (_, _) => Application.Current.Shutdown());

@@ -11,21 +11,21 @@ public partial class PhonePage : UserControl
     public PhonePage()
     {
         InitializeComponent();
-        DataContextChanged += (_, _) => OnSettingsChanged();
+        // Values may have been changed on the start page in the meantime
+        Loaded += (_, _) =>
+        {
+            PasswordBox.Password = Settings.Password;
+            RefreshIdentities();
+        };
     }
 
-    private AppSettings Settings => (AppSettings)DataContext;
+    private static AppSettings Settings => SettingsStore.Current;
 
-    private void OnSettingsChanged()
+    private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
     {
-        if (DataContext is not AppSettings settings)
-            return;
-
-        PasswordBox.Password = settings.Password;
-        RefreshIdentities();
+        if (PasswordBox.Password != Settings.Password)
+            Settings.Password = PasswordBox.Password;
     }
-
-    private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e) => Settings.Password = PasswordBox.Password;
 
     private async void Test_Click(object sender, RoutedEventArgs e)
     {
@@ -35,6 +35,7 @@ public partial class PhonePage : UserControl
         {
             using var client = new SnomPhoneClient(PhoneConnection.From(Settings));
             var model = await client.TestConnectionAsync();
+            Settings.PhoneModel = model;
             StatusText.Set(TestResult, Loc.T("Phone.TestOk", model), StatusText.Kind.Success);
         }
         catch (PhoneException ex)

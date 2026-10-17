@@ -82,12 +82,21 @@ public static class Loc
         ["Phone.Intro"] = (
             "Die App steuert dein Snom-Telefon über dessen Web-Oberfläche. Trage die IP-Adresse des Telefons und die Zugangsdaten der Web-Oberfläche ein. Die IP-Adresse findest du am Telefon meist unter Menü → Informationen.",
             "The app controls your Snom phone through its web interface. Enter the phone's IP address and the web interface credentials. You can usually find the IP address on the phone under Menu → Information."),
-        ["Phone.Host"] = ("IP-Adresse / Hostname", "IP address / host name"),
+        ["Phone.Host"] = ("IP-Adresse", "IP address"),
         ["Phone.Connection"] = ("Verbindung", "Connection"),
         ["Phone.UseHttps"] = ("HTTPS verwenden", "Use HTTPS"),
         ["Phone.IgnoreCert"] = ("Zertifikat nicht prüfen (selbstsigniert)", "Don't verify certificate (self-signed)"),
         ["Phone.Username"] = ("Benutzername", "Username"),
         ["Phone.Password"] = ("Passwort", "Password"),
+        ["Phone.HostHelp"] = (
+            "Die IP-Adresse findest du am Telefon unter Menü → Informationen (oder Taste „i“), z. B. 192.168.1.50.",
+            "You can find the IP address on the phone under Menu → Information (or the \"i\" key), e.g. 192.168.1.50."),
+        ["Phone.ConnectionHelp"] = (
+            "Beim Verbinden auf der Startseite wird automatisch erkannt, ob das Telefon HTTP oder HTTPS nutzt. Snom-Telefone verwenden selbstsignierte Zertifikate, deshalb wird das Zertifikat standardmäßig nicht geprüft.",
+            "Connecting on the home page detects automatically whether the phone uses HTTP or HTTPS. Snom phones use self-signed certificates, so the certificate is not verified by default."),
+        ["Phone.CredentialsHelp"] = (
+            "Die Zugangsdaten, mit denen du dich im Browser an der Web-Oberfläche des Telefons anmeldest – nicht die SIP-Zugangsdaten. Das Passwort wird verschlüsselt gespeichert.",
+            "The credentials you use to log in to the phone's web interface in the browser – not the SIP credentials. The password is stored encrypted."),
         ["Phone.Test"] = ("Verbindung testen", "Test connection"),
         ["Phone.Testing"] = ("Verbinde …", "Connecting …"),
         ["Phone.TestOk"] = ("Verbunden: {0}", "Connected: {0}"),
@@ -109,6 +118,9 @@ public static class Loc
         ["Identity.Remove"] = ("Entfernen", "Remove"),
         ["Identity.Manual"] = ("Manuell hinzufügen", "Add manually"),
         ["Identity.ManualHint"] = ("SIP-Adresse der Identität, z. B. 1234@pbx.firma.de", "SIP address of the identity, e.g. 1234@pbx.example.com"),
+        ["Identity.ShowSelectionHelp"] = (
+            "Zeigt im Wählfenster eine Auswahl, über welche Leitung gewählt werden soll.",
+            "Shows a line selection in the dial window."),
         ["Identity.Add"] = ("Hinzufügen", "Add"),
         ["Identity.ShowSelection"] = ("Identität im Wählfenster auswählbar machen", "Allow choosing the identity in the dial window"),
 
@@ -126,6 +138,12 @@ public static class Loc
             "Spaces, parentheses, slashes and dashes are always removed."),
         ["Dialing.ConvertOwnCountry"] = ("Eigene Landesvorwahl durch 0 ersetzen", "Replace own country code with 0"),
         ["Dialing.PlusToZeros"] = ("Bei ausländischen Nummern + durch 00 ersetzen", "Replace + with 00 for foreign numbers"),
+        ["Dialing.ConvertOwnCountryHelp"] = (
+            "Aus +49 30 1234 bzw. 0049 30 1234 wird 030 1234. Für Österreich 43, für die Schweiz 41 eintragen.",
+            "Turns +49 30 1234 or 0049 30 1234 into 030 1234. Use 43 for Austria, 41 for Switzerland, 44 for the UK."),
+        ["Dialing.PlusToZerosHelp"] = (
+            "Aus +43 1 2345 wird 0043 1 2345. Manche Telefonanlagen können kein + wählen.",
+            "Turns +43 1 2345 into 0043 1 2345. Some phone systems cannot dial a +."),
         ["Dialing.OutsideLine"] = ("Amtsholung", "Outside line prefix"),
         ["Dialing.OutsideLineFrom"] = ("bei Nummern ab", "for numbers with at least"),
         ["Dialing.Digits"] = ("Ziffern", "digits"),
@@ -150,6 +168,9 @@ public static class Loc
         ["Hotkey.ClipboardFallback"] = (
             "Wenn nichts markiert ist: Nummer aus der Zwischenablage übernehmen",
             "If nothing is selected: use a number from the clipboard"),
+        ["Hotkey.ClipboardFallbackHelp"] = (
+            "Praktisch, wenn du Nummern lieber mit Strg+C kopierst: Steht eine Telefonnummer in der Zwischenablage, wird sie ins Wählfenster übernommen.",
+            "Handy if you prefer copying numbers with Ctrl+C: if the clipboard contains a phone number, it is put into the dial window."),
         ["Hotkey.InUseTitle"] = ("Hotkey nicht verfügbar", "Hotkey not available"),
         ["Hotkey.InUseText"] = ("{0} wird bereits von einem anderen Programm verwendet. Bitte wähle eine andere Tastenkombination.", "{0} is already used by another application. Please choose a different combination."),
 
@@ -174,16 +195,17 @@ public static class Loc
         ["General.Title"] = ("Allgemein", "General"),
         ["General.Language"] = ("Sprache", "Language"),
         ["General.LanguageSystem"] = ("Wie Windows", "Same as Windows"),
-        ["General.LanguageHint"] = ("Wird für neu geöffnete Fenster übernommen.", "Applies to newly opened windows."),
         ["General.Autostart"] = ("Mit Windows starten", "Start with Windows"),
+        ["General.AutostartHelp"] = (
+            "Damit tel:-Links und der Hotkey nach jedem Neustart sofort funktionieren. Die App startet unsichtbar im Infobereich.",
+            "So that tel: links and the hotkey work right after every restart. The app starts hidden in the notification area."),
+        ["General.Installed"] = ("Installiert: Version {0}", "Installed: version {0}"),
         ["General.UpdatesTitle"] = ("Updates", "Updates"),
         ["General.CheckUpdates"] = ("Automatisch nach neuen Versionen suchen", "Automatically check for new versions"),
         ["General.CheckNow"] = ("Jetzt suchen", "Check now"),
         ["General.Tools"] = ("Werkzeuge", "Tools"),
-        ["General.RunWizard"] = ("Einrichtungsassistent starten", "Run setup assistant"),
         ["General.OpenLog"] = ("Protokoll öffnen", "Open log"),
         ["General.OpenFolder"] = ("Einstellungsordner öffnen", "Open settings folder"),
-        ["General.About"] = ("Info", "About"),
 
         // ---------- Updates ----------
         ["Update.Checking"] = ("Suche …", "Checking …"),
@@ -198,48 +220,67 @@ public static class Loc
         ["Update.Downloading"] = ("Update wird heruntergeladen …", "Downloading update …"),
         ["Update.Failed"] = ("Update fehlgeschlagen", "Update failed"),
 
-        // ---------- Windows ----------
-        ["Settings.Title"] = ("Click to Call for Snom – Einstellungen", "Click to Call for Snom – Settings"),
-        ["Tab.Phone"] = ("Telefon", "Phone"),
-        ["Tab.Dialing"] = ("Wählen", "Dialing"),
-        ["Tab.Hotkey"] = ("Hotkey", "Hotkey"),
-        ["Tab.Protocols"] = ("Links", "Links"),
-        ["Tab.General"] = ("Allgemein", "General"),
+        // ---------- Navigation ----------
+        ["Nav.Home"] = ("Start", "Home"),
+        ["Nav.Phone"] = ("Telefon", "Phone"),
+        ["Nav.Dialing"] = ("Wählen", "Dialing"),
+        ["Nav.Hotkey"] = ("Hotkey", "Hotkey"),
+        ["Nav.Links"] = ("Links", "Links"),
+        ["Nav.General"] = ("Allgemein", "General"),
 
-        // ---------- Wizard ----------
-        ["Wizard.Title"] = ("Click to Call for Snom – Einrichtung", "Click to Call for Snom – Setup"),
-        ["Wizard.Back"] = ("Zurück", "Back"),
-        ["Wizard.Next"] = ("Weiter", "Next"),
-        ["Wizard.Finish"] = ("Fertigstellen", "Finish"),
-        ["Wizard.Step"] = ("Schritt {0} von {1}", "Step {0} of {1}"),
-        ["Wizard.WelcomeTitle"] = ("Willkommen bei Click to Call for Snom", "Welcome to Click to Call for Snom"),
-        ["Wizard.WelcomeText"] = (
-            "Mit dieser App wählst du Telefonnummern direkt auf deinem Snom-Tischtelefon: per Klick auf tel:-Links im Browser oder in anderen Programmen, oder per Hotkey für markierte Nummern. In den nächsten Schritten richten wir alles gemeinsam ein.",
-            "This app dials phone numbers directly on your Snom desk phone: by clicking tel: links in the browser or other applications, or with a hotkey for selected numbers. The next steps will guide you through the setup."),
-        ["Wizard.HostRequired"] = ("Bitte gib die IP-Adresse deines Telefons ein.", "Please enter your phone's IP address."),
-        ["Wizard.FinishTitle"] = ("Fast geschafft!", "Almost done!"),
-        ["Wizard.FinishText"] = (
-            "Die App läuft im Hintergrund und ist über das Symbol im Infobereich der Taskleiste erreichbar (ggf. unter dem Pfeil ^). Dort findest du auch die Einstellungen.",
-            "The app runs in the background and is available via the icon in the notification area of the taskbar (possibly under the ^ arrow). The settings are there as well."),
-        ["Wizard.TestCallTitle"] = ("Testanruf", "Test call"),
-        ["Wizard.TestCallHint"] = ("Gib eine Nummer ein (z. B. dein Handy) und prüfe, ob das Telefon wählt.", "Enter a number (e.g. your mobile) and check whether the phone dials."),
-        ["Wizard.TestCall"] = ("Anrufen", "Call"),
-        ["Wizard.TestCallOk"] = ("Das Telefon hat den Wählbefehl angenommen.", "The phone accepted the dial command."),
-        ["Wizard.TestCallFailed"] = ("Das hat nicht geklappt – Details in der Benachrichtigung.", "That didn't work – see the notification for details."),
+        // ---------- Home ----------
+        ["Home.Title"] = ("Start", "Home"),
+        ["Home.NoPhone"] = ("Kein Telefon verbunden", "No phone connected"),
+        ["Home.NoPhoneText"] = ("Verbinde dein Snom-Telefon, um loszulegen.", "Connect your Snom phone to get started."),
+        ["Home.Connect"] = ("Telefon verbinden", "Connect phone"),
+        ["Home.DoConnect"] = ("Verbinden", "Connect"),
+        ["Home.Change"] = ("Ändern", "Change"),
+        ["Home.Recheck"] = ("Verbindung erneut prüfen", "Check connection again"),
+        ["Home.Online"] = ("Verbunden", "Connected"),
+        ["Home.Offline"] = ("Nicht erreichbar", "Not reachable"),
+        ["Home.Checking"] = ("Prüfe Verbindung …", "Checking connection …"),
+        ["Home.HostRequired"] = ("Bitte die IP-Adresse des Telefons eingeben.", "Please enter the phone's IP address."),
+        ["Home.Scan"] = ("Im Netzwerk suchen", "Search network"),
+        ["Home.Scanning"] = ("Suche Snom-Telefone im Netzwerk …", "Searching for Snom phones on the network …"),
+        ["Home.ScanFound"] = ("Gefunden – klicke auf dein Telefon:", "Found – click your phone:"),
+        ["Home.ScanNone"] = (
+            "Keine Snom-Telefone gefunden. Die IP-Adresse steht am Telefon unter Menü → Informationen.",
+            "No Snom phones found. You can find the IP address on the phone under Menu → Information."),
+        ["Home.NeedsLogin"] = (
+            "Dein Telefon ist passwortgeschützt. Bitte die Zugangsdaten der Web-Oberfläche eingeben.",
+            "Your phone is password protected. Please enter the web interface credentials."),
+        ["Home.Line"] = ("Leitung", "Line"),
+        ["Home.LineHelp"] = (
+            "Dein Telefon hat mehrere Identitäten (Leitungen). Hier legst du fest, über welche standardmäßig gewählt wird.",
+            "Your phone has several identities (lines). Choose which one is used for dialing by default."),
+        ["Home.QuickTitle"] = ("Schnellzugriff", "Quick access"),
+        ["Home.LinksTitle"] = ("tel:-Links", "tel: links"),
+        ["Home.LinksActive"] = (
+            "Klicks auf Telefonnummern im Browser und in anderen Programmen wählen auf deinem Telefon.",
+            "Clicking phone numbers in the browser and other apps dials on your phone."),
+        ["Home.LinksInactive"] = ("Noch nicht als Standard-App für Telefonnummern festgelegt.", "Not yet set as the default app for phone numbers."),
+        ["Home.LinksSet"] = ("Als Standard festlegen", "Set as default"),
+        ["Home.Active"] = ("✓ Aktiv", "✓ Active"),
+        ["Home.HotkeyTitle"] = ("Hotkey", "Hotkey"),
+        ["Home.HotkeyActive"] = ("Nummer irgendwo markieren und {0} drücken.", "Select a number anywhere and press {0}."),
+        ["Home.HotkeyOff"] = ("Ausgeschaltet", "Turned off"),
+        ["Home.TestTitle"] = ("Testanruf", "Test call"),
+        ["Home.TestDescription"] = ("Prüfe, ob das Telefon wählt – z. B. mit deiner Handynummer.", "Check whether the phone dials – e.g. with your mobile number."),
+        ["Home.Call"] = ("Anrufen", "Call"),
 
         // ---------- Tray ----------
         ["Tray.Dial"] = ("Nummer wählen …", "Dial number …"),
         ["Tray.Redial"] = ("Wahlwiederholung", "Redial"),
         ["Tray.RedialNumber"] = ("Wahlwiederholung: {0}", "Redial: {0}"),
-        ["Tray.Settings"] = ("Einstellungen …", "Settings …"),
-        ["Tray.Wizard"] = ("Einrichtungsassistent …", "Setup assistant …"),
+        ["Tray.Open"] = ("Click to Call öffnen", "Open Click to Call"),
         ["Tray.CheckUpdates"] = ("Nach Updates suchen", "Check for updates"),
         ["Tray.Exit"] = ("Beenden", "Exit"),
 
         // ---------- Ready ----------
-        ["Ready.Title"] = ("Click to Call for Snom ist bereit", "Click to Call for Snom is ready"),
-        ["Ready.Text"] = ("Die App läuft im Infobereich der Taskleiste.", "The app is running in the notification area."),
-        ["Ready.TextHotkey"] = ("Die App läuft im Infobereich. Nummer markieren und {0} drücken zum Wählen.", "The app is running in the notification area. Select a number and press {0} to dial."),
+        ["Ready.Title"] = ("Click to Call läuft weiter", "Click to Call keeps running"),
+        ["Ready.Background"] = (
+            "Die App bleibt im Infobereich der Taskleiste aktiv. Links und Hotkey funktionieren weiter.",
+            "The app stays active in the notification area. Links and the hotkey keep working."),
     };
 }
 

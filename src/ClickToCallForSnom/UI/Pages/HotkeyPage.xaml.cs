@@ -10,16 +10,14 @@ public partial class HotkeyPage : UserControl
     public HotkeyPage()
     {
         InitializeComponent();
-        DataContextChanged += (_, _) => ShowHotkey();
+        Loaded += (_, _) => ShowHotkey();
     }
 
-    private AppSettings Settings => (AppSettings)DataContext;
+    private static AppSettings Settings => SettingsStore.Current;
 
     private void ShowHotkey()
     {
-        if (DataContext is not AppSettings settings)
-            return;
-
+        var settings = Settings;
         HotkeyBox.Text = settings.Hotkey.ToString();
         var available = App.Services?.Hotkeys.IsAvailable(settings.Hotkey) ?? true;
         StatusText.Set(HotkeyStatus,
@@ -30,14 +28,16 @@ public partial class HotkeyPage : UserControl
     // While recording, the active global hotkey must not fire
     private void HotkeyBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        App.Services?.Hotkeys.Unregister();
+        if (App.Services is not null)
+            App.Services.HotkeyRecording = true;
         HotkeyStatus.Text = Loc.T("Hotkey.Recording");
         HotkeyStatus.ClearValue(TextBlock.ForegroundProperty);
     }
 
     private void HotkeyBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        App.Services?.RegisterHotkey();
+        if (App.Services is not null)
+            App.Services.HotkeyRecording = false;
         ShowHotkey();
     }
 

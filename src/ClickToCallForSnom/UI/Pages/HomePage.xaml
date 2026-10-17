@@ -1,0 +1,218 @@
+<UserControl x:Class="ClickToCallForSnom.UI.Pages.HomePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ClickToCallForSnom.Core"
+             xmlns:ui="clr-namespace:ClickToCallForSnom.UI">
+    <StackPanel>
+        <TextBlock Style="{StaticResource PageTitle}" Margin="0,0,0,20" Text="{loc:Tr Home.Title}" />
+
+        <!-- ===== Phone card ===== -->
+        <Border Style="{StaticResource Card}" Padding="24,20">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border x:Name="PhoneIconCircle"
+                            Width="56"
+                            Height="56"
+                            Margin="0,0,20,0"
+                            CornerRadius="28"
+                            Background="{DynamicResource SubtleFillColorSecondaryBrush}">
+                        <TextBlock x:Name="PhoneIcon"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontFamily="{StaticResource IconFont}"
+                                   FontSize="26"
+                                   Text="&#xE717;" />
+                    </Border>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock x:Name="PhoneTitle" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="PhoneSubtitle" Margin="0,2,0,0" Style="{StaticResource CardDescription}" FontSize="13" />
+                        <StackPanel x:Name="StatusPill" Margin="0,6,0,0" Orientation="Horizontal" Visibility="Collapsed">
+                            <Ellipse x:Name="StatusDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock x:Name="StatusLabel" FontSize="12" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Orientation="Horizontal">
+                        <Button x:Name="ConnectButton"
+                                Padding="16,6"
+                                Style="{DynamicResource AccentButtonStyle}"
+                                Click="ShowConnectForm_Click"
+                                Content="{loc:Tr Home.Connect}" />
+                        <Button x:Name="RecheckButton"
+                                Margin="0,0,8,0"
+                                Click="Recheck_Click"
+                                ToolTip="{loc:Tr Home.Recheck}">
+                            <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE72C;" />
+                        </Button>
+                        <Button x:Name="ChangeButton" Click="ShowConnectForm_Click" Content="{loc:Tr Home.Change}" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- Line (identity) selection -->
+                <Grid x:Name="LinePanel" Margin="76,16,0,0" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" MaxWidth="360" />
+                    </Grid.ColumnDefinitions>
+                    <ui:LabelWithHelp Margin="0,0,16,0" Label="{loc:Tr Home.Line}" Help="{loc:Tr Home.LineHelp}" />
+                    <ComboBox x:Name="LineBox"
+                              Grid.Column="1"
+                              HorizontalAlignment="Stretch"
+                              DisplayMemberPath="DisplayName"
+                              SelectionChanged="LineBox_SelectionChanged" />
+                </Grid>
+
+                <!-- Connect form -->
+                <StackPanel x:Name="ConnectForm" Margin="0,20,0,0" Visibility="Collapsed">
+                    <Border Height="1" Margin="0,0,0,20" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="*" MaxWidth="320" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <ui:LabelWithHelp Label="{loc:Tr Phone.Host}" Help="{loc:Tr Phone.HostHelp}" />
+                        <TextBox x:Name="HostBox" Grid.Column="1" KeyDown="FormBox_KeyDown" />
+                        <Button x:Name="ScanButton"
+                                Grid.Column="2"
+                                Margin="12,0,0,0"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource LinkButton}"
+                                Click="Scan_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="0,0,6,0" VerticalAlignment="Center" FontFamily="{StaticResource IconFont}" Text="&#xE721;" />
+                                <TextBlock VerticalAlignment="Center" Text="{loc:Tr Home.Scan}" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Scan results -->
+                        <StackPanel x:Name="ScanPanel" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,10,0,0" Visibility="Collapsed">
+                            <ProgressBar x:Name="ScanProgress" Height="3" IsIndeterminate="True" />
+                            <TextBlock x:Name="ScanStatus" Margin="0,6,0,0" Style="{StaticResource CardDescription}" />
+                            <WrapPanel x:Name="ScanResults" Margin="0,6,0,0" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Only shown when the phone asks for a login -->
+                    <StackPanel x:Name="CredentialsPanel" Margin="0,16,0,0" Visibility="Collapsed">
+                        <Border Margin="0,0,0,12"
+                                Padding="12,10"
+                                CornerRadius="4"
+                                Background="{DynamicResource SubtleFillColorSecondaryBrush}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" FontFamily="{StaticResource IconFont}" Text="&#xE72E;" />
+                                <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{loc:Tr Home.NeedsLogin}" />
+                            </StackPanel>
+                        </Border>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="170" />
+                                <ColumnDefinition Width="*" MaxWidth="320" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="8" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <ui:LabelWithHelp Label="{loc:Tr Phone.Username}" Help="{loc:Tr Phone.CredentialsHelp}" />
+                            <TextBox x:Name="UserBox" Grid.Column="1" KeyDown="FormBox_KeyDown" />
+                            <ui:LabelWithHelp Grid.Row="2" Label="{loc:Tr Phone.Password}" />
+                            <PasswordBox x:Name="PasswordBox" Grid.Row="2" Grid.Column="1" KeyDown="FormBox_KeyDown" />
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Margin="170,16,0,0" Orientation="Horizontal">
+                        <Button x:Name="DoConnectButton"
+                                MinWidth="110"
+                                Style="{DynamicResource AccentButtonStyle}"
+                                Click="Connect_Click"
+                                Content="{loc:Tr Home.DoConnect}" />
+                        <Button x:Name="CancelConnectButton"
+                                MinWidth="90"
+                                Margin="8,0,0,0"
+                                Click="CancelConnect_Click"
+                                Content="{loc:Tr Common.Cancel}" />
+                        <TextBlock x:Name="ConnectMessage" Style="{StaticResource Status}" MaxWidth="360" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- ===== Quick setup ===== -->
+        <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr Home.QuickTitle}" />
+
+        <Border Style="{StaticResource Card}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource CardIcon}" Text="&#xE71B;" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource CardTitle}" Text="{loc:Tr Home.LinksTitle}" />
+                    <TextBlock x:Name="LinksDescription" Style="{StaticResource CardDescription}" />
+                </StackPanel>
+                <Button x:Name="LinksButton"
+                        Grid.Column="2"
+                        Margin="16,0,0,0"
+                        Click="Links_Click"
+                        Content="{loc:Tr Home.LinksSet}" />
+                <TextBlock x:Name="LinksOk"
+                           Grid.Column="2"
+                           Margin="16,0,0,0"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource SystemFillColorSuccessBrush}"
+                           Text="{loc:Tr Home.Active}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource Card}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource CardIcon}" Text="&#xE765;" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource CardTitle}" Text="{loc:Tr Home.HotkeyTitle}" />
+                    <TextBlock x:Name="HotkeyDescription" Style="{StaticResource CardDescription}" />
+                </StackPanel>
+                <Button Grid.Column="2" Margin="16,0,0,0" Click="Hotkey_Click" Content="{loc:Tr Home.Change}" />
+            </Grid>
+        </Border>
+
+        <Border Style="{StaticResource Card}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource CardIcon}" Text="&#xE8EA;" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource CardTitle}" Text="{loc:Tr Home.TestTitle}" />
+                    <TextBlock Style="{StaticResource CardDescription}" Text="{loc:Tr Home.TestDescription}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Margin="16,0,0,0" VerticalAlignment="Center" Orientation="Horizontal">
+                    <TextBox x:Name="TestNumberBox" Width="170" VerticalAlignment="Center" KeyDown="TestNumberBox_KeyDown" />
+                    <Button x:Name="TestCallButton" Margin="8,0,0,0" Click="TestCall_Click" Content="{loc:Tr Home.Call}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </StackPanel>
+</UserControl>

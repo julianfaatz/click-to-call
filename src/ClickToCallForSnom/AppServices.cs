@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Threading;
@@ -7,11 +8,13 @@ using ClickToCallForSnom.UI;
 
 namespace ClickToCallForSnom;
 
-/// <summary>Owns the long living parts of the app and applies settings to them.</summary>
+/// <summary>Owns the long living parts of the app, saves settings automatically and applies them.</summary>
 public sealed class AppServices : IDisposable
 {
     private readonly DispatcherTimer _updateTimer = new() { Interval = TimeSpan.FromHours(12) };
+    private readonly DispatcherTimer _saveTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
     private bool _updateToastShown;
+    private bool _hotkeyRecording;
 
     public CallController Calls { get; } = new();
     public HotkeyManager Hotkeys { get; } = new();
@@ -21,16 +24,37 @@ public sealed class AppServices : IDisposable
     {
         Tray = new TrayIcon(this);
         Hotkeys.Pressed += (_, _) => _ = Calls.HandleHotkeyAsync();
-        Calls.SetupRequired += (_, _) => SetupWizardWindow.ShowSingle();
+        Calls.SetupRequired += (_, _) => MainWindow.ShowSingle(AppPage.Home);
         SettingsStore.Changed += (_, _) => Tray.Rebuild();
 
         _updateTimer.Tick += (_, _) => _ = CheckForUpdatesAsync(manual: false);
+        _saveTimer.Tick += (_, _) =>
+        {
+            _saveTimer.Stop();
+            SettingsStore.SaveCurrent();
+        };
+    }
+
+    /// <summary>While the user records a new hotkey in the settings, the global hotkey must not fire.</summary>
+    public bool HotkeyRecording
+    {
+        get => _hotkeyRecording;
+        set
+        {
+            _hotkeyRecording = value;
+            RegisterHotkey();
+        }
     }
 
     public void Start()
     {
-        RegisterHotkey();
-        RegisterProtocols(SettingsStore.Current);
+        var settings = SettingsStore.Current;
+        settings.Autostart = Autostart.IsEnabled;
+        settings.PropertyChanged += Settings_PropertyChanged;
+        settings.Identities.CollectionChanged += (_, _) => ScheduleSave();
+
+        RegisterHotkey(notifyConflict: true);
+        RegisterProtocols();
 
         // First update check shortly after start, then periodically
         var first = new DispatcherTimer { Interval = TimeSpan.FromSeconds(20) };
@@ -44,67 +68,65 @@ public sealed class AppServices : IDisposable
     }
 
     /// <summary>Handles a command line, either from the own start or forwarded by a later start.</summary>
-    public void HandleArguments(string[] args, bool forwarded)
+    public void HandleArguments(string[] args)
     {
         var callUri = args.FirstOrDefault(CallUriParser.IsCallUri);
         if (callUri is not null)
-        {
             Calls.HandleLink(callUri);
-            return;
-        }
-
-        if (args.Contains("--settings"))
-            SettingsWindow.ShowSingle();
         else if (args.Contains("--dial"))
             Calls.ShowDialWindow();
-        else if (!SettingsStore.Current.SetupCompleted)
-            SetupWizardWindow.ShowSingle();
-        else if (forwarded)
-            SettingsWindow.ShowSingle(); // started again from the start menu: show something
-        else if (!args.Contains("--autostart"))
-            ShowReadyNotification();
+        else if (args.Contains("--settings"))
+            MainWindow.ShowSingle(AppPage.General);
+        else if (!args.Contains("--autostart") || !SettingsStore.Current.IsPhoneConfigured)
+            MainWindow.ShowSingle(); // normal start (start menu, desktop) or nothing set up yet
     }
 
-    public void SaveAndApply(AppSettings settings)
+    /// <summary>Every change is saved automatically and applied right away.</summary>
+    private void Settings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        var languageChanged = settings.Language != SettingsStore.Current.Language;
+        switch (e.PropertyName)
+        {
+            case nameof(AppSettings.Hotkey) or nameof(AppSettings.HotkeyEnabled):
+                RegisterHotkey();
+                break;
+            case nameof(AppSettings.HandleTel) or nameof(AppSettings.HandleCallto) or nameof(AppSettings.HandleSip):
+                RegisterProtocols();
+                break;
+            case nameof(AppSettings.Autostart):
+                if (Environment.ProcessPath is { } exe)
+                    Autostart.Set(SettingsStore.Current.Autostart, exe);
+                return; // lives in the registry, not in the settings file
+            case nameof(AppSettings.Language):
+                Loc.SetLanguage(SettingsStore.Current.Language);
+                Tray.Rebuild();
+                // Rebuild after the ComboBox that triggered the change has finished
+                Application.Current.Dispatcher.BeginInvoke(MainWindow.Reload, DispatcherPriority.Background);
+                break;
+        }
 
-        SettingsStore.Save(settings);
-        Loc.SetLanguage(settings.Language);
-
-        if (Environment.ProcessPath is { } exe)
-            Autostart.Set(settings.Autostart, exe);
-
-        RegisterHotkey();
-        RegisterProtocols(settings);
-
-        if (languageChanged)
-            Tray.Rebuild();
+        ScheduleSave();
     }
 
-    public void RegisterHotkey()
+    private void ScheduleSave()
+    {
+        _saveTimer.Stop();
+        _saveTimer.Start();
+    }
+
+    public void RegisterHotkey(bool notifyConflict = false)
     {
         var settings = SettingsStore.Current;
-        if (!settings.HotkeyEnabled)
+        if (!settings.HotkeyEnabled || _hotkeyRecording)
         {
             Hotkeys.Unregister();
             return;
         }
 
-        if (!Hotkeys.Register(settings.Hotkey))
+        if (!Hotkeys.Register(settings.Hotkey) && notifyConflict)
         {
             ToastWindow.ShowToast(Loc.T("Hotkey.InUseTitle"), Loc.T("Hotkey.InUseText", settings.Hotkey), ToastKind.Error,
-                TimeSpan.FromSeconds(15), new ToastAction(Loc.T("Tray.Settings"), () => SettingsWindow.ShowSingle(2)));
+                TimeSpan.FromSeconds(15), new ToastAction(Loc.T("Home.Change"), () => MainWindow.ShowSingle(AppPage.Hotkey)));
         }
-    }
-
-    public void ShowSetupWizard() => SetupWizardWindow.ShowSingle();
-
-    public void ShowReadyNotification()
-    {
-        var settings = SettingsStore.Current;
-        var text = settings.HotkeyEnabled ? Loc.T("Ready.TextHotkey", settings.Hotkey) : Loc.T("Ready.Text");
-        ToastWindow.ShowToast(Loc.T("Ready.Title"), text, ToastKind.Info, TimeSpan.FromSeconds(8));
     }
 
     public async Task CheckForUpdatesAsync(bool manual)
@@ -141,7 +163,7 @@ public sealed class AppServices : IDisposable
         var actions = new List<ToastAction>();
         if (update.InstallerUrl is not null)
             actions.Add(new ToastAction(Loc.T("Update.Install"), () => _ = InstallUpdateAsync(update), IsPrimary: true));
-        actions.Add(new ToastAction(Loc.T("Update.Details"), () => Process.Start(new ProcessStartInfo(update.HtmlUrl) { UseShellExecute = true })));
+        actions.Add(new ToastAction(Loc.T("Update.Details"), () => OpenUrl(update.HtmlUrl)));
         actions.Add(new ToastAction(Loc.T("Update.Skip"), () =>
         {
             SettingsStore.Current.SkippedUpdateVersion = update.Version.ToString();
@@ -158,6 +180,7 @@ public sealed class AppServices : IDisposable
         try
         {
             var installer = await UpdateChecker.DownloadInstallerAsync(update);
+            SettingsStore.SaveCurrent();
             UpdateChecker.RunInstaller(installer);
             Application.Current.Shutdown();
         }
@@ -165,18 +188,18 @@ public sealed class AppServices : IDisposable
         {
             Log.Error("Update installation failed", ex);
             toast.Update(Loc.T("Update.Failed"), ex.Message, ToastKind.Error, TimeSpan.FromSeconds(15),
-                new ToastAction(Loc.T("Update.Details"), () => Process.Start(new ProcessStartInfo(update.HtmlUrl) { UseShellExecute = true })));
+                new ToastAction(Loc.T("Update.Details"), () => OpenUrl(update.HtmlUrl)));
         }
     }
 
-    private static void RegisterProtocols(AppSettings settings)
+    private static void RegisterProtocols()
     {
         if (Environment.ProcessPath is not { } exe)
             return;
 
         try
         {
-            ProtocolRegistration.Register(settings, exe);
+            ProtocolRegistration.Register(SettingsStore.Current, exe);
         }
         catch (Exception ex)
         {
@@ -184,8 +207,13 @@ public sealed class AppServices : IDisposable
         }
     }
 
+    private static void OpenUrl(string url) => Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+
     public void Dispose()
     {
+        if (_saveTimer.IsEnabled)
+            SettingsStore.SaveCurrent();
+        _saveTimer.Stop();
         _updateTimer.Stop();
         Hotkeys.Dispose();
         Tray.Dispose();

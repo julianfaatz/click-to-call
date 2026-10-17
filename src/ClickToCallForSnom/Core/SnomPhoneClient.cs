@@ -61,7 +61,8 @@ public sealed partial class SnomPhoneClient : IDisposable
             UseProxy = false,
         };
 
-        if (connection.UseHttps && connection.IgnoreCertificateErrors)
+        // Also needed for HTTP: phones set to HTTPS only redirect there
+        if (connection.IgnoreCertificateErrors)
             handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
         _http = new HttpClient(handler)

@@ -20,7 +20,7 @@ public partial class GeneralPage : UserControl
         };
 
         VersionText.Text = $"Click to Call for Snom {UpdateChecker.CurrentVersion}";
-        RepoLink.Inlines.Add(UpdateChecker.RepositoryUrl);
+        UpdateStatus.Text = Loc.T("General.Installed", UpdateChecker.CurrentVersion);
     }
 
     private async void CheckNow_Click(object sender, RoutedEventArgs e)
@@ -48,12 +48,6 @@ public partial class GeneralPage : UserControl
         {
             CheckNowButton.IsEnabled = true;
         }
-    }
-
-    private void Wizard_Click(object sender, RoutedEventArgs e)
-    {
-        Window.GetWindow(this)?.Close();
-        App.Services?.ShowSetupWizard();
     }
 
     private void Log_Click(object sender, RoutedEventArgs e)

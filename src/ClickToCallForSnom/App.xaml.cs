@@ -26,10 +26,10 @@ public partial class App : Application
         Services = new AppServices();
         Services.Start();
 
-        _instance.ArgumentsReceived += args => Dispatcher.InvokeAsync(() => Services.HandleArguments(args, forwarded: true));
+        _instance.ArgumentsReceived += args => Dispatcher.InvokeAsync(() => Services.HandleArguments(args));
         _instance.StartListening();
 
-        Services.HandleArguments(_args, forwarded: false);
+        Services.HandleArguments(_args);
         Log.Info($"Started version {UpdateChecker.CurrentVersion}");
     }
 

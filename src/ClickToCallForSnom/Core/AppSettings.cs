@@ -24,7 +24,8 @@ public sealed class AppSettings : ObservableObject
     public string Username { get => _username; set => Set(ref _username, (value ?? "").Trim()); }
 
     /// <summary>Password encrypted with Windows DPAPI (current user).</summary>
-    public string ProtectedPassword { get; set; } = "";
+    private string _protectedPassword = "";
+    public string ProtectedPassword { get => _protectedPassword; set => Set(ref _protectedPassword, value ?? ""); }
 
     [JsonIgnore]
     public string Password
@@ -32,6 +33,10 @@ public sealed class AppSettings : ObservableObject
         get => SecretProtector.Unprotect(ProtectedPassword);
         set => ProtectedPassword = SecretProtector.Protect(value);
     }
+
+    /// <summary>Model name reported by the phone at the last successful connection (for display only).</summary>
+    private string _phoneModel = "";
+    public string PhoneModel { get => _phoneModel; set => Set(ref _phoneModel, value ?? ""); }
 
     // ---------- Identities ----------
 
@@ -114,8 +119,6 @@ public sealed class AppSettings : ObservableObject
     private bool _autostart;
     [JsonIgnore]
     public bool Autostart { get => _autostart; set => Set(ref _autostart, value); }
-
-    public bool SetupCompleted { get; set; }
 
     /// <summary>Most recent dialed numbers (newest first). Basis for redial / call history.</summary>
     public List<string> RecentNumbers { get; set; } = [];
