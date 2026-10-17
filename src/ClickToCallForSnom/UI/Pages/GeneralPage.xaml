@@ -4,71 +4,84 @@
              xmlns:loc="clr-namespace:ClickToCallForSnom.Core"
              xmlns:ui="clr-namespace:ClickToCallForSnom.UI">
     <StackPanel>
-        <TextBlock Style="{StaticResource PageTitle}" Margin="0,0,0,20" Text="{loc:Tr General.Title}" />
+        <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Tr General.Title}" />
 
-        <Border Style="{StaticResource Card}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Style="{StaticResource CardIcon}" Text="&#xF2B7;" />
-                <TextBlock Grid.Column="1" Style="{StaticResource CardTitle}" VerticalAlignment="Center" Text="{loc:Tr General.Language}" />
-                <ComboBox x:Name="LanguageBox"
-                          Grid.Column="2"
-                          Width="180"
-                          DisplayMemberPath="Value"
-                          SelectedValuePath="Key"
-                          SelectedValue="{Binding Language}" />
-            </Grid>
-        </Border>
+        <ui:SettingCard Icon="&#xF2B7;" Title="{loc:Tr General.Language}">
+            <ComboBox x:Name="LanguageBox"
+                      Width="180"
+                      DisplayMemberPath="Value"
+                      SelectedValuePath="Key"
+                      SelectedValue="{Binding Language}" />
+        </ui:SettingCard>
 
-        <Border Style="{StaticResource Card}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Style="{StaticResource CardIcon}" Text="&#xE7E8;" />
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal">
-                    <TextBlock Style="{StaticResource CardTitle}" VerticalAlignment="Center" Text="{loc:Tr General.Autostart}" />
-                    <ui:HelpTip Help="{loc:Tr General.AutostartHelp}" />
+        <ui:SettingCard Icon="&#xE7E8;" Title="{loc:Tr General.Autostart}" Description="{loc:Tr General.AutostartHelp}">
+            <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding Autostart}" />
+        </ui:SettingCard>
+
+        <ui:SettingCard x:Name="UpdateCard" Icon="&#xE895;" Title="{loc:Tr General.UpdatesTitle}">
+            <Button x:Name="CheckNowButton" MinWidth="110" Click="CheckNow_Click" Content="{loc:Tr General.CheckNow}" />
+            <ui:SettingCard.Footer>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" Text="{loc:Tr General.CheckUpdates}" TextWrapping="Wrap" />
+                    <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding CheckForUpdates}" />
+                </Grid>
+            </ui:SettingCard.Footer>
+        </ui:SettingCard>
+
+        <!-- ===== Advanced ===== -->
+        <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr General.Advanced}" />
+
+        <ui:SettingCard x:Name="IdentitiesCard" Icon="&#xE77B;" Title="{loc:Tr Identity.Title}">
+            <Button x:Name="LoadIdentitiesButton" MinWidth="110" Click="LoadIdentities_Click" Content="{loc:Tr Identity.Load}" />
+            <ui:SettingCard.Footer>
+                <StackPanel>
+                    <ItemsControl x:Name="IdentityList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                    <Button Grid.Column="1"
+                                            Padding="8,4"
+                                            Click="RemoveIdentity_Click"
+                                            Tag="{Binding}"
+                                            ToolTip="{loc:Tr Identity.Remove}">
+                                        <TextBlock FontFamily="{StaticResource IconFont}" FontSize="12" Text="&#xE74D;" />
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock x:Name="IdentityResult" Margin="0,0,0,10" Style="{StaticResource CardDescription}" Visibility="Collapsed" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="ManualIdentityBox" KeyDown="ManualIdentityBox_KeyDown" />
+                        <Button Grid.Column="1" Margin="8,0,0,0" Click="AddIdentity_Click" Content="{loc:Tr Identity.Add}" />
+                    </Grid>
+                    <TextBlock Margin="2,6,0,0" Style="{StaticResource Hint}" Text="{loc:Tr Identity.ManualHint}" />
                 </StackPanel>
-                <CheckBox Grid.Column="2" MinWidth="0" IsChecked="{Binding Autostart}" />
-            </Grid>
-        </Border>
+            </ui:SettingCard.Footer>
+        </ui:SettingCard>
 
-        <Border Style="{StaticResource Card}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <TextBlock Style="{StaticResource CardIcon}" Text="&#xE895;" />
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Style="{StaticResource CardTitle}" Text="{loc:Tr General.UpdatesTitle}" />
-                    <TextBlock x:Name="UpdateStatus" Style="{StaticResource CardDescription}" />
-                </StackPanel>
-                <Button x:Name="CheckNowButton" Grid.Column="2" Click="CheckNow_Click" Content="{loc:Tr General.CheckNow}" />
-                <CheckBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,10,0,0" Content="{loc:Tr General.CheckUpdates}" IsChecked="{Binding CheckForUpdates}" />
-            </Grid>
-        </Border>
+        <ui:SettingCard Icon="&#xE9D9;" Title="{loc:Tr General.Troubleshooting}" Description="{loc:Tr General.TroubleshootingHint}">
+            <StackPanel Orientation="Horizontal">
+                <Button Click="Log_Click" Content="{loc:Tr General.OpenLog}" />
+                <Button Margin="8,0,0,0" Click="Folder_Click" Content="{loc:Tr General.OpenFolder}" />
+            </StackPanel>
+        </ui:SettingCard>
 
-        <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr General.Tools}" />
-        <WrapPanel>
-            <Button Margin="0,0,8,8" Click="Log_Click" Content="{loc:Tr General.OpenLog}" />
-            <Button Margin="0,0,8,8" Click="Folder_Click" Content="{loc:Tr General.OpenFolder}" />
-            <Button Margin="0,0,8,8" Click="Repo_Click" Content="GitHub" />
-        </WrapPanel>
-
-        <TextBlock x:Name="VersionText" Margin="0,16,0,0" Style="{StaticResource CardDescription}" />
-        <TextBlock Margin="0,4,0,0" Style="{StaticResource CardDescription}" Text="{loc:Tr App.Disclaimer}" />
+        <ui:SettingCard x:Name="AboutCard" Icon="&#xE946;" Description="{loc:Tr App.Disclaimer}">
+            <Button Click="Repo_Click" Content="GitHub" />
+        </ui:SettingCard>
     </StackPanel>
 </UserControl>

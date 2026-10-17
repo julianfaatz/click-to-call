@@ -40,33 +40,41 @@ public static class Loc
 
         // ---------- Common ----------
         ["Common.Close"] = ("Schließen", "Close"),
-        ["Common.Save"] = ("Speichern", "Save"),
         ["Common.Cancel"] = ("Abbrechen", "Cancel"),
         ["Key.Ctrl"] = ("Strg", "Ctrl"),
         ["Key.Shift"] = ("Umschalt", "Shift"),
         ["Key.Space"] = ("Leertaste", "Space"),
 
         // ---------- Errors ----------
-        ["Error.NotConfigured"] = ("Es ist noch kein Telefon eingerichtet.", "No phone has been set up yet."),
-        ["Error.Unreachable"] = ("Telefon nicht erreichbar. Bitte IP-Adresse und Netzwerk prüfen.", "Phone not reachable. Please check the IP address and network."),
-        ["Error.Timeout"] = ("Das Telefon antwortet nicht (Zeitüberschreitung).", "The phone does not respond (timeout)."),
+        ["Error.NotConfigured"] = ("Es ist noch kein Telefon verbunden.", "No phone has been connected yet."),
+        ["Error.Unreachable"] = (
+            "Telefon nicht erreichbar. Ist es eingeschaltet und die IP-Adresse richtig?",
+            "Phone not reachable. Is it switched on and is the IP address correct?"),
+        ["Error.Timeout"] = ("Das Telefon antwortet nicht.", "The phone does not respond."),
         ["Error.Unauthorized"] = ("Benutzername oder Passwort falsch.", "Wrong username or password."),
         ["Error.Forbidden"] = (
-            "Das Telefon verweigert den Zugriff (403). Bitte Benutzerrechte und die HTTP-Fernsteuerung im Telefon prüfen.",
-            "The phone denied access (403). Please check the user's rights and the HTTP remote control setting on the phone."),
+            "Das Telefon verweigert den Zugriff. Bitte im Web-Interface des Telefons prüfen, ob der Benutzer Admin-Rechte hat.",
+            "The phone denied access. Please check in the phone's web interface that the user has admin rights."),
         ["Error.Certificate"] = (
-            "Das HTTPS-Zertifikat des Telefons wurde abgelehnt. Option „Zertifikat nicht prüfen“ aktivieren oder HTTP verwenden.",
-            "The phone's HTTPS certificate was rejected. Enable \"Don't verify certificate\" or use HTTP."),
+            "Die sichere Verbindung (HTTPS) zum Telefon ist fehlgeschlagen. Bitte auf der Startseite neu verbinden.",
+            "The secure connection (HTTPS) to the phone failed. Please connect again on the home page."),
         ["Error.HttpError"] = ("Das Telefon meldet einen Fehler (HTTP {0}).", "The phone reported an error (HTTP {0})."),
+
+        // ---------- Setup required ----------
+        ["Setup.RequiredTitle"] = ("Noch kein Telefon verbunden", "No phone connected yet"),
+        ["Setup.RequiredText"] = (
+            "Verbinde zuerst dein Snom-Telefon – danach geht es direkt mit deiner Nummer weiter.",
+            "Connect your Snom phone first – then you'll continue right where you left off."),
 
         // ---------- Dial window ----------
         ["Dial.WindowTitle"] = ("Nummer wählen", "Dial number"),
         ["Dial.Title"] = ("Nummer wählen", "Dial number"),
         ["Dial.TitleLink"] = ("Diese Nummer wählen?", "Dial this number?"),
-        ["Dial.Identity"] = ("Identität", "Identity"),
+        ["Dial.Identity"] = ("Leitung", "Line"),
         ["Dial.Dial"] = ("Wählen (Enter)", "Dial (Enter)"),
         ["Dial.Cancel"] = ("Abbrechen (Esc)", "Cancel (Esc)"),
         ["Dial.Preview"] = ("Wird gewählt als: {0}", "Will be dialed as: {0}"),
+        ["Dial.Recent"] = ("Zuletzt gewählt", "Recently dialed"),
 
         // ---------- Call ----------
         ["Call.InvalidTitle"] = ("Keine gültige Rufnummer", "Not a valid phone number"),
@@ -75,121 +83,97 @@ public static class Loc
         ["Call.HangUp"] = ("Auflegen", "Hang up"),
         ["Call.Failed"] = ("Wählen fehlgeschlagen", "Dialing failed"),
         ["Call.Retry"] = ("Erneut versuchen", "Retry"),
+        ["Call.CheckPhone"] = ("Verbindung prüfen", "Check connection"),
         ["Call.HangUpFailed"] = ("Auflegen fehlgeschlagen", "Hang up failed"),
 
-        // ---------- Phone page ----------
-        ["Phone.Title"] = ("Telefon", "Phone"),
-        ["Phone.Intro"] = (
-            "Die App steuert dein Snom-Telefon über dessen Web-Oberfläche. Trage die IP-Adresse des Telefons und die Zugangsdaten der Web-Oberfläche ein. Die IP-Adresse findest du am Telefon meist unter Menü → Informationen.",
-            "The app controls your Snom phone through its web interface. Enter the phone's IP address and the web interface credentials. You can usually find the IP address on the phone under Menu → Information."),
+        // ---------- Connect form ----------
         ["Phone.Host"] = ("IP-Adresse", "IP address"),
-        ["Phone.Connection"] = ("Verbindung", "Connection"),
-        ["Phone.UseHttps"] = ("HTTPS verwenden", "Use HTTPS"),
-        ["Phone.IgnoreCert"] = ("Zertifikat nicht prüfen (selbstsigniert)", "Don't verify certificate (self-signed)"),
+        ["Phone.HostHelp"] = (
+            "Steht am Telefon unter Menü → Informationen (oder Taste „i“), z. B. 192.168.1.50.",
+            "Shown on the phone under Menu → Information (or the \"i\" key), e.g. 192.168.1.50."),
         ["Phone.Username"] = ("Benutzername", "Username"),
         ["Phone.Password"] = ("Passwort", "Password"),
-        ["Phone.HostHelp"] = (
-            "Die IP-Adresse findest du am Telefon unter Menü → Informationen (oder Taste „i“), z. B. 192.168.1.50.",
-            "You can find the IP address on the phone under Menu → Information (or the \"i\" key), e.g. 192.168.1.50."),
-        ["Phone.ConnectionHelp"] = (
-            "Beim Verbinden auf der Startseite wird automatisch erkannt, ob das Telefon HTTP oder HTTPS nutzt. Snom-Telefone verwenden selbstsignierte Zertifikate, deshalb wird das Zertifikat standardmäßig nicht geprüft.",
-            "Connecting on the home page detects automatically whether the phone uses HTTP or HTTPS. Snom phones use self-signed certificates, so the certificate is not verified by default."),
-        ["Phone.CredentialsHelp"] = (
-            "Die Zugangsdaten, mit denen du dich im Browser an der Web-Oberfläche des Telefons anmeldest – nicht die SIP-Zugangsdaten. Das Passwort wird verschlüsselt gespeichert.",
-            "The credentials you use to log in to the phone's web interface in the browser – not the SIP credentials. The password is stored encrypted."),
-        ["Phone.Test"] = ("Verbindung testen", "Test connection"),
         ["Phone.Testing"] = ("Verbinde …", "Connecting …"),
-        ["Phone.TestOk"] = ("Verbunden: {0}", "Connected: {0}"),
 
         // ---------- Identities ----------
-        ["Identity.Title"] = ("Identität (Leitung)", "Identity (line)"),
+        ["Identity.Title"] = ("Leitungen", "Lines"),
         ["Identity.Intro"] = (
-            "Normalerweise wählt das Telefon über seine Standard-Identität. Wenn mehrere Identitäten eingerichtet sind, kannst du sie hier vom Telefon laden und eine als Standard festlegen oder im Wählfenster zur Auswahl anbieten.",
-            "Normally the phone dials using its default identity. If several identities are configured, you can load them from the phone here and pick a default or offer a choice in the dial window."),
-        ["Identity.Load"] = ("Vom Telefon laden", "Load from phone"),
-        ["Identity.Loading"] = ("Lade …", "Loading …"),
-        ["Identity.Loaded"] = ("{0} Identität(en) gefunden", "{0} identity(ies) found"),
-        ["Identity.NoneFound"] = ("Keine Identitäten gefunden.", "No identities found."),
-        ["Identity.ManualFallback"] = ("Du kannst Identitäten auch manuell hinzufügen.", "You can also add identities manually."),
-        ["Identity.ParseError"] = ("Die Antwort des Telefons konnte nicht gelesen werden. Bitte manuell hinzufügen.", "Could not read the phone's response. Please add identities manually."),
-        ["Identity.Default"] = ("Standard-Identität", "Default identity"),
+            "Werden beim Verbinden automatisch vom Telefon gelesen. Nur wichtig, wenn dein Telefon mehrere Leitungen (Identitäten) hat.",
+            "Read from the phone automatically when connecting. Only relevant if your phone has several lines (identities)."),
+        ["Identity.Count"] = (
+            "{0} Leitung(en) eingerichtet. Die Standard-Leitung wählst du auf der Startseite.",
+            "{0} line(s) set up. Pick the default line on the home page."),
+        ["Identity.Load"] = ("Neu einlesen", "Reload"),
+        ["Identity.Loading"] = ("Lese Leitungen vom Telefon …", "Reading lines from the phone …"),
+        ["Identity.Loaded"] = ("{0} Leitung(en) gefunden", "{0} line(s) found"),
+        ["Identity.NoneFound"] = ("Keine Leitungen gefunden.", "No lines found."),
+        ["Identity.ManualFallback"] = ("Du kannst Leitungen auch manuell hinzufügen.", "You can also add lines manually."),
+        ["Identity.ParseError"] = ("Die Antwort des Telefons konnte nicht gelesen werden. Bitte manuell hinzufügen.", "Could not read the phone's response. Please add lines manually."),
         ["Identity.PhoneDefault"] = ("Standard des Telefons", "Phone default"),
         ["Identity.Numbered"] = ("Identität {0}", "Identity {0}"),
         ["Identity.Remove"] = ("Entfernen", "Remove"),
-        ["Identity.Manual"] = ("Manuell hinzufügen", "Add manually"),
-        ["Identity.ManualHint"] = ("SIP-Adresse der Identität, z. B. 1234@pbx.firma.de", "SIP address of the identity, e.g. 1234@pbx.example.com"),
-        ["Identity.ShowSelectionHelp"] = (
-            "Zeigt im Wählfenster eine Auswahl, über welche Leitung gewählt werden soll.",
-            "Shows a line selection in the dial window."),
         ["Identity.Add"] = ("Hinzufügen", "Add"),
-        ["Identity.ShowSelection"] = ("Identität im Wählfenster auswählbar machen", "Allow choosing the identity in the dial window"),
+        ["Identity.Invalid"] = ("Bitte eine SIP-Adresse wie 1234@pbx.firma.de eingeben.", "Please enter a SIP address like 1234@pbx.example.com."),
+        ["Identity.ManualHint"] = ("Manuell hinzufügen: SIP-Adresse der Leitung, z. B. 1234@pbx.firma.de", "Add manually: SIP address of the line, e.g. 1234@pbx.example.com"),
+        ["Identity.ShowSelection"] = ("Leitung bei jedem Anruf auswählen", "Choose the line for every call"),
+        ["Identity.ShowSelectionHelp"] = ("Das Wählfenster fragt, über welche Leitung gewählt werden soll.", "The dial window asks which line to use."),
 
         // ---------- Dialing page ----------
         ["Dialing.Title"] = ("Wählen", "Dialing"),
-        ["Dialing.ConfirmLinks"] = ("Vor dem Wählen von Links nachfragen", "Ask before dialing links"),
+        ["Dialing.ConfirmLinks"] = ("Vor dem Wählen nachfragen", "Ask before dialing"),
         ["Dialing.ConfirmLinksHint"] = (
-            "Beim Klick auf einen tel:-Link erscheint ein Fenster mit der Nummer – Enter wählt, Esc bricht ab. Ohne Nachfrage wird sofort gewählt.",
-            "Clicking a tel: link shows a window with the number – Enter dials, Esc cancels. Without confirmation the number is dialed right away."),
-        ["Dialing.ShowNotification"] = ("Benachrichtigung mit Auflegen-Taste anzeigen für", "Show notification with hang-up button for"),
-        ["Dialing.Seconds"] = ("Sekunden", "seconds"),
-        ["Dialing.NormalizeTitle"] = ("Rufnummern aufbereiten", "Number formatting"),
-        ["Dialing.NormalizeIntro"] = (
-            "Leerzeichen, Klammern, Schrägstriche und Bindestriche werden immer entfernt.",
-            "Spaces, parentheses, slashes and dashes are always removed."),
+            "Bei Klick auf einen Telefon-Link erst die Nummer zeigen – Enter wählt, Esc bricht ab.",
+            "When clicking a phone link, show the number first – Enter dials, Esc cancels."),
+        ["Dialing.ShowNotification"] = ("Benachrichtigung mit Auflegen-Taste", "Notification with hang-up button"),
+        ["Dialing.ShowNotificationHint"] = ("Erscheint unten rechts, während das Telefon wählt.", "Appears in the bottom right corner while the phone dials."),
+        ["Dialing.SecondsOption"] = ("{0} Sekunden", "{0} seconds"),
+        ["Dialing.NormalizeTitle"] = ("Rufnummern", "Phone numbers"),
         ["Dialing.ConvertOwnCountry"] = ("Eigene Landesvorwahl durch 0 ersetzen", "Replace own country code with 0"),
-        ["Dialing.PlusToZeros"] = ("Bei ausländischen Nummern + durch 00 ersetzen", "Replace + with 00 for foreign numbers"),
-        ["Dialing.ConvertOwnCountryHelp"] = (
-            "Aus +49 30 1234 bzw. 0049 30 1234 wird 030 1234. Für Österreich 43, für die Schweiz 41 eintragen.",
-            "Turns +49 30 1234 or 0049 30 1234 into 030 1234. Use 43 for Austria, 41 for Switzerland, 44 for the UK."),
+        ["Dialing.ConvertOwnCountryHelp"] = ("Aus +{0} 30 1234 wird 030 1234.", "Turns +{0} 30 1234 into 030 1234."),
+        ["Dialing.PlusToZeros"] = ("Bei Auslandsnummern + durch 00 ersetzen", "Replace + with 00 for foreign numbers"),
         ["Dialing.PlusToZerosHelp"] = (
-            "Aus +43 1 2345 wird 0043 1 2345. Manche Telefonanlagen können kein + wählen.",
-            "Turns +43 1 2345 into 0043 1 2345. Some phone systems cannot dial a +."),
+            "Aus +43 1 2345 wird 0043 1 2345. Für Telefonanlagen, die kein + wählen können.",
+            "Turns +43 1 2345 into 0043 1 2345. For phone systems that cannot dial a +."),
         ["Dialing.OutsideLine"] = ("Amtsholung", "Outside line prefix"),
-        ["Dialing.OutsideLineFrom"] = ("bei Nummern ab", "for numbers with at least"),
-        ["Dialing.Digits"] = ("Ziffern", "digits"),
         ["Dialing.OutsideLineHint"] = (
-            "Leer lassen, wenn keine Amtsholung nötig ist. Kürzere Nummern (interne Durchwahlen) werden ohne Amtsholung gewählt.",
-            "Leave empty if no prefix is needed. Shorter numbers (internal extensions) are dialed without it."),
-        ["Dialing.TryIt"] = ("Ausprobieren", "Try it"),
+            "Ziffer vor externen Nummern, z. B. 0. Leer lassen, wenn deine Telefonanlage keine braucht.",
+            "Digit dialed before external numbers, e.g. 9. Leave empty if your phone system doesn't need one."),
+        ["Dialing.OutsideLineFrom"] = ("Nur bei Nummern ab", "Only for numbers with at least"),
+        ["Dialing.Digits"] = ("Ziffern – kürzere sind interne Durchwahlen", "digits – shorter ones are internal extensions"),
+        ["Dialing.TryIt"] = ("Ausprobieren: So wird eine Nummer gewählt", "Try it: this is how a number gets dialed"),
 
-        // ---------- Hotkey page ----------
+        // ---------- Hotkey ----------
         ["Hotkey.Title"] = ("Hotkey", "Hotkey"),
         ["Hotkey.Intro"] = (
-            "Markiere in einem beliebigen Programm eine Telefonnummer und drücke den Hotkey – das Wählfenster öffnet sich mit der Nummer, Enter wählt. Ist nichts markiert, öffnet sich ein leeres Wählfenster.",
-            "Select a phone number in any application and press the hotkey – the dial window opens with the number, Enter dials. If nothing is selected, an empty dial window opens."),
-        ["Hotkey.Enabled"] = ("Hotkey aktivieren", "Enable hotkey"),
+            "Nummer in einem beliebigen Programm markieren und Tastenkombination drücken – das Wählfenster öffnet sich.",
+            "Select a number in any application and press the key combination – the dial window opens."),
+        ["Hotkey.Enabled"] = ("Wählen per Tastenkombination", "Dial with a key combination"),
         ["Hotkey.Combination"] = ("Tastenkombination", "Key combination"),
-        ["Hotkey.BoxHint"] = ("Hier klicken und die gewünschte Tastenkombination drücken", "Click here and press the desired key combination"),
-        ["Hotkey.Reset"] = ("Standard", "Default"),
-        ["Hotkey.Recording"] = ("Drücke jetzt die gewünschte Tastenkombination …", "Now press the desired key combination …"),
-        ["Hotkey.Available"] = ("Tastenkombination ist frei", "Key combination is available"),
-        ["Hotkey.InUse"] = ("Wird bereits von einem anderen Programm verwendet", "Already used by another application"),
+        ["Hotkey.BoxHint"] = ("Ins Feld klicken und die neue Kombination drücken.", "Click the box and press the new combination."),
+        ["Hotkey.Reset"] = ("Auf Standard zurücksetzen", "Reset to default"),
+        ["Hotkey.Recording"] = ("Jetzt Tasten drücken …", "Press the keys now …"),
+        ["Hotkey.Available"] = ("Aktiv", "Active"),
+        ["Hotkey.Saved"] = ("Gespeichert", "Saved"),
+        ["Hotkey.InUse"] = ("Wird schon von einem anderen Programm verwendet", "Already used by another application"),
         ["Hotkey.NeedModifier"] = ("Bitte mit Strg, Alt, Umschalt oder Win kombinieren", "Please combine with Ctrl, Alt, Shift or Win"),
-        ["Hotkey.ClipboardFallback"] = (
-            "Wenn nichts markiert ist: Nummer aus der Zwischenablage übernehmen",
-            "If nothing is selected: use a number from the clipboard"),
+        ["Hotkey.ClipboardFallback"] = ("Kopierte Nummer übernehmen", "Use a copied number"),
         ["Hotkey.ClipboardFallbackHelp"] = (
-            "Praktisch, wenn du Nummern lieber mit Strg+C kopierst: Steht eine Telefonnummer in der Zwischenablage, wird sie ins Wählfenster übernommen.",
-            "Handy if you prefer copying numbers with Ctrl+C: if the clipboard contains a phone number, it is put into the dial window."),
+            "Ist nichts markiert, wird eine Nummer aus der Zwischenablage ins Wählfenster übernommen.",
+            "If nothing is selected, a number from the clipboard is put into the dial window."),
         ["Hotkey.InUseTitle"] = ("Hotkey nicht verfügbar", "Hotkey not available"),
-        ["Hotkey.InUseText"] = ("{0} wird bereits von einem anderen Programm verwendet. Bitte wähle eine andere Tastenkombination.", "{0} is already used by another application. Please choose a different combination."),
+        ["Hotkey.InUseText"] = (
+            "{0} wird bereits von einem anderen Programm verwendet. Bitte wähle eine andere Tastenkombination.",
+            "{0} is already used by another application. Please choose a different combination."),
 
-        // ---------- Protocols page ----------
+        // ---------- Links ----------
         ["Protocols.Title"] = ("Links", "Links"),
-        ["Protocols.Intro"] = (
-            "Welche Link-Arten soll die App öffnen? tel: ist der Standard für Telefonnummern auf Webseiten und in vielen Programmen.",
-            "Which link types should the app open? tel: is the standard for phone numbers on websites and in many applications."),
-        ["Protocols.Tel"] = ("tel: – Telefonnummern auf Webseiten, in E-Mails, CRM …", "tel: – phone numbers on websites, in e-mails, CRM …"),
-        ["Protocols.Callto"] = ("callto: – ältere Variante, z. B. in manchen CRM-Systemen", "callto: – older variant, e.g. in some CRM systems"),
-        ["Protocols.Sip"] = ("sip: – SIP-Adressen", "sip: – SIP addresses"),
-        ["Protocols.DefaultTitle"] = ("Als Standard-App festlegen", "Set as default app"),
-        ["Protocols.DefaultHint"] = (
-            "Windows erlaubt Programmen nicht, sich selbst als Standard festzulegen. Klicke auf den Button und wähle in den Windows-Einstellungen bei TEL (und ggf. CALLTO und SIP) „Click to Call for Snom“ aus.",
-            "Windows does not allow apps to make themselves the default. Click the button and pick \"Click to Call for Snom\" for TEL (and CALLTO / SIP if desired) in the Windows settings."),
-        ["Protocols.OpenDefaultApps"] = ("Windows-Standard-Apps öffnen", "Open Windows default apps"),
-        ["Protocols.Refresh"] = ("Status aktualisieren", "Refresh status"),
-        ["Protocols.IsDefault"] = ("Standard-App", "Default app"),
-        ["Protocols.NotDefault"] = ("Nicht Standard", "Not default"),
+        ["Protocols.DefaultTitle"] = ("Telefon-Links mit Click to Call öffnen", "Open phone links with Click to Call"),
+        ["Protocols.Tel"] = ("Telefonnummern auf Webseiten, in E-Mails, im CRM", "Phone numbers on websites, in e-mails, in CRMs"),
+        ["Protocols.Callto"] = ("Ältere Variante, z. B. in manchen CRM-Systemen", "Older variant, e.g. in some CRM systems"),
+        ["Protocols.Sip"] = ("SIP-Adressen", "SIP addresses"),
+        ["Protocols.OpenDefaultApps"] = ("Windows-Einstellungen", "Windows settings"),
+        ["Protocols.IsDefault"] = ("Aktiv", "Active"),
+        ["Protocols.NotDefault"] = ("Nicht aktiv", "Not active"),
 
         // ---------- General page ----------
         ["General.Title"] = ("Allgemein", "General"),
@@ -197,15 +181,17 @@ public static class Loc
         ["General.LanguageSystem"] = ("Wie Windows", "Same as Windows"),
         ["General.Autostart"] = ("Mit Windows starten", "Start with Windows"),
         ["General.AutostartHelp"] = (
-            "Damit tel:-Links und der Hotkey nach jedem Neustart sofort funktionieren. Die App startet unsichtbar im Infobereich.",
-            "So that tel: links and the hotkey work right after every restart. The app starts hidden in the notification area."),
+            "Damit Links und Hotkey nach jedem Neustart sofort funktionieren. Die App startet unsichtbar im Infobereich.",
+            "So that links and the hotkey work right after every restart. The app starts hidden in the notification area."),
         ["General.Installed"] = ("Installiert: Version {0}", "Installed: version {0}"),
         ["General.UpdatesTitle"] = ("Updates", "Updates"),
         ["General.CheckUpdates"] = ("Automatisch nach neuen Versionen suchen", "Automatically check for new versions"),
         ["General.CheckNow"] = ("Jetzt suchen", "Check now"),
-        ["General.Tools"] = ("Werkzeuge", "Tools"),
+        ["General.Advanced"] = ("Erweitert", "Advanced"),
+        ["General.Troubleshooting"] = ("Fehlersuche", "Troubleshooting"),
+        ["General.TroubleshootingHint"] = ("Das Protokoll hilft, wenn etwas nicht klappt.", "The log helps when something doesn't work."),
         ["General.OpenLog"] = ("Protokoll öffnen", "Open log"),
-        ["General.OpenFolder"] = ("Einstellungsordner öffnen", "Open settings folder"),
+        ["General.OpenFolder"] = ("Ordner öffnen", "Open folder"),
 
         // ---------- Updates ----------
         ["Update.Checking"] = ("Suche …", "Checking …"),
@@ -222,50 +208,82 @@ public static class Loc
 
         // ---------- Navigation ----------
         ["Nav.Home"] = ("Start", "Home"),
-        ["Nav.Phone"] = ("Telefon", "Phone"),
         ["Nav.Dialing"] = ("Wählen", "Dialing"),
-        ["Nav.Hotkey"] = ("Hotkey", "Hotkey"),
-        ["Nav.Links"] = ("Links", "Links"),
         ["Nav.General"] = ("Allgemein", "General"),
 
         // ---------- Home ----------
         ["Home.Title"] = ("Start", "Home"),
-        ["Home.NoPhone"] = ("Kein Telefon verbunden", "No phone connected"),
-        ["Home.NoPhoneText"] = ("Verbinde dein Snom-Telefon, um loszulegen.", "Connect your Snom phone to get started."),
-        ["Home.Connect"] = ("Telefon verbinden", "Connect phone"),
+        ["Home.NoPhone"] = ("Telefon verbinden", "Connect your phone"),
+        ["Home.NoPhoneText"] = ("Einmal einrichten, dann wählst du per Klick.", "Set it up once, then dial with a click."),
         ["Home.DoConnect"] = ("Verbinden", "Connect"),
         ["Home.Change"] = ("Ändern", "Change"),
         ["Home.Recheck"] = ("Verbindung erneut prüfen", "Check connection again"),
         ["Home.Online"] = ("Verbunden", "Connected"),
         ["Home.Offline"] = ("Nicht erreichbar", "Not reachable"),
         ["Home.Checking"] = ("Prüfe Verbindung …", "Checking connection …"),
+        ["Home.ConnectedTitle"] = ("Telefon verbunden", "Phone connected"),
+        ["Home.ConnectedText"] = ("{0} ist bereit.", "{0} is ready."),
         ["Home.HostRequired"] = ("Bitte die IP-Adresse des Telefons eingeben.", "Please enter the phone's IP address."),
         ["Home.Scan"] = ("Im Netzwerk suchen", "Search network"),
-        ["Home.Scanning"] = ("Suche Snom-Telefone im Netzwerk …", "Searching for Snom phones on the network …"),
-        ["Home.ScanFound"] = ("Gefunden – klicke auf dein Telefon:", "Found – click your phone:"),
-        ["Home.ScanNone"] = (
-            "Keine Snom-Telefone gefunden. Die IP-Adresse steht am Telefon unter Menü → Informationen.",
-            "No Snom phones found. You can find the IP address on the phone under Menu → Information."),
+        ["Home.ScanAgain"] = ("Erneut suchen", "Search again"),
+        ["Home.Scanning"] = ("Suche dein Snom-Telefon im Netzwerk …", "Looking for your Snom phone on the network …"),
+        ["Home.ScanFoundOne"] = ("Gefunden! Klicke auf dein Telefon, um es zu verbinden:", "Found it! Click your phone to connect:"),
+        ["Home.ScanFound"] = ("Mehrere Telefone gefunden – klicke auf deins:", "Several phones found – click yours:"),
+        ["Home.ScanNone"] = ("Kein Snom-Telefon gefunden. Bitte die IP-Adresse oben eintragen.", "No Snom phone found. Please enter the IP address above."),
         ["Home.NeedsLogin"] = (
-            "Dein Telefon ist passwortgeschützt. Bitte die Zugangsdaten der Web-Oberfläche eingeben.",
-            "Your phone is password protected. Please enter the web interface credentials."),
+            "Dein Telefon ist passwortgeschützt. Bitte die Zugangsdaten der Web-Oberfläche eingeben (nicht die SIP-Daten).",
+            "Your phone is password protected. Please enter the web interface credentials (not the SIP credentials)."),
         ["Home.Line"] = ("Leitung", "Line"),
         ["Home.LineHelp"] = (
-            "Dein Telefon hat mehrere Identitäten (Leitungen). Hier legst du fest, über welche standardmäßig gewählt wird.",
-            "Your phone has several identities (lines). Choose which one is used for dialing by default."),
-        ["Home.QuickTitle"] = ("Schnellzugriff", "Quick access"),
-        ["Home.LinksTitle"] = ("tel:-Links", "tel: links"),
+            "Dein Telefon hat mehrere Leitungen (Identitäten). Hier legst du fest, über welche standardmäßig gewählt wird.",
+            "Your phone has several lines (identities). Choose which one is used for dialing by default."),
+        ["Home.SetupTitle"] = ("Einrichtung", "Setup"),
+        ["Home.SetupSubtitle"] = ("In drei Schritten startklar – dauert etwa eine Minute.", "Ready in three steps – takes about a minute."),
+        ["Home.Next"] = ("Weiter", "Next"),
+        ["Home.SkipStep"] = ("Überspringen", "Skip"),
+        ["Home.Skipped"] = ("(übersprungen)", "(skipped)"),
+        ["Home.StepGoTo"] = ("Zu diesem Schritt", "Go to this step"),
+        ["Home.StepPhone"] = ("Telefon verbinden", "Connect phone"),
+        ["Home.StepLinksShort"] = ("Links aktivieren", "Activate links"),
+        ["Home.StepLinks"] = ("Telefonnummern anklickbar machen", "Make phone numbers clickable"),
+        ["Home.StepLinksText"] = (
+            "Dann wählt ein Klick auf eine Telefonnummer – im Browser, in Outlook oder im CRM – direkt auf deinem Telefon.",
+            "Then a click on a phone number – in the browser, in Outlook or in your CRM – dials right on your phone."),
+        ["Home.StepLinksHow1"] = ("Auf „Windows-Einstellungen öffnen“ klicken", "Click \"Open Windows settings\""),
+        ["Home.StepLinksHow2"] = ("Bei TEL „Click to Call for Snom“ auswählen", "Pick \"Click to Call for Snom\" for TEL"),
+        ["Home.StepLinksHow3"] = ("Hierher zurückkommen – es geht automatisch weiter", "Come back here – the setup continues automatically"),
+        ["Home.StepLinksButton"] = ("Windows-Einstellungen öffnen", "Open Windows settings"),
+        ["Home.StepLinksButtonAgain"] = ("Erneut öffnen", "Open again"),
+        ["Home.StepLinksWaiting"] = (
+            "Noch nicht erkannt. Bitte in den Windows-Einstellungen bei TEL „Click to Call for Snom“ auswählen.",
+            "Not detected yet. Please pick \"Click to Call for Snom\" for TEL in the Windows settings."),
+        ["Home.StepLinksDone"] = ("✓ Erledigt – Telefonnummern sind jetzt anklickbar.", "✓ Done – phone numbers are now clickable."),
+        ["Home.StepLinksTodo"] = (
+            "Öffnet die Windows-Einstellungen – dort bei TEL „Click to Call for Snom“ auswählen.",
+            "Opens the Windows settings – pick \"Click to Call for Snom\" for TEL there."),
+        ["Home.StepTest"] = ("Testanruf", "Test call"),
+        ["Home.StepTestText"] = (
+            "Gib z. B. deine Handynummer ein. Dein Snom-Telefon wählt sofort – wenn dein Handy klingelt, klappt alles.",
+            "Enter e.g. your mobile number. Your Snom phone dials right away – if your mobile rings, everything works."),
+        ["Home.SkipTest"] = ("Überspringen und fertigstellen", "Skip and finish"),
+        ["Home.DoneTitle"] = ("Alles eingerichtet!", "All set!"),
+        ["Home.DoneText"] = ("Click to Call ist startklar – viel Spaß beim Telefonieren.", "Click to Call is ready – enjoy calling."),
+        ["Home.ReadyTitle"] = ("Alles bereit – so wählst du", "All set – here's how to dial"),
+        ["Home.DialTitle"] = ("Nummer eingeben", "Enter a number"),
+        ["Home.DialDescription"] = ("Nummer eintippen oder einfügen und Enter drücken.", "Type or paste a number and press Enter."),
+        ["Home.LinksTitle"] = ("Auf Telefonnummern klicken", "Click phone numbers"),
         ["Home.LinksActive"] = (
-            "Klicks auf Telefonnummern im Browser und in anderen Programmen wählen auf deinem Telefon.",
-            "Clicking phone numbers in the browser and other apps dials on your phone."),
-        ["Home.LinksInactive"] = ("Noch nicht als Standard-App für Telefonnummern festgelegt.", "Not yet set as the default app for phone numbers."),
-        ["Home.LinksSet"] = ("Als Standard festlegen", "Set as default"),
-        ["Home.Active"] = ("✓ Aktiv", "✓ Active"),
-        ["Home.HotkeyTitle"] = ("Hotkey", "Hotkey"),
-        ["Home.HotkeyActive"] = ("Nummer irgendwo markieren und {0} drücken.", "Select a number anywhere and press {0}."),
+            "Im Browser, in Outlook oder im CRM – dein Telefon wählt sofort.",
+            "In the browser, in Outlook or in your CRM – your phone dials right away."),
+        ["Home.LinksSet"] = ("Aktivieren", "Activate"),
+        ["Home.HotkeyTitle"] = ("Nummer markieren und {0} drücken", "Select a number and press {0}"),
+        ["Home.HotkeyDescription"] = ("Funktioniert in jedem Programm – auch in PDFs und E-Mails.", "Works in any application – including PDFs and e-mails."),
+        ["Home.HotkeyOffTitle"] = ("Wählen per Tastenkombination", "Dial with a key combination"),
         ["Home.HotkeyOff"] = ("Ausgeschaltet", "Turned off"),
-        ["Home.TestTitle"] = ("Testanruf", "Test call"),
-        ["Home.TestDescription"] = ("Prüfe, ob das Telefon wählt – z. B. mit deiner Handynummer.", "Check whether the phone dials – e.g. with your mobile number."),
+        ["Home.TrayTitle"] = ("Immer griffbereit in der Taskleiste", "Always at hand in the taskbar"),
+        ["Home.TrayDescription"] = (
+            "Rechtsklick auf das Symbol unten rechts: Nummer wählen, Wahlwiederholung, Auflegen – auch wenn dieses Fenster zu ist.",
+            "Right-click the icon in the bottom right corner: dial, redial, hang up – even when this window is closed."),
         ["Home.Call"] = ("Anrufen", "Call"),
 
         // ---------- Tray ----------
@@ -279,8 +297,8 @@ public static class Loc
         // ---------- Ready ----------
         ["Ready.Title"] = ("Click to Call läuft weiter", "Click to Call keeps running"),
         ["Ready.Background"] = (
-            "Die App bleibt im Infobereich der Taskleiste aktiv. Links und Hotkey funktionieren weiter.",
-            "The app stays active in the notification area. Links and the hotkey keep working."),
+            "Die App wartet unten rechts im Infobereich der Taskleiste. Links und Hotkey funktionieren weiter.",
+            "The app waits in the notification area of the taskbar. Links and the hotkey keep working."),
     };
 }
 

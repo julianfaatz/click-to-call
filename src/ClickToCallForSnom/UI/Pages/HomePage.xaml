@@ -3,11 +3,57 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:loc="clr-namespace:ClickToCallForSnom.Core"
              xmlns:ui="clr-namespace:ClickToCallForSnom.UI">
-    <StackPanel>
-        <TextBlock Style="{StaticResource PageTitle}" Margin="0,0,0,20" Text="{loc:Tr Home.Title}" />
+    <UserControl.Resources>
+        <Style x:Key="StepCard" TargetType="Border" BasedOn="{StaticResource Card}">
+            <Setter Property="Padding" Value="28,24" />
+        </Style>
+        <Style x:Key="StepIconCircle" TargetType="Border">
+            <Setter Property="Width" Value="56" />
+            <Setter Property="Height" Value="56" />
+            <Setter Property="Margin" Value="0,0,20,0" />
+            <Setter Property="CornerRadius" Value="28" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+        </Style>
+        <Style x:Key="StepIcon" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+            <Setter Property="FontSize" Value="26" />
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+        </Style>
+        <Style x:Key="StepTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="StepText" TargetType="TextBlock" BasedOn="{StaticResource CardDescription}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,4,0,0" />
+        </Style>
+        <Style x:Key="InstructionNumber" TargetType="Border">
+            <Setter Property="Width" Value="22" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Margin" Value="0,0,10,0" />
+            <Setter Property="CornerRadius" Value="11" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+        </Style>
+    </UserControl.Resources>
 
-        <!-- ===== Phone card ===== -->
-        <Border Style="{StaticResource Card}" Padding="24,20">
+    <StackPanel>
+        <TextBlock x:Name="TitleText" Style="{StaticResource PageTitle}" />
+        <TextBlock x:Name="SubtitleText"
+                   Margin="0,-14,0,24"
+                   FontSize="14"
+                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                   Text="{loc:Tr Home.SetupSubtitle}" />
+
+        <!-- ===== Step indicator (filled in code) ===== -->
+        <Grid x:Name="Stepper" Margin="0,0,0,24" />
+
+        <!-- ===== Phone card (step 1 and everyday use) ===== -->
+        <Border x:Name="PhoneCard" Style="{StaticResource Card}" Padding="24,20">
             <StackPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -16,35 +62,20 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Border x:Name="PhoneIconCircle"
-                            Width="56"
-                            Height="56"
-                            Margin="0,0,20,0"
-                            CornerRadius="28"
-                            Background="{DynamicResource SubtleFillColorSecondaryBrush}">
-                        <TextBlock x:Name="PhoneIcon"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   FontFamily="{StaticResource IconFont}"
-                                   FontSize="26"
-                                   Text="&#xE717;" />
+                    <Border Style="{StaticResource StepIconCircle}" VerticalAlignment="Center">
+                        <TextBlock x:Name="PhoneIcon" Style="{StaticResource StepIcon}" Text="&#xE717;" />
                     </Border>
 
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock x:Name="PhoneTitle" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                        <TextBlock x:Name="PhoneSubtitle" Margin="0,2,0,0" Style="{StaticResource CardDescription}" FontSize="13" />
+                        <TextBlock x:Name="PhoneTitle" Style="{StaticResource StepTitle}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                        <TextBlock x:Name="PhoneSubtitle" Style="{StaticResource StepText}" Margin="0,2,0,0" />
                         <StackPanel x:Name="StatusPill" Margin="0,6,0,0" Orientation="Horizontal" Visibility="Collapsed">
                             <Ellipse x:Name="StatusDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
-                            <TextBlock x:Name="StatusLabel" FontSize="12" VerticalAlignment="Center" />
+                            <TextBlock x:Name="StatusLabel" FontSize="12" VerticalAlignment="Center" TextWrapping="Wrap" />
                         </StackPanel>
                     </StackPanel>
 
-                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Orientation="Horizontal">
-                        <Button x:Name="ConnectButton"
-                                Padding="16,6"
-                                Style="{DynamicResource AccentButtonStyle}"
-                                Click="ShowConnectForm_Click"
-                                Content="{loc:Tr Home.Connect}" />
+                    <StackPanel Grid.Column="2" Margin="16,0,0,0" VerticalAlignment="Center" Orientation="Horizontal">
                         <Button x:Name="RecheckButton"
                                 Margin="0,0,8,0"
                                 Click="Recheck_Click"
@@ -71,20 +102,21 @@
 
                 <!-- Connect form -->
                 <StackPanel x:Name="ConnectForm" Margin="0,20,0,0" Visibility="Collapsed">
-                    <Border Height="1" Margin="0,0,0,20" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                    <Border Margin="-24,0,-24,20" Style="{StaticResource Divider}" />
 
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="170" />
+                            <ColumnDefinition Width="150" />
                             <ColumnDefinition Width="*" MaxWidth="320" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <ui:LabelWithHelp Label="{loc:Tr Phone.Host}" Help="{loc:Tr Phone.HostHelp}" />
+                        <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Tr Phone.Host}" />
                         <TextBox x:Name="HostBox" Grid.Column="1" KeyDown="FormBox_KeyDown" />
                         <Button x:Name="ScanButton"
                                 Grid.Column="2"
@@ -94,15 +126,16 @@
                                 Click="Scan_Click">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Margin="0,0,6,0" VerticalAlignment="Center" FontFamily="{StaticResource IconFont}" Text="&#xE721;" />
-                                <TextBlock VerticalAlignment="Center" Text="{loc:Tr Home.Scan}" />
+                                <TextBlock x:Name="ScanButtonText" VerticalAlignment="Center" Text="{loc:Tr Home.Scan}" />
                             </StackPanel>
                         </Button>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="2,6,0,0" Style="{StaticResource Hint}" Text="{loc:Tr Phone.HostHelp}" />
 
                         <!-- Scan results -->
-                        <StackPanel x:Name="ScanPanel" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,10,0,0" Visibility="Collapsed">
+                        <StackPanel x:Name="ScanPanel" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,12,0,0" Visibility="Collapsed">
                             <ProgressBar x:Name="ScanProgress" Height="3" IsIndeterminate="True" />
                             <TextBlock x:Name="ScanStatus" Margin="0,6,0,0" Style="{StaticResource CardDescription}" />
-                            <WrapPanel x:Name="ScanResults" Margin="0,6,0,0" />
+                            <WrapPanel x:Name="ScanResults" Margin="0,8,0,0" />
                         </StackPanel>
                     </Grid>
 
@@ -111,15 +144,19 @@
                         <Border Margin="0,0,0,12"
                                 Padding="12,10"
                                 CornerRadius="4"
-                                Background="{DynamicResource SubtleFillColorSecondaryBrush}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" FontFamily="{StaticResource IconFont}" Text="&#xE72E;" />
-                                <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{loc:Tr Home.NeedsLogin}" />
-                            </StackPanel>
+                                Background="{DynamicResource SystemFillColorAttentionBackgroundBrush}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Margin="0,1,10,0" FontFamily="{StaticResource IconFont}" Text="&#xE72E;" />
+                                <TextBlock Grid.Column="1" TextWrapping="Wrap" Text="{loc:Tr Home.NeedsLogin}" />
+                            </Grid>
                         </Border>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="170" />
+                                <ColumnDefinition Width="150" />
                                 <ColumnDefinition Width="*" MaxWidth="320" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
@@ -127,14 +164,14 @@
                                 <RowDefinition Height="8" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <ui:LabelWithHelp Label="{loc:Tr Phone.Username}" Help="{loc:Tr Phone.CredentialsHelp}" />
+                            <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Tr Phone.Username}" />
                             <TextBox x:Name="UserBox" Grid.Column="1" KeyDown="FormBox_KeyDown" />
-                            <ui:LabelWithHelp Grid.Row="2" Label="{loc:Tr Phone.Password}" />
+                            <TextBlock Grid.Row="2" Style="{StaticResource FieldLabel}" Text="{loc:Tr Phone.Password}" />
                             <PasswordBox x:Name="PasswordBox" Grid.Row="2" Grid.Column="1" KeyDown="FormBox_KeyDown" />
                         </Grid>
                     </StackPanel>
 
-                    <StackPanel Margin="170,16,0,0" Orientation="Horizontal">
+                    <StackPanel Margin="150,16,0,0" Orientation="Horizontal">
                         <Button x:Name="DoConnectButton"
                                 MinWidth="110"
                                 Style="{DynamicResource AccentButtonStyle}"
@@ -145,74 +182,137 @@
                                 Margin="8,0,0,0"
                                 Click="CancelConnect_Click"
                                 Content="{loc:Tr Common.Cancel}" />
-                        <TextBlock x:Name="ConnectMessage" Style="{StaticResource Status}" MaxWidth="360" />
                     </StackPanel>
+                    <TextBlock x:Name="ConnectMessage" Margin="150,10,0,0" TextWrapping="Wrap" Visibility="Collapsed" />
+                </StackPanel>
+
+                <!-- Setup: phone already connected, user came back to step 1 -->
+                <StackPanel x:Name="Step1Next" Margin="76,20,0,0" Orientation="Horizontal" Visibility="Collapsed">
+                    <Button MinWidth="110" Style="{DynamicResource AccentButtonStyle}" Click="Next_Click" Content="{loc:Tr Home.Next}" />
                 </StackPanel>
             </StackPanel>
         </Border>
 
-        <!-- ===== Quick setup ===== -->
-        <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr Home.QuickTitle}" />
-
-        <Border Style="{StaticResource Card}">
+        <!-- ===== Step 2: links ===== -->
+        <Border x:Name="Step2Card" Style="{StaticResource StepCard}" Visibility="Collapsed">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Style="{StaticResource CardIcon}" Text="&#xE71B;" />
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Style="{StaticResource CardTitle}" Text="{loc:Tr Home.LinksTitle}" />
-                    <TextBlock x:Name="LinksDescription" Style="{StaticResource CardDescription}" />
+                <Border Style="{StaticResource StepIconCircle}">
+                    <TextBlock Style="{StaticResource StepIcon}" Text="&#xE71B;" />
+                </Border>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Style="{StaticResource StepTitle}" Text="{loc:Tr Home.StepLinks}" />
+                    <TextBlock Style="{StaticResource StepText}" Text="{loc:Tr Home.StepLinksText}" />
+
+                    <!-- How to -->
+                    <StackPanel x:Name="Step2Instructions" Margin="0,20,0,0">
+                        <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                            <Border Style="{StaticResource InstructionNumber}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="1" /></Border>
+                            <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{loc:Tr Home.StepLinksHow1}" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                            <Border Style="{StaticResource InstructionNumber}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="2" /></Border>
+                            <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{loc:Tr Home.StepLinksHow2}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Style="{StaticResource InstructionNumber}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="3" /></Border>
+                            <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{loc:Tr Home.StepLinksHow3}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Already done (user came back to this step) -->
+                    <TextBlock x:Name="Step2Done"
+                               Margin="0,20,0,0"
+                               Foreground="{DynamicResource SystemFillColorSuccessBrush}"
+                               Text="{loc:Tr Home.StepLinksDone}"
+                               Visibility="Collapsed" />
+
+                    <TextBlock x:Name="Step2Waiting"
+                               Margin="0,16,0,0"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource SystemFillColorCautionBrush}"
+                               Text="{loc:Tr Home.StepLinksWaiting}"
+                               Visibility="Collapsed" />
+
+                    <StackPanel Margin="0,24,0,0" Orientation="Horizontal">
+                        <Button x:Name="Step2Button" MinWidth="110" Style="{DynamicResource AccentButtonStyle}" Click="Links_Click" Content="{loc:Tr Home.StepLinksButton}" />
+                        <Button x:Name="Step2NextButton" MinWidth="110" Style="{DynamicResource AccentButtonStyle}" Click="Next_Click" Content="{loc:Tr Home.Next}" Visibility="Collapsed" />
+                        <Button x:Name="Step2SkipButton" Margin="20,0,0,0" VerticalAlignment="Center" Style="{StaticResource LinkButton}" Click="SkipLinks_Click" Content="{loc:Tr Home.SkipStep}" />
+                    </StackPanel>
                 </StackPanel>
-                <Button x:Name="LinksButton"
-                        Grid.Column="2"
-                        Margin="16,0,0,0"
-                        Click="Links_Click"
-                        Content="{loc:Tr Home.LinksSet}" />
-                <TextBlock x:Name="LinksOk"
-                           Grid.Column="2"
-                           Margin="16,0,0,0"
-                           VerticalAlignment="Center"
-                           Foreground="{DynamicResource SystemFillColorSuccessBrush}"
-                           Text="{loc:Tr Home.Active}" />
             </Grid>
         </Border>
 
-        <Border Style="{StaticResource Card}">
+        <!-- ===== Step 3: test call ===== -->
+        <Border x:Name="Step3Card" Style="{StaticResource StepCard}" Visibility="Collapsed">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Style="{StaticResource CardIcon}" Text="&#xE765;" />
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Style="{StaticResource CardTitle}" Text="{loc:Tr Home.HotkeyTitle}" />
-                    <TextBlock x:Name="HotkeyDescription" Style="{StaticResource CardDescription}" />
+                <Border Style="{StaticResource StepIconCircle}">
+                    <TextBlock Style="{StaticResource StepIcon}" Text="&#xE8EA;" />
+                </Border>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Style="{StaticResource StepTitle}" Text="{loc:Tr Home.StepTest}" />
+                    <TextBlock Style="{StaticResource StepText}" Text="{loc:Tr Home.StepTestText}" />
+
+                    <StackPanel Margin="0,20,0,0" Orientation="Horizontal">
+                        <TextBox x:Name="TestNumberBox" Width="240" FontSize="16" VerticalAlignment="Center" KeyDown="DialBox_KeyDown" />
+                        <Button x:Name="TestCallButton" Margin="8,0,0,0" MinWidth="110" Style="{DynamicResource AccentButtonStyle}" Click="Call_Click" Content="{loc:Tr Home.Call}" />
+                    </StackPanel>
+
+                    <Button Margin="0,20,0,0" HorizontalAlignment="Left" Style="{StaticResource LinkButton}" Click="SkipTest_Click" Content="{loc:Tr Home.SkipTest}" />
                 </StackPanel>
-                <Button Grid.Column="2" Margin="16,0,0,0" Click="Hotkey_Click" Content="{loc:Tr Home.Change}" />
             </Grid>
         </Border>
 
-        <Border Style="{StaticResource Card}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Style="{StaticResource CardIcon}" Text="&#xE8EA;" />
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Style="{StaticResource CardTitle}" Text="{loc:Tr Home.TestTitle}" />
-                    <TextBlock Style="{StaticResource CardDescription}" Text="{loc:Tr Home.TestDescription}" />
+        <!-- ===== Everyday use (after the setup) ===== -->
+        <StackPanel x:Name="ReadyPanel" Visibility="Collapsed">
+            <Border x:Name="DoneBanner"
+                    Margin="0,4,0,0"
+                    Padding="16,12"
+                    CornerRadius="6"
+                    Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}"
+                    Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Margin="0,1,12,0"
+                               FontFamily="{StaticResource IconFont}"
+                               FontSize="16"
+                               Foreground="{DynamicResource SystemFillColorSuccessBrush}"
+                               Text="&#xE930;" />
+                    <StackPanel Grid.Column="1">
+                        <TextBlock FontWeight="SemiBold" Text="{loc:Tr Home.DoneTitle}" />
+                        <TextBlock Margin="0,2,0,0" TextWrapping="Wrap" Text="{loc:Tr Home.DoneText}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr Home.ReadyTitle}" />
+
+            <ui:SettingCard Icon="&#xE717;" Title="{loc:Tr Home.DialTitle}" Description="{loc:Tr Home.DialDescription}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBox x:Name="DialNumberBox" Width="190" VerticalAlignment="Center" KeyDown="DialBox_KeyDown" />
+                    <Button x:Name="DialCallButton" Margin="8,0,0,0" MinWidth="90" Style="{DynamicResource AccentButtonStyle}" Click="Call_Click" Content="{loc:Tr Home.Call}" />
                 </StackPanel>
-                <StackPanel Grid.Column="2" Margin="16,0,0,0" VerticalAlignment="Center" Orientation="Horizontal">
-                    <TextBox x:Name="TestNumberBox" Width="170" VerticalAlignment="Center" KeyDown="TestNumberBox_KeyDown" />
-                    <Button x:Name="TestCallButton" Margin="8,0,0,0" Click="TestCall_Click" Content="{loc:Tr Home.Call}" />
-                </StackPanel>
-            </Grid>
-        </Border>
+            </ui:SettingCard>
+
+            <ui:SettingCard x:Name="LinksTip" Icon="&#xE71B;" Title="{loc:Tr Home.LinksTitle}">
+                <Button x:Name="LinksTipButton" MinWidth="110" Style="{DynamicResource AccentButtonStyle}" Click="Links_Click" Content="{loc:Tr Home.LinksSet}" />
+            </ui:SettingCard>
+
+            <ui:SettingCard x:Name="HotkeyTip" Icon="&#xE765;">
+                <Button MinWidth="90" Click="Hotkey_Click" Content="{loc:Tr Home.Change}" />
+            </ui:SettingCard>
+
+            <ui:SettingCard Icon="&#xEA8F;" Title="{loc:Tr Home.TrayTitle}" Description="{loc:Tr Home.TrayDescription}" />
+        </StackPanel>
     </StackPanel>
 </UserControl>

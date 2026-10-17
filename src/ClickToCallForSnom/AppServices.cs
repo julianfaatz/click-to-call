@@ -24,7 +24,11 @@ public sealed class AppServices : IDisposable
     {
         Tray = new TrayIcon(this);
         Hotkeys.Pressed += (_, _) => _ = Calls.HandleHotkeyAsync();
-        Calls.SetupRequired += (_, _) => MainWindow.ShowSingle(AppPage.Home);
+        Calls.SetupRequired += (_, _) =>
+        {
+            MainWindow.ShowSingle(AppPage.Home);
+            ToastWindow.ShowToast(Loc.T("Setup.RequiredTitle"), Loc.T("Setup.RequiredText"), ToastKind.Info, TimeSpan.FromSeconds(10));
+        };
         SettingsStore.Changed += (_, _) => Tray.Rebuild();
 
         _updateTimer.Tick += (_, _) => _ = CheckForUpdatesAsync(manual: false);
@@ -125,7 +129,7 @@ public sealed class AppServices : IDisposable
         if (!Hotkeys.Register(settings.Hotkey) && notifyConflict)
         {
             ToastWindow.ShowToast(Loc.T("Hotkey.InUseTitle"), Loc.T("Hotkey.InUseText", settings.Hotkey), ToastKind.Error,
-                TimeSpan.FromSeconds(15), new ToastAction(Loc.T("Home.Change"), () => MainWindow.ShowSingle(AppPage.Hotkey)));
+                TimeSpan.FromSeconds(15), new ToastAction(Loc.T("Home.Change"), () => MainWindow.ShowSingle(AppPage.Dialing, "Hotkey")));
         }
     }
 

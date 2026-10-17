@@ -115,6 +115,26 @@ public sealed class AppSettings : ObservableObject
 
     public string SkippedUpdateVersion { get; set; } = "";
 
+    /// <summary>The "keeps running in the notification area" hint is shown only once.</summary>
+    public bool BackgroundHintShown { get; set; }
+
+    // ---------- Setup ----------
+
+    /// <summary>The guided setup on the start page was finished (test call made or skipped).</summary>
+    private bool _setupCompleted;
+    public bool SetupCompleted { get => _setupCompleted; set => Set(ref _setupCompleted, value); }
+
+    /// <summary>The user skipped the "make phone numbers clickable" setup step.</summary>
+    private bool _setupLinksSkipped;
+    public bool SetupLinksSkipped { get => _setupLinksSkipped; set => Set(ref _setupLinksSkipped, value); }
+
+    // ---------- Window ----------
+
+    /// <summary>Last size of the app window (0 = default size).</summary>
+    public double WindowWidth { get; set; }
+    public double WindowHeight { get; set; }
+    public bool WindowMaximized { get; set; }
+
     /// <summary>Lives in the registry (Run key), not in the JSON file. Filled when a settings window opens.</summary>
     private bool _autostart;
     [JsonIgnore]
@@ -134,6 +154,43 @@ public sealed class AppSettings : ObservableObject
         RecentNumbers.Insert(0, number);
         if (RecentNumbers.Count > max)
             RecentNumbers.RemoveRange(max, RecentNumbers.Count - max);
+    }
+
+    /// <summary>Country calling code for the Windows region (used for new installations).</summary>
+    public static string CountryCodeForRegion()
+    {
+        try
+        {
+            return System.Globalization.RegionInfo.CurrentRegion.TwoLetterISORegionName switch
+            {
+                "AT" => "43",
+                "CH" => "41",
+                "LI" => "423",
+                "LU" => "352",
+                "NL" => "31",
+                "BE" => "32",
+                "FR" => "33",
+                "IT" => "39",
+                "ES" => "34",
+                "PT" => "351",
+                "GB" => "44",
+                "IE" => "353",
+                "DK" => "45",
+                "SE" => "46",
+                "NO" => "47",
+                "FI" => "358",
+                "PL" => "48",
+                "CZ" => "420",
+                "SK" => "421",
+                "HU" => "36",
+                "US" or "CA" => "1",
+                _ => "49",
+            };
+        }
+        catch (ArgumentException)
+        {
+            return "49";
+        }
     }
 
     public AppSettings Clone() => SettingsStore.Deserialize(SettingsStore.Serialize(this));

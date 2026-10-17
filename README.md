@@ -14,7 +14,7 @@ Wählt Telefonnummern direkt auf deinem **Snom-Tischtelefon** – per Klick auf 
 - **Benachrichtigung mit Auflegen-Taste**
 - **Rufnummern-Aufbereitung**: `+49 (0)30 / 123-456` → `030123456`, optional Amtsholung
 - **Identitätsauswahl** bei mehreren Leitungen (wird vom Telefon gelesen)
-- **Einfache Einrichtung**: App öffnen, IP eingeben (oder Telefon im Netzwerk suchen lassen), verbinden – HTTP/HTTPS und Login werden automatisch erkannt
+- **Einfache Einrichtung**: Die App sucht dein Telefon beim ersten Start automatisch im Netzwerk, ein Klick verbindet – HTTP/HTTPS und Login werden automatisch erkannt. Eine Checkliste führt durch die restlichen Schritte.
 - **Deutsch und Englisch**
 - **Update-Hinweis** bei neuen Versionen auf GitHub, Installation per Klick
 - Installation **ohne Admin-Rechte**, Passwort verschlüsselt (Windows DPAPI)
@@ -25,8 +25,8 @@ Getestet mit Snom D385, sollte mit allen aktuellen Snom-Tischtelefonen funktioni
 
 1. Unter [Releases](https://github.com/julianfaatz/click-to-call-for-snom/releases) die Datei `ClickToCallForSnom-x.y.z-setup.exe` herunterladen und ausführen.
    *Hinweis:* Da der Installer nicht signiert ist, zeigt Windows SmartScreen evtl. eine Warnung → „Weitere Informationen“ → „Trotzdem ausführen“.
-2. Die App öffnet sich mit „Kein Telefon verbunden“: IP-Adresse eingeben (oder „Im Netzwerk suchen“) und auf **Verbinden** klicken. Fragt das Telefon nach einem Passwort, erscheinen die Anmeldefelder automatisch.
-3. Unter **Schnellzugriff → tel:-Links** auf „Als Standard festlegen“ klicken und in den Windows-Einstellungen bei **TEL** „Click to Call for Snom“ auswählen. (Windows erlaubt Programmen nicht, das selbst zu tun.)
+2. Die App öffnet sich und sucht dein Telefon im Netzwerk: auf das gefundene Telefon klicken (oder die IP-Adresse eingeben und **Verbinden**). Fragt das Telefon nach einem Passwort, erscheinen die Anmeldefelder automatisch.
+3. Der Einrichtungs-Checkliste auf der Startseite folgen: bei **Telefonnummern anklickbar machen** auf „Aktivieren“ klicken und in den Windows-Einstellungen bei **TEL** „Click to Call for Snom“ auswählen (Windows erlaubt Programmen nicht, das selbst zu tun). Danach einen Testanruf machen – fertig.
 
 Beim Schließen läuft die App im Infobereich der Taskleiste weiter. Klick auf das Symbol öffnet die App, Rechtsklick das Menü (Nummer wählen, Wahlwiederholung, Auflegen, Updates …). Alle Einstellungen werden automatisch gespeichert.
 
@@ -37,9 +37,9 @@ Beim Schließen läuft die App im Infobereich der Taskleiste weiter. Klick auf d
 | „Benutzername oder Passwort falsch“ | Zugangsdaten der Web-Oberfläche des Telefons verwenden (nicht die SIP-Zugangsdaten). |
 | „Zugriff verweigert (403)“ | Im Web-Interface des Telefons prüfen, ob der Benutzer Admin-Rechte hat und HTTP-Steuerung/Action-URLs erlaubt sind. |
 | Telefon nicht erreichbar | IP-Adresse prüfen (am Telefon: Menü → Informationen), PC und Telefon müssen sich im Netz erreichen. |
-| HTTPS-Fehler | Snom-Telefone nutzen selbstsignierte Zertifikate → „Zertifikat nicht prüfen“ aktivieren. |
-| Klick auf tel:-Link macht nichts | Start → tel:-Links → „Als Standard festlegen“ und die App auswählen. |
-| Hotkey geht nicht | Seite Hotkey: wird dort „bereits verwendet“ angezeigt, eine andere Kombination wählen. |
+| HTTPS-Fehler | Auf der Startseite „Ändern“ → „Verbinden“ – HTTP/HTTPS wird neu erkannt, selbstsignierte Zertifikate werden akzeptiert. |
+| Klick auf tel:-Link macht nichts | Wählen → Links → „Aktivieren“ und in den Windows-Einstellungen die App auswählen. |
+| Hotkey geht nicht | Wählen → Hotkey: wird dort „schon verwendet“ angezeigt, eine andere Kombination wählen. |
 
 Protokoll und Einstellungen liegen in `%APPDATA%\ClickToCallForSnom`.
 
@@ -71,8 +71,8 @@ In VS Code: `F5` startet die App mit Debugger, `Strg+Umschalt+B` baut.
 src/ClickToCallForSnom/
   Core/        Logik ohne UI: Snom-Client, Nummern-Aufbereitung, Einstellungen, Registry, Hotkey, Updates
   Services/    CallController – alles, was zu einem Anruf führt
-  UI/          App-Fenster, Wählfenster, Benachrichtigungen, Tray-Icon, (?)-Hilfesymbol
-  UI/Pages/    Seiten des App-Fensters (Start, Telefon, Wählen, Hotkey, Links, Allgemein)
+  UI/          App-Fenster, Wählfenster, Benachrichtigungen, Tray-Icon, Einstellungszeile (SettingCard), (?)-Hilfesymbol
+  UI/Pages/    Seiten des App-Fensters (Start, Wählen, Allgemein)
 tests/         xUnit-Tests
 installer/     Inno-Setup-Skript
 ```
@@ -92,7 +92,7 @@ Installierte Apps bekommen beim nächsten Start (bzw. innerhalb von 12 Stunden) 
 
 ## English
 
-**Click to Call for Snom** dials phone numbers on Snom desk phones: click `tel:`/`callto:`/`sip:` links anywhere, or select a number in any application and press the hotkey (default `Ctrl + Alt + W`). Setup is a single step: open the app, enter the phone's IP (or let it search the network) and connect. It comes with number normalization, identity selection, hang-up button, update notifications and a German/English UI. Download the installer from [Releases](https://github.com/julianfaatz/click-to-call-for-snom/releases); no admin rights required.
+**Click to Call for Snom** dials phone numbers on Snom desk phones: click `tel:`/`callto:`/`sip:` links anywhere, or select a number in any application and press the hotkey (default `Ctrl + Alt + W`). Setup is guided: the app finds the phone on the network on first start, one click connects, and a short checklist covers the rest. It comes with number normalization, identity selection, hang-up button, update notifications and a German/English UI. Download the installer from [Releases](https://github.com/julianfaatz/click-to-call-for-snom/releases); no admin rights required.
 
 ## Lizenz
 

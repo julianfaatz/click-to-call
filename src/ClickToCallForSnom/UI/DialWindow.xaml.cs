@@ -26,6 +26,24 @@ public partial class DialWindow : Window
             IdentityPanel.Visibility = Visibility.Visible;
         }
 
+        foreach (var recent in settings.RecentNumbers.Take(4))
+        {
+            var button = new System.Windows.Controls.Button
+            {
+                Content = recent,
+                Margin = new Thickness(0, 0, 6, 6),
+                Padding = new Thickness(10, 3, 10, 4),
+                Focusable = false,
+            };
+            button.Click += (_, _) =>
+            {
+                NumberBox.Text = recent;
+                NumberBox.Focus();
+                NumberBox.CaretIndex = recent.Length;
+            };
+            RecentList.Children.Add(button);
+        }
+
         Closed += (_, _) => { if (_current == this) _current = null; };
         Deactivated += (_, _) => { if (string.IsNullOrWhiteSpace(NumberBox.Text)) Close(); };
     }
@@ -79,6 +97,7 @@ public partial class DialWindow : Window
         var normalized = PhoneNumberNormalizer.Normalize(input, NormalizationOptions.From(SettingsStore.Current));
 
         DialButton.IsEnabled = normalized.Length > 0;
+        RecentPanel.Visibility = input.Trim().Length == 0 && RecentList.Children.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         if (normalized.Length == 0 || normalized == input.Trim())
         {
             PreviewText.Visibility = Visibility.Collapsed;

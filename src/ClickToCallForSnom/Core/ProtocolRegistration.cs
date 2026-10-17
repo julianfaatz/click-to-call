@@ -90,13 +90,29 @@ public static class ProtocolRegistration
     /// <summary>True if Windows currently opens links of this scheme with this app.</summary>
     public static bool IsDefaultHandler(string scheme)
     {
-        using var choice = Registry.CurrentUser.OpenSubKey(
-            $@"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\{scheme}\UserChoice");
-        if (choice?.GetValue("ProgId") is string progId)
+        if (ReadUserChoice(scheme) is { } progId)
             return progId == ProgId(scheme) || (progId == scheme && ReadCommand(Registry.ClassesRoot, scheme) is { } c && IsOurCommand(c));
 
         // No explicit user choice: Windows uses the class registration
         return ReadCommand(Registry.ClassesRoot, scheme) is { } cmd && IsOurCommand(cmd);
+    }
+
+    /// <summary>
+    /// The ProgId the user picked in the Windows settings. Newer Windows 11 builds store it in
+    /// "UserChoiceLatest\ProgId" (and may leave an outdated "UserChoice" behind), older ones in "UserChoice".
+    /// </summary>
+    private static string? ReadUserChoice(string scheme)
+    {
+        var basePath = $@"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\{scheme}";
+
+        using (var latest = Registry.CurrentUser.OpenSubKey($@"{basePath}\UserChoiceLatest\ProgId"))
+        {
+            if (latest?.GetValue("ProgId") is string { Length: > 0 } progId)
+                return progId;
+        }
+
+        using var choice = Registry.CurrentUser.OpenSubKey($@"{basePath}\UserChoice");
+        return choice?.GetValue("ProgId") is string { Length: > 0 } legacy ? legacy : null;
     }
 
     public static void OpenDefaultAppsSettings()

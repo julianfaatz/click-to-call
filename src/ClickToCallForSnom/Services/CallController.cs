@@ -7,9 +7,18 @@ namespace ClickToCallForSnom.Services;
 public sealed class CallController
 {
     private ToastWindow? _callToast;
+    private string? _pendingNumber;
 
     /// <summary>Raised when the phone is not configured yet and the user tried to call.</summary>
     public event EventHandler? SetupRequired;
+
+    /// <summary>Number the user wanted to dial before a phone was connected. Returns it once.</summary>
+    public string? TakePendingNumber()
+    {
+        var number = _pendingNumber;
+        _pendingNumber = null;
+        return number;
+    }
 
     private static AppSettings Settings => SettingsStore.Current;
 
@@ -18,7 +27,7 @@ public sealed class CallController
         var target = CallUriParser.ExtractTarget(uri);
         Log.Info($"Link received: {uri}");
 
-        if (!EnsureConfigured())
+        if (!EnsureConfigured(target))
             return;
 
         if (Settings.ConfirmLinkCalls)
@@ -45,7 +54,7 @@ public sealed class CallController
 
     public void ShowDialWindow(string prefill = "", bool fromLink = false)
     {
-        if (!EnsureConfigured())
+        if (!EnsureConfigured(prefill))
             return;
 
         DialWindow.ShowFor(prefill, fromLink, (number, identity) => _ = DialAsync(number, identity));
@@ -95,8 +104,14 @@ public sealed class CallController
         catch (PhoneException ex)
         {
             Log.Error($"Dialing {number} failed", ex);
-            ShowCallToast(Loc.T("Call.Failed"), ex.UserMessage, ToastKind.Error, TimeSpan.FromSeconds(20),
-                new ToastAction(Loc.T("Call.Retry"), () => _ = DialAsync(rawNumber, identityUri, settingsOverride)));
+            var actions = new List<ToastAction>
+            {
+                new(Loc.T("Call.Retry"), () => _ = DialAsync(rawNumber, identityUri, settingsOverride), IsPrimary: true),
+            };
+            if (ex.Kind is PhoneErrorKind.Unauthorized or PhoneErrorKind.Unreachable or PhoneErrorKind.Timeout)
+                actions.Add(new ToastAction(Loc.T("Call.CheckPhone"), () => MainWindow.ShowSingle(AppPage.Home)));
+
+            ShowCallToast(Loc.T("Call.Failed"), ex.UserMessage, ToastKind.Error, TimeSpan.FromSeconds(20), [.. actions]);
             return false;
         }
     }
@@ -131,11 +146,12 @@ public sealed class CallController
         _callToast = ToastWindow.ShowToast(title, message, kind, autoClose, actions);
     }
 
-    private bool EnsureConfigured()
+    private bool EnsureConfigured(string? number = null)
     {
         if (Settings.IsPhoneConfigured)
             return true;
 
+        _pendingNumber = string.IsNullOrWhiteSpace(number) ? null : number;
         SetupRequired?.Invoke(this, EventArgs.Empty);
         return false;
     }

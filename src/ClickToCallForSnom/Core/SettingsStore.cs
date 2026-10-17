@@ -29,6 +29,8 @@ public static class SettingsStore
         {
             if (File.Exists(FilePath))
                 Current = Deserialize(File.ReadAllText(FilePath));
+            else
+                Current = new AppSettings { OwnCountryCode = AppSettings.CountryCodeForRegion() };
         }
         catch (Exception ex)
         {

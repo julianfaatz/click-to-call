@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using ClickToCallForSnom.Core;
 using ClickToCallForSnom.UI.Pages;
 
@@ -8,18 +9,20 @@ namespace ClickToCallForSnom.UI;
 public enum AppPage
 {
     Home,
-    Phone,
     Dialing,
-    Hotkey,
-    Links,
     General,
+}
+
+/// <summary>A page that can scroll to one of its sections, e.g. "Hotkey" on the dialing page.</summary>
+public interface ISectionPage
+{
+    void ShowSection(string section);
 }
 
 /// <summary>The app window: start page with the phone status plus all settings. Changes are saved automatically.</summary>
 public partial class MainWindow : Window
 {
     private static MainWindow? _current;
-    private static bool _closedHintShown;
 
     private readonly Dictionary<AppPage, FrameworkElement> _pages;
 
@@ -27,24 +30,20 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = SettingsStore.Current;
-        VersionText.Text = $"Version {UpdateChecker.CurrentVersion}";
 
         _pages = new()
         {
             [AppPage.Home] = new HomePage(),
-            [AppPage.Phone] = new PhonePage(),
             [AppPage.Dialing] = new DialingPage(),
-            [AppPage.Hotkey] = new HotkeyPage(),
-            [AppPage.Links] = new ProtocolsPage(),
             [AppPage.General] = new GeneralPage(),
         };
 
         AddNavItem(AppPage.Home, "", "Nav.Home");
-        AddNavItem(AppPage.Phone, "", "Nav.Phone");
-        AddNavItem(AppPage.Dialing, "", "Nav.Dialing");
-        AddNavItem(AppPage.Hotkey, "", "Nav.Hotkey");
-        AddNavItem(AppPage.Links, "", "Nav.Links");
+        AddNavItem(AppPage.Dialing, "", "Nav.Dialing");
         AddNavItem(AppPage.General, "", "Nav.General");
+
+        RestoreSize();
+        Closing += (_, _) => RememberSize();
 
         Closed += (_, _) =>
         {
@@ -52,15 +51,18 @@ public partial class MainWindow : Window
                 return;
             _current = null;
 
-            if (!_closedHintShown)
-            {
-                _closedHintShown = true;
-                ToastWindow.ShowToast(Loc.T("Ready.Title"), Loc.T("Ready.Background"), ToastKind.Info, TimeSpan.FromSeconds(6));
-            }
+            // Explain once that closing the window does not quit the app
+            var settings = SettingsStore.Current;
+            var showHint = !settings.BackgroundHintShown && settings.IsPhoneConfigured;
+            settings.BackgroundHintShown |= showHint;
+            SettingsStore.SaveCurrent(); // window size, hint flag
+            if (showHint)
+                ToastWindow.ShowToast(Loc.T("Ready.Title"), Loc.T("Ready.Background"), ToastKind.Info, TimeSpan.FromSeconds(8));
         };
     }
 
-    public static void ShowSingle(AppPage? page = null)
+    /// <param name="section">Optional section of the page to scroll to (see <see cref="ISectionPage"/>).</param>
+    public static void ShowSingle(AppPage? page = null, string? section = null)
     {
         _current ??= new MainWindow();
         _current.Navigate(page ?? _current.CurrentPage ?? AppPage.Home);
@@ -68,6 +70,9 @@ public partial class MainWindow : Window
         if (_current.WindowState == WindowState.Minimized)
             _current.WindowState = WindowState.Normal;
         _current.Activate();
+
+        if (section is not null && _current.PageHost.Content is ISectionPage sectionPage)
+            _current.Dispatcher.BeginInvoke(() => sectionPage.ShowSection(section), DispatcherPriority.Loaded);
     }
 
     /// <summary>Rebuilds the window, e.g. after the language changed (texts are resolved at creation).</summary>
@@ -90,6 +95,35 @@ public partial class MainWindow : Window
         replacement.Navigate(page ?? AppPage.Home);
         replacement.Show();
         old.Close();
+    }
+
+    /// <summary>Opens with the last used size, but never larger than the screen.</summary>
+    private void RestoreSize()
+    {
+        var settings = SettingsStore.Current;
+        var area = SystemParameters.WorkArea;
+        if (settings.WindowWidth > 0 && settings.WindowHeight > 0)
+        {
+            Width = settings.WindowWidth;
+            Height = settings.WindowHeight;
+        }
+
+        Width = Math.Max(MinWidth, Math.Min(Width, area.Width - 40));
+        Height = Math.Max(MinHeight, Math.Min(Height, area.Height - 40));
+        if (settings.WindowMaximized)
+            WindowState = WindowState.Maximized;
+    }
+
+    private void RememberSize()
+    {
+        var settings = SettingsStore.Current;
+        var bounds = WindowState == WindowState.Normal ? new Rect(Left, Top, Width, Height) : RestoreBounds;
+        if (bounds.Width > 0 && bounds.Height > 0)
+        {
+            settings.WindowWidth = Math.Round(bounds.Width);
+            settings.WindowHeight = Math.Round(bounds.Height);
+        }
+        settings.WindowMaximized = WindowState == WindowState.Maximized;
     }
 
     private AppPage? CurrentPage => (Nav.SelectedItem as ListBoxItem)?.Tag as AppPage?;
