@@ -33,7 +33,7 @@ public static class Loc
     private static readonly Dictionary<string, (string De, string En)> Texts = new()
     {
         // ---------- App ----------
-        ["App.Description"] = ("Wählt tel:-Links und Rufnummern auf Snom-Tischtelefonen.", "Dials tel: links and phone numbers on Snom desk phones."),
+        ["App.Description"] = ("Wählt tel:-Links und Rufnummern auf deinem Tischtelefon.", "Dials tel: links and phone numbers on your desk phone."),
         ["App.Disclaimer"] = (
             "Kein offizielles Produkt der Snom Technology GmbH. Snom ist eine Marke der Snom Technology GmbH. Open Source unter MIT-Lizenz.",
             "Not an official product of Snom Technology GmbH. Snom is a trademark of Snom Technology GmbH. Open source under the MIT license."),
@@ -64,8 +64,8 @@ public static class Loc
         // ---------- Setup required ----------
         ["Setup.RequiredTitle"] = ("Noch kein Telefon verbunden", "No phone connected yet"),
         ["Setup.RequiredText"] = (
-            "Verbinde zuerst dein Snom-Telefon – danach geht es direkt mit deiner Nummer weiter.",
-            "Connect your Snom phone first – then you'll continue right where you left off."),
+            "Verbinde zuerst dein Tischtelefon – danach geht es direkt mit deiner Nummer weiter.",
+            "Connect your desk phone first – then you'll continue right where you left off."),
 
         // ---------- Dial window ----------
         ["Dial.WindowTitle"] = ("Nummer wählen", "Dial number"),
@@ -227,10 +227,10 @@ public static class Loc
         ["Home.HostRequired"] = ("Bitte die IP-Adresse des Telefons eingeben.", "Please enter the phone's IP address."),
         ["Home.Scan"] = ("Im Netzwerk suchen", "Search network"),
         ["Home.ScanAgain"] = ("Erneut suchen", "Search again"),
-        ["Home.Scanning"] = ("Suche dein Snom-Telefon im Netzwerk …", "Looking for your Snom phone on the network …"),
+        ["Home.Scanning"] = ("Suche dein Tischtelefon im Netzwerk …", "Looking for your desk phone on the network …"),
         ["Home.ScanFoundOne"] = ("Gefunden! Klicke auf dein Telefon, um es zu verbinden:", "Found it! Click your phone to connect:"),
         ["Home.ScanFound"] = ("Mehrere Telefone gefunden – klicke auf deins:", "Several phones found – click yours:"),
-        ["Home.ScanNone"] = ("Kein Snom-Telefon gefunden. Bitte die IP-Adresse oben eintragen.", "No Snom phone found. Please enter the IP address above."),
+        ["Home.ScanNone"] = ("Kein Tischtelefon gefunden. Bitte die IP-Adresse oben eintragen.", "No desk phone found. Please enter the IP address above."),
         ["Home.NeedsLogin"] = (
             "Dein Telefon ist passwortgeschützt. Bitte die Zugangsdaten der Web-Oberfläche eingeben (nicht die SIP-Daten).",
             "Your phone is password protected. Please enter the web interface credentials (not the SIP credentials)."),
@@ -264,8 +264,8 @@ public static class Loc
             "Opens the Windows settings – pick \"Click to Call for Snom\" for TEL there."),
         ["Home.StepTest"] = ("Testanruf", "Test call"),
         ["Home.StepTestText"] = (
-            "Gib z. B. deine Handynummer ein. Dein Snom-Telefon wählt sofort – wenn dein Handy klingelt, klappt alles.",
-            "Enter e.g. your mobile number. Your Snom phone dials right away – if your mobile rings, everything works."),
+            "Gib z. B. deine Handynummer ein. Dein Tischtelefon wählt sofort – wenn dein Handy klingelt, klappt alles.",
+            "Enter e.g. your mobile number. Your desk phone dials right away – if your mobile rings, everything works."),
         ["Home.SkipTest"] = ("Überspringen und fertigstellen", "Skip and finish"),
         ["Home.DoneTitle"] = ("Alles eingerichtet!", "All set!"),
         ["Home.DoneText"] = ("Click to Call ist startklar – viel Spaß beim Telefonieren.", "Click to Call is ready – enjoy calling."),
