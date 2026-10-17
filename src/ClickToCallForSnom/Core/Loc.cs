@@ -47,6 +47,7 @@ public static class Loc
 
         // ---------- Errors ----------
         ["Error.NotConfigured"] = ("Es ist noch kein Telefon verbunden.", "No phone has been connected yet."),
+        ["Error.InvalidAddress"] = ("„{0}“ ist keine gültige IP-Adresse oder kein gültiger Name.", "\"{0}\" is not a valid IP address or host name."),
         ["Error.Unreachable"] = (
             "Telefon nicht erreichbar. Ist es eingeschaltet und die IP-Adresse richtig?",
             "Phone not reachable. Is it switched on and is the IP address correct?"),
@@ -155,7 +156,7 @@ public static class Loc
         ["Hotkey.Available"] = ("Aktiv", "Active"),
         ["Hotkey.Saved"] = ("Gespeichert", "Saved"),
         ["Hotkey.InUse"] = ("Wird schon von einem anderen Programm verwendet", "Already used by another application"),
-        ["Hotkey.NeedModifier"] = ("Bitte mit Strg, Alt, Umschalt oder Win kombinieren", "Please combine with Ctrl, Alt, Shift or Win"),
+        ["Hotkey.NeedModifier"] = ("Bitte mit Strg, Alt oder Win kombinieren", "Please combine with Ctrl, Alt or Win"),
         ["Hotkey.ClipboardFallback"] = ("Kopierte Nummer übernehmen", "Use a copied number"),
         ["Hotkey.ClipboardFallbackHelp"] = (
             "Ist nichts markiert, wird eine Nummer aus der Zwischenablage ins Wählfenster übernommen.",

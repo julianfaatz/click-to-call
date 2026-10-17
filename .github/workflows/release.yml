@@ -22,16 +22,20 @@ jobs:
       - name: Install Inno Setup
         run: choco install innosetup -y --no-progress
 
+      # The tag name goes through env, never directly into the script (no script injection via tag names)
       - name: Build, test and package
         shell: pwsh
+        env:
+          TAG: ${{ github.ref_name }}
         run: |
-          $version = "${{ github.ref_name }}".TrimStart("v")
+          $version = $env:TAG.TrimStart("v")
           ./build.ps1 -Version $version
 
       - name: Create GitHub release
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
         run: |
-          gh release create "${{ github.ref_name }}" (Get-ChildItem artifacts -File).FullName `
-            --title "${{ github.ref_name }}" --generate-notes
+          gh release create $env:TAG (Get-ChildItem artifacts -File).FullName `
+            --title $env:TAG --generate-notes

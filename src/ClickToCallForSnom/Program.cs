@@ -15,15 +15,16 @@ public static class Program
         SettingsStore.Load();
         Loc.SetLanguage(SettingsStore.Current.Language);
 
-        // Called by the installer / uninstaller – no UI
-        if (args.Contains("--register"))
+        // Called by the installer / uninstaller – no UI. Only as the sole argument, so that a crafted
+        // link (tel:1" --unregister) from an app that does not escape quotes cannot trigger it.
+        if (args is ["--register"])
         {
             if (Environment.ProcessPath is { } exe)
                 ProtocolRegistration.Register(SettingsStore.Current, exe);
             return 0;
         }
 
-        if (args.Contains("--unregister"))
+        if (args is ["--unregister"])
         {
             ProtocolRegistration.Unregister();
             if (Environment.ProcessPath is { } exe)

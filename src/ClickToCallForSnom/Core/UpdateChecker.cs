@@ -47,13 +47,17 @@ public static class UpdateChecker
         foreach (var asset in root.GetProperty("assets").EnumerateArray())
         {
             var name = asset.GetProperty("name").GetString() ?? "";
-            if (name.EndsWith("-setup.exe", StringComparison.OrdinalIgnoreCase))
-                installerUrl = asset.GetProperty("browser_download_url").GetString();
+            var url = asset.GetProperty("browser_download_url").GetString() ?? "";
+            if (name.EndsWith("-setup.exe", StringComparison.OrdinalIgnoreCase) && IsOwnUrl(url, "/releases/download/"))
+                installerUrl = url;
         }
+
+        // Opened with the shell: only ever our own release page, never whatever the response contains
+        var htmlUrl = root.GetProperty("html_url").GetString() ?? "";
 
         return new UpdateInfo(
             latest,
-            root.GetProperty("html_url").GetString() ?? RepositoryUrl,
+            IsOwnUrl(htmlUrl, "/releases/") ? htmlUrl : RepositoryUrl + "/releases",
             installerUrl,
             root.TryGetProperty("body", out var body) ? body.GetString() ?? "" : "");
     }
@@ -63,13 +67,23 @@ public static class UpdateChecker
         if (update.InstallerUrl is null)
             throw new InvalidOperationException("Release has no installer");
 
-        var path = Path.Combine(Path.GetTempPath(), $"ClickToCallForSnom-{update.Version}-setup.exe");
-        using var http = CreateClient();
-        http.Timeout = TimeSpan.FromMinutes(5);
-        await using var source = await http.GetStreamAsync(update.InstallerUrl, ct);
-        await using var target = File.Create(path);
-        await source.CopyToAsync(target, ct);
-        return path;
+        // Own fresh folder: no other file can sit there under the installer's name
+        var directory = Directory.CreateTempSubdirectory("ClickToCallForSnom-update-");
+        var path = Path.Combine(directory.FullName, $"ClickToCallForSnom-{update.Version}-setup.exe");
+        try
+        {
+            using var http = CreateClient();
+            http.Timeout = TimeSpan.FromMinutes(5);
+            await using var source = await http.GetStreamAsync(update.InstallerUrl, ct);
+            await using var target = File.Create(path);
+            await source.CopyToAsync(target, ct);
+            return path;
+        }
+        catch
+        {
+            directory.Delete(recursive: true); // no half downloaded installer left behind
+            throw;
+        }
     }
 
     /// <summary>Starts the installer in silent mode. The installer closes this app and restarts it afterwards.</summary>
@@ -80,6 +94,10 @@ public static class UpdateChecker
             UseShellExecute = true,
         });
     }
+
+    private static bool IsOwnUrl(string url, string pathPrefix) =>
+        url.StartsWith(RepositoryUrl + pathPrefix, StringComparison.OrdinalIgnoreCase)
+        && Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps;
 
     private static HttpClient CreateClient()
     {

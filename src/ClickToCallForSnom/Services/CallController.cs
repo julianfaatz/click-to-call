@@ -8,6 +8,7 @@ public sealed class CallController
 {
     private ToastWindow? _callToast;
     private string? _pendingNumber;
+    private bool _hotkeyBusy;
 
     /// <summary>Raised when the phone is not configured yet and the user tried to call.</summary>
     public event EventHandler? SetupRequired;
@@ -30,7 +31,9 @@ public sealed class CallController
         if (!EnsureConfigured(target))
             return;
 
-        if (Settings.ConfirmLinkCalls)
+        // Links come from untrusted sources (web pages, mails). Feature codes like *21*0900...# (call forwarding)
+        // and SIP addresses are never sent to the phone without confirmation.
+        if (Settings.ConfirmLinkCalls || !IsPlainNumber(target))
             ShowDialWindow(target, fromLink: true);
         else
             _ = DialAsync(target, NullIfEmpty(Settings.DefaultIdentityUri));
@@ -38,18 +41,28 @@ public sealed class CallController
 
     public async Task HandleHotkeyAsync()
     {
-        if (!EnsureConfigured())
+        // A second press while the selection is still being copied would back up our own Ctrl+C
+        // result as "the user's clipboard" and restore the wrong content
+        if (_hotkeyBusy || !EnsureConfigured())
             return;
 
-        var text = PhoneNumberNormalizer.ExtractFromText(await SelectionGrabber.GetSelectedTextAsync());
-        if (text.Length == 0 && Settings.HotkeyUseClipboardFallback)
+        _hotkeyBusy = true;
+        try
         {
-            var clipboard = SelectionGrabber.GetClipboardText().Trim();
-            if (PhoneNumberNormalizer.LooksLikeNumber(clipboard))
-                text = clipboard;
-        }
+            var text = PhoneNumberNormalizer.ExtractFromText(await SelectionGrabber.GetSelectedTextAsync());
+            if (text.Length == 0 && Settings.HotkeyUseClipboardFallback)
+            {
+                var clipboard = SelectionGrabber.GetClipboardText().Trim();
+                if (PhoneNumberNormalizer.LooksLikeNumber(clipboard))
+                    text = clipboard;
+            }
 
-        ShowDialWindow(text, fromLink: false);
+            ShowDialWindow(text, fromLink: false);
+        }
+        finally
+        {
+            _hotkeyBusy = false;
+        }
     }
 
     public void ShowDialWindow(string prefill = "", bool fromLink = false)
@@ -89,7 +102,9 @@ public sealed class CallController
 
             if (settingsOverride is null)
             {
-                Settings.AddRecentNumber(number);
+                // Stored without the outside line prefix: the list is normalized again on redial,
+                // a stored "0" + "030..." would become "+30..." (Greece)
+                Settings.AddRecentNumber(PhoneNumberNormalizer.Normalize(rawNumber, NormalizationOptions.From(settings) with { OutsideLinePrefix = "" }));
                 SettingsStore.SaveCurrent();
             }
 
@@ -154,6 +169,12 @@ public sealed class CallController
         _pendingNumber = string.IsNullOrWhiteSpace(number) ? null : number;
         SetupRequired?.Invoke(this, EventArgs.Empty);
         return false;
+    }
+
+    private static bool IsPlainNumber(string target)
+    {
+        var number = PhoneNumberNormalizer.Normalize(target, NormalizationOptions.From(Settings));
+        return number.Length > 0 && number.TrimStart('+').All(char.IsAsciiDigit);
     }
 
     private static string? NullIfEmpty(string value) => string.IsNullOrWhiteSpace(value) ? null : value;

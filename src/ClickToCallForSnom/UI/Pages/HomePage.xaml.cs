@@ -17,6 +17,7 @@ public partial class HomePage : UserControl
     private CancellationTokenSource? _statusCts;
     private bool _updatingLines;
     private bool _autoScanDone;
+    private Window? _window; // Window.GetWindow() is already null in Unloaded
 
     public HomePage()
     {
@@ -31,15 +32,17 @@ public partial class HomePage : UserControl
             else if (ConnectForm.Visibility != Visibility.Visible)
                 OpenConnectForm();
 
-            if (Window.GetWindow(this) is { } window)
-                window.Activated += Window_Activated;
+            _window = Window.GetWindow(this);
+            if (_window is not null)
+                _window.Activated += Window_Activated;
         };
         Unloaded += (_, _) =>
         {
             Settings.PropertyChanged -= Settings_PropertyChanged;
             SettingsStore.Changed -= SettingsStore_Changed;
-            if (Window.GetWindow(this) is { } window)
-                window.Activated -= Window_Activated;
+            if (_window is not null)
+                _window.Activated -= Window_Activated;
+            _window = null;
             _scanCts?.Cancel();
             _statusCts?.Cancel();
         };
@@ -208,6 +211,9 @@ public partial class HomePage : UserControl
 
     private async void Connect_Click(object sender, RoutedEventArgs e)
     {
+        if (!DoConnectButton.IsEnabled)
+            return; // already connecting (Enter in a text box, a scan result)
+
         var host = HostBox.Text.Trim();
         if (host.Length == 0)
         {

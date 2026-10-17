@@ -40,6 +40,27 @@ public class SnomPhoneClientTests
         Assert.Throws<PhoneException>(() => new SnomPhoneClient(new PhoneConnection("", false, true, "", "")));
 
     [Theory]
+    [InlineData("192.168.1 .50")]
+    [InlineData("phone<1>")]
+    public void Rejects_invalid_host(string host)
+    {
+        var ex = Assert.Throws<PhoneException>(() => new SnomPhoneClient(new PhoneConnection(host, false, true, "", "")));
+        Assert.Equal(PhoneErrorKind.InvalidAddress, ex.Kind);
+    }
+
+    [Fact]
+    public void Ignores_dtd_in_settings_xml()
+    {
+        const string xml = """
+            <?xml version="1.0"?>
+            <!DOCTYPE settings [<!ENTITY a "aaaaaaaaaa"><!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;">]>
+            <settings><phone-settings><user_name idx="1">201</user_name><user_host idx="1">pbx</user_host></phone-settings></settings>
+            """;
+
+        Assert.Equal("201@pbx", Assert.Single(SnomPhoneClient.ParseIdentities(xml)).Uri);
+    }
+
+    [Theory]
     [InlineData("192.168.1.50", false, "http://192.168.1.50/")]
     [InlineData("http://192.168.1.50/", false, "http://192.168.1.50/")]
     [InlineData("192.168.1.50:8080", true, "https://192.168.1.50:8080/")]

@@ -55,6 +55,19 @@ public class PhoneNumberNormalizerTests
         Assert.Equal(expected, PhoneNumberNormalizer.Normalize(input, options));
     }
 
+    [Theory]
+    [InlineData("030 1234567")]
+    [InlineData("+49 30 1234567")]
+    [InlineData("+44 20 1234567")]
+    [InlineData("1234")]
+    public void Recent_numbers_dial_the_same_on_redial(string input)
+    {
+        // The call history stores numbers without the outside line prefix and normalizes them again on redial
+        var options = German with { OutsideLinePrefix = "0", OutsideLineMinLength = 5 };
+        var stored = PhoneNumberNormalizer.Normalize(input, options with { OutsideLinePrefix = "" });
+        Assert.Equal(PhoneNumberNormalizer.Normalize(input, options), PhoneNumberNormalizer.Normalize(stored, options));
+    }
+
     [Fact]
     public void Dials_sip_addresses_as_they_are() =>
         Assert.Equal("alice@pbx.example.com", PhoneNumberNormalizer.Normalize("alice@pbx.example.com", German));

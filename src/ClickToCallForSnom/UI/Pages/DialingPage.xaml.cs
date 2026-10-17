@@ -10,6 +10,7 @@ namespace ClickToCallForSnom.UI.Pages;
 public partial class DialingPage : UserControl, ISectionPage
 {
     private static readonly int[] SecondOptions = [5, 10, 15, 30, 60];
+    private Window? _window; // Window.GetWindow() is already null in Unloaded
 
     public DialingPage()
     {
@@ -17,8 +18,9 @@ public partial class DialingPage : UserControl, ISectionPage
         Loaded += (_, _) =>
         {
             Settings.PropertyChanged += Settings_PropertyChanged;
-            if (Window.GetWindow(this) is { } window)
-                window.Activated += Window_Activated;
+            _window = Window.GetWindow(this);
+            if (_window is not null)
+                _window.Activated += Window_Activated;
 
             FillSecondOptions();
             IdentityCard.Visibility = Settings.Identities.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -29,8 +31,9 @@ public partial class DialingPage : UserControl, ISectionPage
         Unloaded += (_, _) =>
         {
             Settings.PropertyChanged -= Settings_PropertyChanged;
-            if (Window.GetWindow(this) is { } window)
-                window.Activated -= Window_Activated;
+            if (_window is not null)
+                _window.Activated -= Window_Activated;
+            _window = null;
         };
     }
 
@@ -102,7 +105,8 @@ public partial class DialingPage : UserControl, ISectionPage
         if (hotkey is null)
             return; // only a modifier so far
 
-        if (hotkey.Modifiers == HotkeyModifiers.None)
+        // Shift alone would swallow e.g. the capital letter system wide
+        if ((hotkey.Modifiers & ~HotkeyModifiers.Shift) == HotkeyModifiers.None)
         {
             StatusText.Set(HotkeyStatus, Loc.T("Hotkey.NeedModifier"), StatusText.Kind.Error);
             return;

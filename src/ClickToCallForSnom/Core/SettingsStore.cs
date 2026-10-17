@@ -37,7 +37,17 @@ public static class SettingsStore
         }
         catch (Exception ex)
         {
+            // Keep the broken file: the next automatic save would otherwise overwrite the user's configuration
             Log.Error("Could not load settings, using defaults", ex);
+            try
+            {
+                File.Copy(FilePath, FilePath + ".broken", overwrite: true);
+            }
+            catch (Exception copyEx)
+            {
+                Log.Error("Could not back up broken settings", copyEx);
+            }
+
             Current = new AppSettings();
         }
     }

@@ -1,7 +1,9 @@
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Security.Authentication;
 using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace ClickToCallForSnom.Core;
@@ -15,6 +17,7 @@ public sealed record PhoneConnection(string Host, bool UseHttps, bool IgnoreCert
 public enum PhoneErrorKind
 {
     NotConfigured,
+    InvalidAddress,
     Unreachable,
     Timeout,
     Unauthorized,
@@ -32,6 +35,7 @@ public sealed class PhoneException(PhoneErrorKind kind, string? detail = null, E
     public string UserMessage => Kind switch
     {
         PhoneErrorKind.HttpError => Loc.T("Error.HttpError", Detail ?? "?"),
+        PhoneErrorKind.InvalidAddress => Loc.T("Error.InvalidAddress", Detail ?? ""),
         _ => Loc.T("Error." + Kind),
     };
 }
@@ -65,10 +69,19 @@ public sealed partial class SnomPhoneClient : IDisposable
         if (connection.IgnoreCertificateErrors)
             handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 
+        // e.g. typos with spaces or other characters that are not allowed in a host name
+        if (!Uri.TryCreate($"{(connection.UseHttps ? "https" : "http")}://{host}/", UriKind.Absolute, out var baseAddress))
+        {
+            handler.Dispose();
+            throw new PhoneException(PhoneErrorKind.InvalidAddress, host);
+        }
+
         _http = new HttpClient(handler)
         {
-            BaseAddress = new Uri($"{(connection.UseHttps ? "https" : "http")}://{host}/"),
+            BaseAddress = baseAddress,
             Timeout = timeout ?? TimeSpan.FromSeconds(6),
+            // The phone's pages are small – don't buffer whatever a wrong device sends back
+            MaxResponseContentBufferSize = 4 * 1024 * 1024,
         };
     }
 
@@ -111,7 +124,9 @@ public sealed partial class SnomPhoneClient : IDisposable
 
     internal static IReadOnlyList<PhoneIdentity> ParseIdentities(string xml)
     {
-        var doc = XDocument.Parse(xml);
+        // The phone is trusted only so far: never process DTDs / entity definitions from it
+        using var reader = XmlReader.Create(new StringReader(xml), new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, XmlResolver = null });
+        var doc = XDocument.Load(reader);
 
         Dictionary<int, string> Values(string name) => doc.Descendants(name)
             .Where(e => int.TryParse((string?)e.Attribute("idx"), out _))

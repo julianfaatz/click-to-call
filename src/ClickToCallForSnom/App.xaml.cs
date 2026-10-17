@@ -22,6 +22,12 @@ public partial class App : Application
     {
         base.OnStartup(e);
         DispatcherUnhandledException += OnUnhandledException;
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            // Fire-and-forget tasks (_ = DialAsync(...)) must not fail silently
+            Log.Error("Unobserved task exception", args.Exception);
+            args.SetObserved();
+        };
 
 #if DEBUG
         if (MockPhone.IsEnabled)

@@ -29,6 +29,7 @@ public static partial class PhoneScanner
         })
         {
             Timeout = TimeSpan.FromSeconds(3),
+            MaxResponseContentBufferSize = 1024 * 1024, // every device in the network answers, not only phones
         };
 
         await Parallel.ForEachAsync(targets, new ParallelOptions { MaxDegreeOfParallelism = 64, CancellationToken = ct }, async (ip, token) =>
