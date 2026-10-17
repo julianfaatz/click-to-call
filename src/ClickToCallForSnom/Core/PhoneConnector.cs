@@ -13,7 +13,8 @@ public sealed record ConnectResult(ConnectStatus Status, bool UseHttps, string M
 /// <summary>Finds out how to talk to a phone: tries HTTP and HTTPS and detects whether a login is needed.</summary>
 public static class PhoneConnector
 {
-    public static async Task<ConnectResult> ConnectAsync(string host, string username, string password, bool preferHttps, CancellationToken ct = default)
+    public static async Task<ConnectResult> ConnectAsync(
+        PhoneVendor vendor, string host, string username, string password, bool preferHttps, CancellationToken ct = default)
     {
         PhoneException? lastError = null;
         bool[] schemes = preferHttps ? [true, false] : [false, true];
@@ -22,7 +23,8 @@ public static class PhoneConnector
         {
             try
             {
-                using var client = new SnomPhoneClient(new PhoneConnection(host, https, true, username, password), TimeSpan.FromSeconds(4));
+                using var client = PhoneDrivers.CreateClient(
+                    new PhoneConnection(host, https, true, username, password, vendor), TimeSpan.FromSeconds(4));
                 var model = await client.TestConnectionAsync(ct);
                 return new ConnectResult(ConnectStatus.Connected, https, model, null);
             }

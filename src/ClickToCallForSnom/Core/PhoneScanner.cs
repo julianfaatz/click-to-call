@@ -3,17 +3,16 @@ using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text.RegularExpressions;
 
 namespace ClickToCallForSnom.Core;
 
-public sealed record FoundPhone(string Address, string Model)
+public sealed record FoundPhone(string Address, string Model, PhoneVendor Vendor)
 {
     public string DisplayName => $"{Model} · {Address}";
 }
 
-/// <summary>Looks for Snom phones in the local /24 network(s) by asking each address for its web page.</summary>
-public static partial class PhoneScanner
+/// <summary>Looks for supported phones in the local /24 network(s) by asking each address for its web page.</summary>
+public static class PhoneScanner
 {
     public static async Task<IReadOnlyList<FoundPhone>> ScanAsync(CancellationToken ct = default)
     {
@@ -34,21 +33,20 @@ public static partial class PhoneScanner
 
         await Parallel.ForEachAsync(targets, new ParallelOptions { MaxDegreeOfParallelism = 64, CancellationToken = ct }, async (ip, token) =>
         {
-            var model = await ProbeAsync(http, $"http://{ip}/", token);
-            if (model is not null)
-                found.Add(new FoundPhone(ip.ToString(), model));
+            if (await ProbeAsync(http, $"http://{ip}/", token) is { } phone)
+                found.Add(phone with { Address = ip.ToString() });
         });
 
         var phones = found.OrderBy(p => IPAddress.Parse(p.Address).GetAddressBytes()[3]).ToList();
 #if DEBUG
         if (MockPhone.Address is { } mock)
-            phones.Insert(0, new FoundPhone(mock, MockPhone.Model + " (Mock)"));
+            phones.Insert(0, new FoundPhone(mock, MockPhone.Model + " (Mock)", PhoneVendor.Snom));
 #endif
         return phones;
     }
 
-    /// <returns>The model name if the address looks like a Snom phone, otherwise null.</returns>
-    private static async Task<string?> ProbeAsync(HttpClient http, string url, CancellationToken ct, bool followHttps = true)
+    /// <returns>The phone (without address) if a driver recognizes the device, otherwise null.</returns>
+    private static async Task<FoundPhone?> ProbeAsync(HttpClient http, string url, CancellationToken ct, bool followHttps = true)
     {
         try
         {
@@ -63,18 +61,18 @@ public static partial class PhoneScanner
                 response.Headers.WwwAuthenticate.ToString(),
                 await response.Content.ReadAsStringAsync(ct));
 
-            return text.Contains("snom", StringComparison.OrdinalIgnoreCase) ? ExtractModel(text) : null;
+            foreach (var driver in PhoneDrivers.All)
+            {
+                if (driver.Detect(text) is { } model)
+                    return new FoundPhone("", model, driver.Vendor);
+            }
+
+            return null;
         }
         catch
         {
             return null;
         }
-    }
-
-    internal static string ExtractModel(string text)
-    {
-        var match = ModelRegex().Match(text);
-        return match.Success ? "Snom " + match.Groups[1].Value.ToUpperInvariant() : "Snom";
     }
 
     private static IEnumerable<IPAddress> LocalSubnetAddresses()
@@ -105,7 +103,4 @@ public static partial class PhoneScanner
             }
         }
     }
-
-    [GeneratedRegex(@"snom\s*-?\s*([A-Z]\d{3,4}[A-Z]*)\b", RegexOptions.IgnoreCase)]
-    private static partial Regex ModelRegex();
 }

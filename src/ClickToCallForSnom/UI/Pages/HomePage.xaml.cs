@@ -18,6 +18,7 @@ public partial class HomePage : UserControl
     private bool _updatingLines;
     private bool _autoScanDone;
     private Window? _window; // Window.GetWindow() is already null in Unloaded
+    private IReadOnlyList<FoundPhone> _foundPhones = [];
 
     public HomePage()
     {
@@ -73,7 +74,7 @@ public partial class HomePage : UserControl
         var configured = Settings.IsPhoneConfigured;
 
         PhoneTitle.Text = configured
-            ? (string.IsNullOrEmpty(Settings.PhoneModel) ? "Snom" : Settings.PhoneModel)
+            ? (string.IsNullOrEmpty(Settings.PhoneModel) ? PhoneDrivers.For(Settings.Vendor).Name : Settings.PhoneModel)
             : Loc.T("Home.NoPhone");
         PhoneSubtitle.Text = configured ? Settings.PhoneHost : Loc.T("Home.NoPhoneText");
 
@@ -133,7 +134,7 @@ public partial class HomePage : UserControl
         SetStatus(PhoneState.Checking);
         try
         {
-            using var client = new SnomPhoneClient(PhoneConnection.From(Settings), TimeSpan.FromSeconds(5));
+            using var client = PhoneDrivers.CreateClient(PhoneConnection.From(Settings), TimeSpan.FromSeconds(5));
             var model = await client.TestConnectionAsync(ct);
             if (ct.IsCancellationRequested)
                 return;
@@ -229,10 +230,13 @@ public partial class HomePage : UserControl
         SetConnectMessage(Loc.T("Phone.Testing"), StatusText.Kind.Neutral);
         try
         {
-            var result = await PhoneConnector.ConnectAsync(host, user, password, Settings.UseHttps && host == Settings.PhoneHost);
+            // The scan already knows the manufacturer of the phones it found
+            var vendor = _foundPhones.FirstOrDefault(p => p.Address == host)?.Vendor ?? Settings.Vendor;
+            var result = await PhoneConnector.ConnectAsync(vendor, host, user, password, Settings.UseHttps && host == Settings.PhoneHost);
             switch (result.Status)
             {
                 case ConnectStatus.Connected:
+                    Settings.Vendor = vendor;
                     Settings.PhoneHost = host;
                     Settings.UseHttps = result.UseHttps;
                     Settings.IgnoreCertificateErrors = true;
@@ -279,9 +283,12 @@ public partial class HomePage : UserControl
     /// <summary>Reads the phone's identities silently – only relevant if there is more than one.</summary>
     private async Task LoadIdentitiesAsync()
     {
+        if (!PhoneDrivers.For(Settings.Vendor).CanReadIdentities)
+            return;
+
         try
         {
-            using var client = new SnomPhoneClient(PhoneConnection.From(Settings));
+            using var client = PhoneDrivers.CreateClient(PhoneConnection.From(Settings));
             var identities = await client.GetIdentitiesAsync();
             Settings.Identities.Clear();
             foreach (var identity in identities)
@@ -313,6 +320,7 @@ public partial class HomePage : UserControl
         try
         {
             var phones = await PhoneScanner.ScanAsync(ct);
+            _foundPhones = phones;
             ScanStatus.Text = phones.Count switch
             {
                 0 => Loc.T("Home.ScanNone"),

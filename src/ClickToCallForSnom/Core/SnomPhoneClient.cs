@@ -1,43 +1,30 @@
 using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Security.Authentication;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 
 namespace ClickToCallForSnom.Core;
 
-public sealed record PhoneConnection(string Host, bool UseHttps, bool IgnoreCertificateErrors, string Username, string Password)
+public sealed partial class SnomDriver : IPhoneDriver
 {
-    public static PhoneConnection From(AppSettings s) =>
-        new(s.PhoneHost, s.UseHttps, s.IgnoreCertificateErrors, s.Username, s.Password);
-}
+    public PhoneVendor Vendor => PhoneVendor.Snom;
+    public string Name => "Snom";
+    public bool CanReadIdentities => true;
 
-public enum PhoneErrorKind
-{
-    NotConfigured,
-    InvalidAddress,
-    Unreachable,
-    Timeout,
-    Unauthorized,
-    Forbidden,
-    Certificate,
-    HttpError,
-}
-
-public sealed class PhoneException(PhoneErrorKind kind, string? detail = null, Exception? inner = null)
-    : Exception(detail ?? kind.ToString(), inner)
-{
-    public PhoneErrorKind Kind { get; } = kind;
-    public string? Detail { get; } = detail;
-
-    public string UserMessage => Kind switch
+    public string? Detect(string probeText)
     {
-        PhoneErrorKind.HttpError => Loc.T("Error.HttpError", Detail ?? "?"),
-        PhoneErrorKind.InvalidAddress => Loc.T("Error.InvalidAddress", Detail ?? ""),
-        _ => Loc.T("Error." + Kind),
-    };
+        if (!probeText.Contains("snom", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var match = ModelRegex().Match(probeText);
+        return match.Success ? "Snom " + match.Groups[1].Value.ToUpperInvariant() : Name;
+    }
+
+    public IPhoneClient CreateClient(PhoneConnection connection, TimeSpan? timeout = null) => new SnomPhoneClient(connection, timeout);
+
+    [GeneratedRegex(@"snom\s*-?\s*([A-Z]\d{3,4}[A-Z]*)\b", RegexOptions.IgnoreCase)]
+    private static partial Regex ModelRegex();
 }
 
 /// <summary>
@@ -45,49 +32,10 @@ public sealed class PhoneException(PhoneErrorKind kind, string? detail = null, E
 /// Dialing:  GET /command.htm?number=...&amp;outgoing_uri=user@host
 /// Hang up:  GET /command.htm?key=CANCEL
 /// </summary>
-public sealed partial class SnomPhoneClient : IDisposable
+public sealed partial class SnomPhoneClient(PhoneConnection connection, TimeSpan? timeout = null)
+    : HttpPhoneClient(connection, timeout)
 {
-    private readonly HttpClient _http;
-
-    public SnomPhoneClient(PhoneConnection connection, TimeSpan? timeout = null)
-    {
-        var host = StripScheme(connection.Host);
-        if (string.IsNullOrWhiteSpace(host))
-            throw new PhoneException(PhoneErrorKind.NotConfigured);
-
-        var handler = new HttpClientHandler
-        {
-            // Supports both Basic and Digest authentication
-            Credentials = string.IsNullOrEmpty(connection.Username)
-                ? null
-                : new NetworkCredential(connection.Username, connection.Password),
-            PreAuthenticate = true,
-            UseProxy = false,
-        };
-
-        // Also needed for HTTP: phones set to HTTPS only redirect there
-        if (connection.IgnoreCertificateErrors)
-            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-
-        // e.g. typos with spaces or other characters that are not allowed in a host name
-        if (!Uri.TryCreate($"{(connection.UseHttps ? "https" : "http")}://{host}/", UriKind.Absolute, out var baseAddress))
-        {
-            handler.Dispose();
-            throw new PhoneException(PhoneErrorKind.InvalidAddress, host);
-        }
-
-        _http = new HttpClient(handler)
-        {
-            BaseAddress = baseAddress,
-            Timeout = timeout ?? TimeSpan.FromSeconds(6),
-            // The phone's pages are small – don't buffer whatever a wrong device sends back
-            MaxResponseContentBufferSize = 4 * 1024 * 1024,
-        };
-    }
-
-    public Uri BaseAddress => _http.BaseAddress!;
-
-    public async Task DialAsync(string number, string? outgoingUri = null, CancellationToken ct = default)
+    public override async Task DialAsync(string number, string? outgoingUri = null, CancellationToken ct = default)
     {
         var query = "command.htm?number=" + Uri.EscapeDataString(number);
         if (!string.IsNullOrWhiteSpace(outgoingUri))
@@ -96,10 +44,10 @@ public sealed partial class SnomPhoneClient : IDisposable
         await GetStringAsync(query, ct);
     }
 
-    public Task HangUpAsync(CancellationToken ct = default) => GetStringAsync("command.htm?key=CANCEL", ct);
+    public override Task HangUpAsync(CancellationToken ct = default) => GetStringAsync("command.htm?key=CANCEL", ct);
 
-    /// <summary>Checks reachability and credentials. Returns the phone's page title (usually contains the model).</summary>
-    public async Task<string> TestConnectionAsync(CancellationToken ct = default)
+    /// <summary>Returns the phone's page title (usually contains the model).</summary>
+    public override async Task<string> TestConnectionAsync(CancellationToken ct = default)
     {
         string html;
         try
@@ -116,7 +64,7 @@ public sealed partial class SnomPhoneClient : IDisposable
     }
 
     /// <summary>Reads the configured SIP identities from /settings.xml.</summary>
-    public async Task<IReadOnlyList<PhoneIdentity>> GetIdentitiesAsync(CancellationToken ct = default)
+    public override async Task<IReadOnlyList<PhoneIdentity>> GetIdentitiesAsync(CancellationToken ct = default)
     {
         var xml = await GetStringAsync("settings.xml", ct);
         return ParseIdentities(xml);
@@ -153,53 +101,6 @@ public sealed partial class SnomPhoneClient : IDisposable
         return identities;
     }
 
-    private async Task<string> GetStringAsync(string relativeUrl, CancellationToken ct)
-    {
-        HttpResponseMessage response;
-        try
-        {
-            response = await _http.GetAsync(relativeUrl, ct);
-        }
-        catch (TaskCanceledException ex) when (!ct.IsCancellationRequested)
-        {
-            throw new PhoneException(PhoneErrorKind.Timeout, inner: ex);
-        }
-        catch (HttpRequestException ex) when (ex.InnerException is AuthenticationException)
-        {
-            throw new PhoneException(PhoneErrorKind.Certificate, ex.InnerException.Message, ex);
-        }
-        catch (HttpRequestException ex)
-        {
-            throw new PhoneException(PhoneErrorKind.Unreachable, ex.Message, ex);
-        }
-
-        using (response)
-        {
-            switch (response.StatusCode)
-            {
-                case HttpStatusCode.Unauthorized:
-                    throw new PhoneException(PhoneErrorKind.Unauthorized);
-                case HttpStatusCode.Forbidden:
-                    throw new PhoneException(PhoneErrorKind.Forbidden);
-                case var code when !response.IsSuccessStatusCode:
-                    throw new PhoneException(PhoneErrorKind.HttpError, ((int)code).ToString());
-            }
-
-            return await response.Content.ReadAsStringAsync(ct);
-        }
-    }
-
-    private static string StripScheme(string host)
-    {
-        host = host.Trim();
-        var idx = host.IndexOf("://", StringComparison.Ordinal);
-        if (idx >= 0)
-            host = host[(idx + 3)..];
-        return host.TrimEnd('/');
-    }
-
     [GeneratedRegex("<title>(.*?)</title>", RegexOptions.IgnoreCase | RegexOptions.Singleline)]
     private static partial Regex TitleRegex();
-
-    public void Dispose() => _http.Dispose();
 }

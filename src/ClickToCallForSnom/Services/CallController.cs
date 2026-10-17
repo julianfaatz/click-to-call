@@ -97,7 +97,7 @@ public sealed class CallController
 
         try
         {
-            using var client = new SnomPhoneClient(PhoneConnection.From(settings));
+            using var client = PhoneDrivers.CreateClient(PhoneConnection.From(settings));
             await client.DialAsync(number, identityUri);
 
             if (settingsOverride is null)
@@ -139,7 +139,7 @@ public sealed class CallController
 
         try
         {
-            using var client = new SnomPhoneClient(PhoneConnection.From(settings));
+            using var client = PhoneDrivers.CreateClient(PhoneConnection.From(settings));
             await client.HangUpAsync();
             Log.Info("Hung up");
         }

@@ -65,7 +65,7 @@ public partial class GeneralPage : UserControl
         IdentitiesCard.Description = Settings.Identities.Count > 0
             ? Loc.T("Identity.Count", Settings.Identities.Count)
             : Loc.T("Identity.Intro");
-        LoadIdentitiesButton.IsEnabled = Settings.IsPhoneConfigured;
+        LoadIdentitiesButton.IsEnabled = Settings.IsPhoneConfigured && PhoneDrivers.For(Settings.Vendor).CanReadIdentities;
     }
 
     private void ShowIdentityResult(string text, StatusText.Kind kind)
@@ -80,7 +80,7 @@ public partial class GeneralPage : UserControl
         ShowIdentityResult(Loc.T("Identity.Loading"), StatusText.Kind.Neutral);
         try
         {
-            using var client = new SnomPhoneClient(PhoneConnection.From(Settings));
+            using var client = PhoneDrivers.CreateClient(PhoneConnection.From(Settings));
             var identities = await client.GetIdentitiesAsync();
             if (identities.Count == 0)
             {

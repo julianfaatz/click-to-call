@@ -10,13 +10,17 @@ public sealed class AppSettings : ObservableObject
 {
     // ---------- Phone ----------
 
+    /// <summary>Manufacturer of the connected phone. Missing in settings of older versions = Snom.</summary>
+    private PhoneVendor _vendor = PhoneVendor.Snom;
+    public PhoneVendor Vendor { get => _vendor; set => Set(ref _vendor, value); }
+
     private string _phoneHost = "";
     public string PhoneHost { get => _phoneHost; set => Set(ref _phoneHost, (value ?? "").Trim()); }
 
     private bool _useHttps;
     public bool UseHttps { get => _useHttps; set => Set(ref _useHttps, value); }
 
-    /// <summary>Snom phones ship with self-signed certificates, so this is on by default.</summary>
+    /// <summary>Desk phones ship with self-signed certificates, so this is on by default.</summary>
     private bool _ignoreCertificateErrors = true;
     public bool IgnoreCertificateErrors { get => _ignoreCertificateErrors; set => Set(ref _ignoreCertificateErrors, value); }
 
