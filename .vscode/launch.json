@@ -13,6 +13,36 @@
       "stopAtEntry": false
     },
     {
+      "name": "Mock-Telefon",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/ClickToCallForSnom/bin/Debug/net10.0-windows/ClickToCallForSnom.exe",
+      "args": ["--mock"],
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole"
+    },
+    {
+      "name": "Mock-Telefon mit Login (admin / 1234)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/ClickToCallForSnom/bin/Debug/net10.0-windows/ClickToCallForSnom.exe",
+      "args": ["--mock-login"],
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole"
+    },
+    {
+      "name": "Mock-Telefon – Einrichtung von vorn",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/ClickToCallForSnom/bin/Debug/net10.0-windows/ClickToCallForSnom.exe",
+      "args": ["--mock-login", "--mock-reset"],
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole"
+    },
+    {
       "name": "Click to Call for Snom (tel: link)",
       "type": "coreclr",
       "request": "launch",

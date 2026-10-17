@@ -38,7 +38,12 @@ public static partial class PhoneScanner
                 found.Add(new FoundPhone(ip.ToString(), model));
         });
 
-        return found.OrderBy(p => IPAddress.Parse(p.Address).GetAddressBytes()[3]).ToList();
+        var phones = found.OrderBy(p => IPAddress.Parse(p.Address).GetAddressBytes()[3]).ToList();
+#if DEBUG
+        if (MockPhone.Address is { } mock)
+            phones.Insert(0, new FoundPhone(mock, MockPhone.Model + " (Mock)"));
+#endif
+        return phones;
     }
 
     /// <returns>The model name if the address looks like a Snom phone, otherwise null.</returns>

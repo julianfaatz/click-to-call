@@ -13,10 +13,13 @@ public static class SettingsStore
         Converters = { new JsonStringEnumConverter() },
     };
 
-    public static string Directory { get; } =
+    public static string Directory { get; private set; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ClickToCallForSnom");
 
-    public static string FilePath { get; } = Path.Combine(Directory, "settings.json");
+    public static string FilePath => Path.Combine(Directory, "settings.json");
+
+    /// <summary>Stores settings (and the log) in another folder, e.g. for the development mock. Call before <see cref="Load"/>.</summary>
+    internal static void UseDirectory(string directory) => Directory = directory;
 
     public static AppSettings Current { get; private set; } = new();
 

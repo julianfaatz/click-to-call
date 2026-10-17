@@ -7,6 +7,11 @@ public static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+#if DEBUG
+        // Development: fake phone on localhost with its own settings (see Core/MockPhone.cs)
+        if (MockPhone.IsRequested(args))
+            MockPhone.Prepare(args);
+#endif
         SettingsStore.Load();
         Loc.SetLanguage(SettingsStore.Current.Language);
 

@@ -65,6 +65,18 @@ dotnet test ClickToCallForSnom.slnx      # Tests
 
 In VS Code: `F5` startet die App mit Debugger, `Strg+Umschalt+B` baut.
 
+#### Ohne Telefon testen (Mock)
+
+Debug-Builds enthalten ein simuliertes Snom-Telefon auf `127.0.0.1:18080`, das dieselbe HTTP-Schnittstelle spricht – Verbinden, Login, Netzwerksuche, Wählen, Auflegen und Leitungen laufen durch den echten Code. Ein kleines Fenster „Mock-Telefon“ zeigt, was das Telefon gerade tun würde, und kann ein ausgeschaltetes Telefon simulieren.
+
+| Argument | Wirkung |
+|---|---|
+| `--mock` | Mock-Telefon ohne Login |
+| `--mock-login` | Mock-Telefon mit Login `admin` / `1234` |
+| `--mock-reset` | zusätzlich: Einrichtung von vorn (Mock-Einstellungen löschen) |
+
+In VS Code gibt es dafür fertige Startkonfigurationen („Mock-Telefon …“). Der Mock nutzt eigene Einstellungen in `%APPDATA%\ClickToCallForSnom\mock`, die echte Konfiguration bleibt unberührt. Läuft die App bereits normal, vorher beenden (es darf nur eine Instanz laufen). In Release-Builds ist der Mock nicht enthalten.
+
 ### Projektstruktur
 
 ```

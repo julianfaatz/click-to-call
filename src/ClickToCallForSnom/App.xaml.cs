@@ -23,6 +23,13 @@ public partial class App : Application
         base.OnStartup(e);
         DispatcherUnhandledException += OnUnhandledException;
 
+#if DEBUG
+        if (MockPhone.IsEnabled)
+        {
+            MockPhone.Start();
+            UI.MockPhoneWindow.ShowWindow();
+        }
+#endif
         Services = new AppServices();
         Services.Start();
 
