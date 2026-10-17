@@ -10,6 +10,7 @@ public partial class DialWindow : Window
 {
     private static DialWindow? _current;
     private readonly Action<string, string?> _onDial;
+    private bool _closing;
 
     private DialWindow(Action<string, string?> onDial)
     {
@@ -44,8 +45,11 @@ public partial class DialWindow : Window
             RecentList.Children.Add(button);
         }
 
+        Closing += (_, _) => _closing = true;
         Closed += (_, _) => { if (_current == this) _current = null; };
-        Deactivated += (_, _) => { if (string.IsNullOrWhiteSpace(NumberBox.Text)) Close(); };
+        // An empty window disappears when the user clicks elsewhere. Closing itself also deactivates the
+        // window, so a second Close() must not happen then.
+        Deactivated += (_, _) => { if (!_closing && string.IsNullOrWhiteSpace(NumberBox.Text)) Close(); };
     }
 
     /// <summary>Shows the dial window (or reuses an open one) prefilled with a number.</summary>
