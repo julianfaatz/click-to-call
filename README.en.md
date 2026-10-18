@@ -17,7 +17,7 @@ Click to Call dials numbers on your desk phone from a Windows PC – by clicking
 
 The screenshots show the German UI; the app is also available in English.
 
-![Start page](docs/start.png)
+![Clicking a phone number – the phone dials](docs/demo.gif)
 
 ## Features
 
@@ -47,6 +47,8 @@ The phone's HTTP remote control is required: `command.htm` on Snom, “Action UR
 3. Follow the checklist on the start page. In the Windows settings, pick “Click to Call” for **TEL** once – Windows does not let apps do this themselves.
 
 The installer is not code-signed yet. If Windows SmartScreen shows a warning: *More info → Run anyway*. Every release includes SHA-256 checksums.
+
+![Start page after setup](docs/start.png)
 
 <table>
   <tr>

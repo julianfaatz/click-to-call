@@ -15,7 +15,7 @@ Telefonnummern am PC anklicken – das Snom- oder Yealink-Tischtelefon wählt.
 
 Click to Call wählt Nummern vom Windows-PC aus auf deinem Tischtelefon – per Klick auf `tel:`-Links oder per Tastenkombination für markierte Nummern in jedem Programm. Die App steuert das Telefon direkt über dessen Web-Schnittstelle im lokalen Netzwerk, eine Telefonanlagen-Software oder ein Server ist nicht nötig.
 
-![Startseite](docs/start.png)
+![Klick auf eine Telefonnummer – das Telefon wählt](docs/demo.gif)
 
 ## Funktionen
 
@@ -45,6 +45,8 @@ Voraussetzung ist die HTTP-Fernsteuerung des Telefons: bei Snom über `command.h
 3. Der Checkliste auf der Startseite folgen. In den Windows-Einstellungen muss bei **TEL** einmal „Click to Call“ ausgewählt werden – das kann Windows nicht automatisch.
 
 Der Installer ist nicht signiert. Zeigt Windows SmartScreen eine Warnung: *Weitere Informationen → Trotzdem ausführen*. Prüfsummen (SHA-256) liegen jedem Release bei.
+
+![Startseite nach der Einrichtung](docs/start.png)
 
 <table>
   <tr>
