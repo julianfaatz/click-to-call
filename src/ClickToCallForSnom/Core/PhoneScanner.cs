@@ -29,7 +29,13 @@ public static class PhoneScanner
         using var http = CreateProbeClient(TimeSpan.FromMilliseconds(800));
         await Parallel.ForEachAsync(targets, new ParallelOptions { MaxDegreeOfParallelism = 64, CancellationToken = ct }, async (ip, token) =>
         {
-            if (Recognize(await ProbeAsync(http, $"http://{ip}/", token)) is { } phone)
+            // Most addresses have no device: find that out without an HTTP request, whose timeout
+            // would throw (thousands of first chance exceptions per scan in the debugger)
+            var http80 = IsPortOpenAsync(ip, 80, token);
+            var https443 = IsPortOpenAsync(ip, 443, token);
+            var url = await http80 ? $"http://{ip}/" : await https443 ? $"https://{ip}/" : null;
+
+            if (url is not null && Recognize(await ProbeAsync(http, url, token)) is { } phone)
                 found.Add(phone with { Address = ip.ToString() });
         });
 
@@ -53,6 +59,26 @@ public static class PhoneScanner
         return Recognize(text) is { } phone
             ? (ProbeStatus.Found, phone with { Address = host })
             : (ProbeStatus.UnknownDevice, null);
+    }
+
+    /// <summary>
+    /// Whether something accepts TCP connections on the port. Uses the event based socket API:
+    /// cancelling it completes with an error code instead of throwing.
+    /// </summary>
+    private static async Task<bool> IsPortOpenAsync(IPAddress address, int port, CancellationToken ct)
+    {
+        using var socket = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        using var args = new SocketAsyncEventArgs { RemoteEndPoint = new IPEndPoint(address, port) };
+        var done = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        args.Completed += (_, e) => done.TrySetResult(e.SocketError == SocketError.Success);
+
+        if (!socket.ConnectAsync(args))
+            return args.SocketError == SocketError.Success; // completed synchronously
+
+        using var timeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(800));
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, ct);
+        await using (linked.Token.Register(() => Socket.CancelConnectAsync(args)))
+            return await done.Task;
     }
 
     private static HttpClient CreateProbeClient(TimeSpan connectTimeout) => new(new SocketsHttpHandler
