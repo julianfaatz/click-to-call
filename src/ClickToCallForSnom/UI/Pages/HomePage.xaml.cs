@@ -20,9 +20,15 @@ public partial class HomePage : UserControl
     private Window? _window; // Window.GetWindow() is already null in Unloaded
     private IReadOnlyList<FoundPhone> _foundPhones = [];
 
+    /// <summary>Entry of the manufacturer selection. Vendor null = recognize automatically.</summary>
+    private sealed record VendorOption(PhoneVendor? Vendor, string Name);
+
     public HomePage()
     {
         InitializeComponent();
+        VendorBox.ItemsSource = new[] { new VendorOption(null, Loc.T("Phone.VendorAuto")) }
+            .Concat(PhoneDrivers.All.Select(d => new VendorOption(d.Vendor, d.Name)))
+            .ToList();
         Loaded += (_, _) =>
         {
             Settings.PropertyChanged += Settings_PropertyChanged;
@@ -83,6 +89,13 @@ public partial class HomePage : UserControl
         var formOpen = ConnectForm.Visibility == Visibility.Visible;
         ChangeButton.Visibility = configured && !formOpen ? Visibility.Visible : Visibility.Collapsed;
         RecheckButton.Visibility = configured && !formOpen ? Visibility.Visible : Visibility.Collapsed;
+
+        // e.g. Yealink: the PC has to be allowed to control the phone
+        var hint = configured ? PhoneDrivers.For(Settings.Vendor).UsageHint(Settings.PhoneHost) : null;
+        PhoneHintTip.Help = hint ?? "";
+        PhoneHintTip.Visibility = hint is null ? Visibility.Collapsed : Visibility.Visible;
+        Step3HintText.Text = hint ?? "";
+        Step3Hint.Visibility = hint is null ? Visibility.Collapsed : Visibility.Visible;
 
         RefreshLines();
     }
@@ -168,6 +181,9 @@ public partial class HomePage : UserControl
         UserBox.Text = Settings.Username;
         PasswordBox.Password = Settings.Password;
         CredentialsPanel.Visibility = Settings.Username.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        // The manufacturer is recognized automatically; changing it is offered once a phone is connected
+        VendorBox.SelectedIndex = 0;
+        VendorPanel.Visibility = Settings.IsPhoneConfigured ? Visibility.Visible : Visibility.Collapsed;
         CancelConnectButton.Visibility = Settings.IsPhoneConfigured ? Visibility.Visible : Visibility.Collapsed;
         SetConnectMessage("", StatusText.Kind.Neutral);
 
@@ -230,13 +246,11 @@ public partial class HomePage : UserControl
         SetConnectMessage(Loc.T("Phone.Testing"), StatusText.Kind.Neutral);
         try
         {
-            // The scan already knows the manufacturer of the phones it found
-            var vendor = _foundPhones.FirstOrDefault(p => p.Address == host)?.Vendor ?? Settings.Vendor;
-            var result = await PhoneConnector.ConnectAsync(vendor, host, user, password, Settings.UseHttps && host == Settings.PhoneHost);
+            var result = await PhoneConnector.ConnectAsync(VendorFor(host), host, user, password, Settings.UseHttps && host == Settings.PhoneHost);
             switch (result.Status)
             {
                 case ConnectStatus.Connected:
-                    Settings.Vendor = vendor;
+                    Settings.Vendor = result.Vendor!.Value;
                     Settings.PhoneHost = host;
                     Settings.UseHttps = result.UseHttps;
                     Settings.IgnoreCertificateErrors = true;
@@ -252,6 +266,13 @@ public partial class HomePage : UserControl
                     // The user clicked a link before the phone was set up: continue with it
                     if (App.Services?.Calls.TakePendingNumber() is { } pending)
                         App.Services.Calls.ShowDialWindow(pending, fromLink: true);
+                    break;
+
+                case ConnectStatus.UnknownVendor:
+                    VendorPanel.Visibility = Visibility.Visible;
+                    SetConnectMessage(Loc.T("Home.VendorUnknown"), StatusText.Kind.Error);
+                    VendorBox.Focus();
+                    VendorBox.IsDropDownOpen = true;
                     break;
 
                 case ConnectStatus.NeedsCredentials:
@@ -278,6 +299,17 @@ public partial class HomePage : UserControl
         {
             DoConnectButton.IsEnabled = true;
         }
+    }
+
+    /// <summary>The manufacturer to connect with, or null to recognize it from the phone.</summary>
+    private PhoneVendor? VendorFor(string host)
+    {
+        if (VendorPanel.IsVisible && (VendorBox.SelectedItem as VendorOption)?.Vendor is { } chosen)
+            return chosen;
+        if (_foundPhones.FirstOrDefault(p => p.Address == host) is { } found)
+            return found.Vendor;
+        // Reconnecting the same phone (e.g. new password): it is known to work
+        return Settings.IsPhoneConfigured && host == Settings.PhoneHost ? Settings.Vendor : null;
     }
 
     /// <summary>Reads the phone's identities silently – only relevant if there is more than one.</summary>

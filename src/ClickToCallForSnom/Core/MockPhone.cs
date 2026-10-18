@@ -9,23 +9,24 @@ namespace ClickToCallForSnom.Core;
 public sealed record MockPhoneEvent(DateTime Time, string Text, string? Display = null);
 
 /// <summary>
-/// Development only: a fake Snom phone on 127.0.0.1 that speaks the same HTTP interface as a real one,
+/// Development only: a fake Snom or Yealink phone on 127.0.0.1 that speaks the same HTTP interface as a real one,
 /// so connecting, login, dialing, hang up and identities run through the real code.
 /// <para>
-/// Start the app with <c>--mock</c> (no login) or <c>--mock-login</c> (user "admin", password "1234").
-/// <c>--mock-reset</c> starts the setup from scratch. Mock settings live in %APPDATA%\ClickToCallForSnom\mock,
-/// the real configuration is not touched.
+/// Start the app with <c>--mock</c> (Snom, no login), <c>--mock-login</c> (Snom, user "admin", password "1234")
+/// or <c>--mock-yealink</c> (Yealink, always with that login). <c>--mock-reset</c> starts the setup from scratch.
+/// Mock settings live in %APPDATA%\ClickToCallForSnom\mock (or mock-yealink), the real configuration is not touched.
 /// </para>
 /// </summary>
 public static class MockPhone
 {
-    public const string Model = "snom D385";
     public const string Username = "admin";
     public const string Password = "1234";
     private const int PreferredPort = 18080;
 
     public static bool IsEnabled { get; private set; }
+    public static PhoneVendor Vendor { get; private set; }
     public static bool RequiresLogin { get; private set; }
+    public static string Model => Vendor == PhoneVendor.Yealink ? "Yealink SIP-T54W" : "snom D385";
     public static string? Address { get; private set; }
 
     /// <summary>While true the phone does not answer (simulates a switched off phone).</summary>
@@ -40,9 +41,10 @@ public static class MockPhone
     public static void Prepare(string[] args)
     {
         IsEnabled = true;
-        RequiresLogin = args.Contains("--mock-login");
+        Vendor = args.Contains("--mock-yealink") ? PhoneVendor.Yealink : PhoneVendor.Snom;
+        RequiresLogin = args.Contains("--mock-login") || Vendor == PhoneVendor.Yealink;
 
-        var directory = Path.Combine(SettingsStore.Directory, "mock");
+        var directory = Path.Combine(SettingsStore.Directory, Vendor == PhoneVendor.Yealink ? "mock-yealink" : "mock");
         if (args.Contains("--mock-reset") && Directory.Exists(directory))
             Directory.Delete(directory, recursive: true);
         SettingsStore.UseDirectory(directory);
@@ -92,17 +94,27 @@ public static class MockPhone
                     return;
 
                 string? authorization = null;
+                var contentLength = 0;
                 while (await reader.ReadLineAsync() is { Length: > 0 } header)
                 {
                     if (header.StartsWith("Authorization:", StringComparison.OrdinalIgnoreCase))
                         authorization = header["Authorization:".Length..].Trim();
+                    else if (header.StartsWith("Content-Length:", StringComparison.OrdinalIgnoreCase))
+                        int.TryParse(header["Content-Length:".Length..].Trim(), out contentLength);
                 }
+
+                var body = new char[Math.Clamp(contentLength, 0, 4096)];
+                var read = 0;
+                while (read < body.Length && await reader.ReadAsync(body.AsMemory(read)) is > 0 and var n)
+                    read += n;
 
                 await Task.Delay(200); // feel like a real device
                 var uri = new Uri("http://mock" + target);
 
+                // Yealink: the start page and the login API work without, only Action URI needs the login
+                var needsLogin = RequiresLogin && (Vendor == PhoneVendor.Snom || uri.AbsolutePath.StartsWith("/servlet", StringComparison.OrdinalIgnoreCase));
                 var expected = "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes($"{Username}:{Password}"));
-                if (RequiresLogin && authorization != expected)
+                if (needsLogin && authorization != expected)
                 {
                     if (authorization is not null)
                         Raise($"Login abgelehnt ({uri.AbsolutePath})");
@@ -111,8 +123,10 @@ public static class MockPhone
                     return;
                 }
 
-                var (status, contentType, body) = Respond(uri);
-                await WriteAsync(stream, status, contentType, body);
+                var (status, contentType, content) = Vendor == PhoneVendor.Yealink
+                    ? RespondYealink(uri, new string(body, 0, read))
+                    : Respond(uri);
+                await WriteAsync(stream, status, contentType, content);
             }
             catch (Exception ex) when (ex is IOException or SocketException or ObjectDisposedException)
             {
@@ -149,6 +163,37 @@ public static class MockPhone
         }
     }
 
+    private static (string Status, string ContentType, string Body) RespondYealink(Uri uri, string body)
+    {
+        var query = ParseQuery(uri.Query);
+        switch (uri.AbsolutePath.ToLowerInvariant())
+        {
+            case "/":
+                Raise("Verbindungstest");
+                return ("200 OK", "text/html", $"<html><head><title>{Model}</title></head><body>Yealink web login (mock)</body></html>");
+
+            case "/api/auth/login":
+                var form = ParseQuery(body);
+                var ok = form.GetValueOrDefault("username") == Username && form.GetValueOrDefault("pwd") == Password;
+                Raise(ok ? "Login geprüft" : "Login abgelehnt (Web-API)");
+                return ("200 OK", "application/json", ok ? "{\"ret\":\"ok\"}" : "{\"ret\":\"failed\"}");
+
+            case "/servlet" when query.TryGetValue("key", out var key) && key.StartsWith("number=", StringComparison.Ordinal):
+                var number = key["number=".Length..];
+                var line = query.TryGetValue("outgoing_uri", out var uriValue) ? uriValue : "Standard-Leitung";
+                Raise($"Wählt {number} über {line}", $"☎  {number}");
+                return ("200 OK", "text/html", "<html><body>OK</body></html>");
+
+            case "/servlet" when query.TryGetValue("key", out var key) && key == "CALLEND":
+                Raise("Aufgelegt", "Bereit");
+                return ("200 OK", "text/html", "<html><body>OK</body></html>");
+
+            default:
+                Raise($"Unbekannte Anfrage: {uri.PathAndQuery} (404)");
+                return ("404 Not Found", "text/html", "<html><body>404</body></html>");
+        }
+    }
+
     private const string SettingsXml = """
         <?xml version="1.0" encoding="utf-8"?>
         <settings>
@@ -169,7 +214,11 @@ public static class MockPhone
         query.TrimStart('?')
             .Split('&', StringSplitOptions.RemoveEmptyEntries)
             .Select(part => part.Split('=', 2))
-            .ToDictionary(p => Uri.UnescapeDataString(p[0]), p => p.Length > 1 ? Uri.UnescapeDataString(p[1]) : "");
+            .GroupBy(p => Unescape(p[0]))
+            .ToDictionary(g => g.Key, g => g.First().Length > 1 ? Unescape(g.First()[1]) : "");
+
+    // Form posts encode spaces as "+"
+    private static string Unescape(string value) => Uri.UnescapeDataString(value.Replace('+', ' '));
 
     private static async Task WriteAsync(Stream stream, string status, string contentType, string body, string extraHeaders = "")
     {

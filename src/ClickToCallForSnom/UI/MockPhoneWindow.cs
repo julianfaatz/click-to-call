@@ -31,6 +31,8 @@ public sealed class MockPhoneWindow : Window
         header.Children.Add(Hint(MockPhone.RequiresLogin
             ? $"Login: {MockPhone.Username} / {MockPhone.Password}"
             : "Kein Login (mit --mock-login testen)"));
+        if (MockPhone.Vendor == PhoneVendor.Yealink)
+            header.Children.Add(Hint("Wählt immer – die IP-Freigabe eines echten Yealink wird nicht simuliert"));
         DockPanel.SetDock(header, Dock.Top);
         root.Children.Add(header);
 

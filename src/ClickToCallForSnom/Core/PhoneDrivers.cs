@@ -17,12 +17,15 @@ public interface IPhoneDriver
     /// </summary>
     string? Detect(string probeText);
 
+    /// <summary>Something the user has to do on this kind of phone before calls work, or null.</summary>
+    string? UsageHint(string phoneHost);
+
     IPhoneClient CreateClient(PhoneConnection connection, TimeSpan? timeout = null);
 }
 
 public static class PhoneDrivers
 {
-    public static IReadOnlyList<IPhoneDriver> All { get; } = [new SnomDriver()];
+    public static IReadOnlyList<IPhoneDriver> All { get; } = [new SnomDriver(), new YealinkDriver()];
 
     public static IPhoneDriver For(PhoneVendor vendor) => All.First(d => d.Vendor == vendor);
 

@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Authentication;
+using System.Text;
 
 namespace ClickToCallForSnom.Core;
 
@@ -8,6 +10,7 @@ namespace ClickToCallForSnom.Core;
 public enum PhoneVendor
 {
     Snom,
+    Yealink,
 }
 
 public sealed record PhoneConnection(
@@ -63,23 +66,31 @@ public interface IPhoneClient : IDisposable
 /// </summary>
 public abstract class HttpPhoneClient : IPhoneClient
 {
+    private const int MaxRedirects = 3;
     private readonly HttpClient _http;
+    private readonly bool _followRedirects;
 
-    protected HttpPhoneClient(PhoneConnection connection, TimeSpan? timeout = null)
+    /// <param name="sendBasicAuthUpfront">
+    /// Send the login with every request instead of waiting for the phone to ask for it
+    /// (for phones that answer without a login challenge).
+    /// </param>
+    protected HttpPhoneClient(PhoneConnection connection, TimeSpan? timeout = null, bool sendBasicAuthUpfront = false)
     {
-        var host = StripScheme(connection.Host);
+        var host = NormalizeHost(connection.Host);
         if (string.IsNullOrWhiteSpace(host))
             throw new PhoneException(PhoneErrorKind.NotConfigured);
 
+        var hasLogin = !string.IsNullOrEmpty(connection.Username);
         var handler = new HttpClientHandler
         {
             // Supports both Basic and Digest authentication
-            Credentials = string.IsNullOrEmpty(connection.Username)
-                ? null
-                : new NetworkCredential(connection.Username, connection.Password),
+            Credentials = hasLogin && !sendBasicAuthUpfront ? new NetworkCredential(connection.Username, connection.Password) : null,
             PreAuthenticate = true,
             UseProxy = false,
+            // .NET drops a preset Authorization header on redirects, so we follow them ourselves then
+            AllowAutoRedirect = !sendBasicAuthUpfront,
         };
+        _followRedirects = sendBasicAuthUpfront;
 
         // Also needed for HTTP: phones set to HTTPS only redirect there
         if (connection.IgnoreCertificateErrors)
@@ -99,9 +110,25 @@ public abstract class HttpPhoneClient : IPhoneClient
             // The phone's pages are small – don't buffer whatever a wrong device sends back
             MaxResponseContentBufferSize = 4 * 1024 * 1024,
         };
+
+        if (hasLogin && sendBasicAuthUpfront)
+        {
+            var token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{connection.Username}:{connection.Password}"));
+            _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
+        }
     }
 
     public Uri BaseAddress => _http.BaseAddress!;
+
+    /// <summary>"http://192.168.1.50/" → "192.168.1.50".</summary>
+    internal static string NormalizeHost(string host)
+    {
+        host = host.Trim();
+        var idx = host.IndexOf("://", StringComparison.Ordinal);
+        if (idx >= 0)
+            host = host[(idx + 3)..];
+        return host.TrimEnd('/');
+    }
 
     public abstract Task DialAsync(string number, string? outgoingUri = null, CancellationToken ct = default);
 
@@ -112,49 +139,63 @@ public abstract class HttpPhoneClient : IPhoneClient
     public virtual Task<IReadOnlyList<PhoneIdentity>> GetIdentitiesAsync(CancellationToken ct = default) =>
         Task.FromResult<IReadOnlyList<PhoneIdentity>>([]);
 
-    protected async Task<string> GetStringAsync(string relativeUrl, CancellationToken ct)
-    {
-        HttpResponseMessage response;
-        try
-        {
-            response = await _http.GetAsync(relativeUrl, ct);
-        }
-        catch (TaskCanceledException ex) when (!ct.IsCancellationRequested)
-        {
-            throw new PhoneException(PhoneErrorKind.Timeout, inner: ex);
-        }
-        catch (HttpRequestException ex) when (ex.InnerException is AuthenticationException)
-        {
-            throw new PhoneException(PhoneErrorKind.Certificate, ex.InnerException.Message, ex);
-        }
-        catch (HttpRequestException ex)
-        {
-            throw new PhoneException(PhoneErrorKind.Unreachable, ex.Message, ex);
-        }
+    protected Task<string> GetStringAsync(string relativeUrl, CancellationToken ct) =>
+        SendAsync(() => new HttpRequestMessage(HttpMethod.Get, relativeUrl), ct);
 
-        using (response)
+    protected Task<string> PostFormAsync(string relativeUrl, IEnumerable<KeyValuePair<string, string>> form, CancellationToken ct) =>
+        SendAsync(() => new HttpRequestMessage(HttpMethod.Post, relativeUrl) { Content = new FormUrlEncodedContent(form) }, ct);
+
+    private async Task<string> SendAsync(Func<HttpRequestMessage> createRequest, CancellationToken ct)
+    {
+        var request = createRequest();
+        for (var redirects = 0; ; redirects++)
         {
-            switch (response.StatusCode)
+            HttpResponseMessage response;
+            try
             {
-                case HttpStatusCode.Unauthorized:
-                    throw new PhoneException(PhoneErrorKind.Unauthorized);
-                case HttpStatusCode.Forbidden:
-                    throw new PhoneException(PhoneErrorKind.Forbidden);
-                case var code when !response.IsSuccessStatusCode:
-                    throw new PhoneException(PhoneErrorKind.HttpError, ((int)code).ToString());
+                using (request)
+                    response = await _http.SendAsync(request, ct);
+            }
+            catch (TaskCanceledException ex) when (!ct.IsCancellationRequested)
+            {
+                throw new PhoneException(PhoneErrorKind.Timeout, inner: ex);
+            }
+            catch (HttpRequestException ex) when (ex.InnerException is AuthenticationException)
+            {
+                throw new PhoneException(PhoneErrorKind.Certificate, ex.InnerException.Message, ex);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new PhoneException(PhoneErrorKind.Unreachable, ex.Message, ex);
             }
 
-            return await response.Content.ReadAsStringAsync(ct);
-        }
-    }
+            using (response)
+            {
+                if (_followRedirects && (int)response.StatusCode is >= 300 and < 400 && response.Headers.Location is { } location)
+                {
+                    var target = location.IsAbsoluteUri ? location : new Uri(BaseAddress, location);
+                    // A phone set to HTTPS only redirects there: the caller tries HTTPS itself (see PhoneConnector)
+                    if (target.Scheme != BaseAddress.Scheme || target.Authority != BaseAddress.Authority || redirects >= MaxRedirects)
+                        throw new PhoneException(PhoneErrorKind.Unreachable, $"Redirected to {target}");
 
-    private static string StripScheme(string host)
-    {
-        host = host.Trim();
-        var idx = host.IndexOf("://", StringComparison.Ordinal);
-        if (idx >= 0)
-            host = host[(idx + 3)..];
-        return host.TrimEnd('/');
+                    request = createRequest();
+                    request.RequestUri = target;
+                    continue;
+                }
+
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.Unauthorized:
+                        throw new PhoneException(PhoneErrorKind.Unauthorized);
+                    case HttpStatusCode.Forbidden:
+                        throw new PhoneException(PhoneErrorKind.Forbidden);
+                    case var code when !response.IsSuccessStatusCode:
+                        throw new PhoneException(PhoneErrorKind.HttpError, ((int)code).ToString());
+                }
+
+                return await response.Content.ReadAsStringAsync(ct);
+            }
+        }
     }
 
     public void Dispose() => _http.Dispose();

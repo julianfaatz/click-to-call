@@ -33,7 +33,7 @@ public static class Loc
     private static readonly Dictionary<string, (string De, string En)> Texts = new()
     {
         // ---------- App ----------
-        ["App.Description"] = ("Wählt tel:-Links und Rufnummern auf deinem Tischtelefon.", "Dials tel: links and phone numbers on your desk phone."),
+        ["App.Description"] = ("Wählt tel:-Links und Rufnummern auf deinem Snom- oder Yealink-Tischtelefon.", "Dials tel: links and phone numbers on your Snom or Yealink desk phone."),
         ["App.Disclaimer"] = (
             "Kein offizielles Produkt der Snom Technology GmbH. Snom ist eine Marke der Snom Technology GmbH. Open Source unter MIT-Lizenz.",
             "Not an official product of Snom Technology GmbH. Snom is a trademark of Snom Technology GmbH. Open source under the MIT license."),
@@ -60,6 +60,15 @@ public static class Loc
             "Die sichere Verbindung (HTTPS) zum Telefon ist fehlgeschlagen. Bitte auf der Startseite neu verbinden.",
             "The secure connection (HTTPS) to the phone failed. Please connect again on the home page."),
         ["Error.HttpError"] = ("Das Telefon meldet einen Fehler (HTTP {0}).", "The phone reported an error (HTTP {0})."),
+
+        // ---------- Phone specific ----------
+        ["Yealink.RemoteControlHint"] = (
+            "Beim ersten Anruf fragt das Telefon, ob es ferngesteuert werden darf – bitte mit OK bestätigen. "
+                + "Passiert beim Wählen nichts: in der Web-Oberfläche des Telefons unter Features → Remote Control "
+                + "bei „Action URI Allow IP List“ die IP-Adresse dieses PCs eintragen{0}.",
+            "On the first call the phone asks whether it may be remote controlled – please confirm with OK. "
+                + "If nothing happens when dialing: in the phone's web interface under Features → Remote Control, "
+                + "add this PC's IP address{0} to the \"Action URI Allow IP List\"."),
 
         // ---------- Setup required ----------
         ["Setup.RequiredTitle"] = ("Noch kein Telefon verbunden", "No phone connected yet"),
@@ -90,8 +99,10 @@ public static class Loc
         // ---------- Connect form ----------
         ["Phone.Host"] = ("IP-Adresse", "IP address"),
         ["Phone.HostHelp"] = (
-            "Steht am Telefon unter Menü → Informationen (oder Taste „i“), z. B. 192.168.1.50.",
-            "Shown on the phone under Menu → Information (or the \"i\" key), e.g. 192.168.1.50."),
+            "Steht im Telefonmenü unter Informationen bzw. Status, z. B. 192.168.1.50.",
+            "Shown in the phone's menu under Information or Status, e.g. 192.168.1.50."),
+        ["Phone.Vendor"] = ("Hersteller", "Manufacturer"),
+        ["Phone.VendorAuto"] = ("Automatisch erkennen", "Recognize automatically"),
         ["Phone.Username"] = ("Benutzername", "Username"),
         ["Phone.Password"] = ("Passwort", "Password"),
         ["Phone.Testing"] = ("Verbinde …", "Connecting …"),
@@ -108,6 +119,9 @@ public static class Loc
         ["Identity.Loading"] = ("Lese Leitungen vom Telefon …", "Reading lines from the phone …"),
         ["Identity.Loaded"] = ("{0} Leitung(en) gefunden", "{0} line(s) found"),
         ["Identity.NoneFound"] = ("Keine Leitungen gefunden.", "No lines found."),
+        ["Identity.IntroManual"] = (
+            "Nur wichtig, wenn dein Telefon mehrere Leitungen (Identitäten) hat. Dieses Telefon meldet sie nicht – bitte unten manuell hinzufügen.",
+            "Only relevant if your phone has several lines (identities). This phone does not report them – please add them manually below."),
         ["Identity.ManualFallback"] = ("Du kannst Leitungen auch manuell hinzufügen.", "You can also add lines manually."),
         ["Identity.ParseError"] = ("Die Antwort des Telefons konnte nicht gelesen werden. Bitte manuell hinzufügen.", "Could not read the phone's response. Please add lines manually."),
         ["Identity.PhoneDefault"] = ("Standard des Telefons", "Phone default"),
@@ -227,10 +241,13 @@ public static class Loc
         ["Home.HostRequired"] = ("Bitte die IP-Adresse des Telefons eingeben.", "Please enter the phone's IP address."),
         ["Home.Scan"] = ("Im Netzwerk suchen", "Search network"),
         ["Home.ScanAgain"] = ("Erneut suchen", "Search again"),
-        ["Home.Scanning"] = ("Suche dein Tischtelefon im Netzwerk …", "Looking for your desk phone on the network …"),
+        ["Home.Scanning"] = ("Suche dein Snom- oder Yealink-Telefon im Netzwerk …", "Looking for your Snom or Yealink phone on the network …"),
         ["Home.ScanFoundOne"] = ("Gefunden! Klicke auf dein Telefon, um es zu verbinden:", "Found it! Click your phone to connect:"),
         ["Home.ScanFound"] = ("Mehrere Telefone gefunden – klicke auf deins:", "Several phones found – click yours:"),
-        ["Home.ScanNone"] = ("Kein Tischtelefon gefunden. Bitte die IP-Adresse oben eintragen.", "No desk phone found. Please enter the IP address above."),
+        ["Home.ScanNone"] = ("Kein Snom- oder Yealink-Telefon gefunden. Bitte die IP-Adresse oben eintragen.", "No Snom or Yealink phone found. Please enter the IP address above."),
+        ["Home.VendorUnknown"] = (
+            "Unter dieser Adresse antwortet ein Gerät, der Hersteller wurde aber nicht erkannt. Bitte auswählen und erneut verbinden.",
+            "A device answers at this address, but its manufacturer was not recognized. Please select it and connect again."),
         ["Home.NeedsLogin"] = (
             "Dein Telefon ist passwortgeschützt. Bitte die Zugangsdaten der Web-Oberfläche eingeben (nicht die SIP-Daten).",
             "Your phone is password protected. Please enter the web interface credentials (not the SIP credentials)."),

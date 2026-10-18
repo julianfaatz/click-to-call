@@ -62,10 +62,11 @@ public partial class GeneralPage : UserControl
     {
         IdentityList.ItemsSource = Settings.Identities.ToList();
         IdentityList.Visibility = Settings.Identities.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        var canRead = PhoneDrivers.For(Settings.Vendor).CanReadIdentities;
         IdentitiesCard.Description = Settings.Identities.Count > 0
             ? Loc.T("Identity.Count", Settings.Identities.Count)
-            : Loc.T("Identity.Intro");
-        LoadIdentitiesButton.IsEnabled = Settings.IsPhoneConfigured && PhoneDrivers.For(Settings.Vendor).CanReadIdentities;
+            : Loc.T(canRead ? "Identity.Intro" : "Identity.IntroManual");
+        LoadIdentitiesButton.IsEnabled = Settings.IsPhoneConfigured && canRead;
     }
 
     private void ShowIdentityResult(string text, StatusText.Kind kind)

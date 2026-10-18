@@ -21,6 +21,8 @@ public sealed partial class SnomDriver : IPhoneDriver
         return match.Success ? "Snom " + match.Groups[1].Value.ToUpperInvariant() : Name;
     }
 
+    public string? UsageHint(string phoneHost) => null;
+
     public IPhoneClient CreateClient(PhoneConnection connection, TimeSpan? timeout = null) => new SnomPhoneClient(connection, timeout);
 
     [GeneratedRegex(@"snom\s*-?\s*([A-Z]\d{3,4}[A-Z]*)\b", RegexOptions.IgnoreCase)]

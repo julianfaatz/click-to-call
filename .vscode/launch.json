@@ -43,6 +43,16 @@
       "console": "internalConsole"
     },
     {
+      "name": "Mock-Telefon Yealink (admin / 1234)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/ClickToCallForSnom/bin/Debug/net10.0-windows/ClickToCallForSnom.exe",
+      "args": ["--mock-yealink"],
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole"
+    },
+    {
       "name": "Click to Call for Snom (tel: link)",
       "type": "coreclr",
       "request": "launch",

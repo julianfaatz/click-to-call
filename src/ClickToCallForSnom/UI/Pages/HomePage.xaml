@@ -72,6 +72,8 @@
                         <StackPanel x:Name="StatusPill" Margin="0,6,0,0" Orientation="Horizontal" Visibility="Collapsed">
                             <Ellipse x:Name="StatusDot" Width="8" Height="8" Margin="0,0,6,0" VerticalAlignment="Center" />
                             <TextBlock x:Name="StatusLabel" FontSize="12" VerticalAlignment="Center" TextWrapping="Wrap" />
+                            <!-- Something the user has to set up on this kind of phone (e.g. Yealink remote control) -->
+                            <ui:HelpTip x:Name="PhoneHintTip" Visibility="Collapsed" />
                         </StackPanel>
                     </StackPanel>
 
@@ -137,6 +139,16 @@
                             <TextBlock x:Name="ScanStatus" Margin="0,6,0,0" Style="{StaticResource CardDescription}" />
                             <WrapPanel x:Name="ScanResults" Margin="0,8,0,0" />
                         </StackPanel>
+                    </Grid>
+
+                    <!-- Only shown when the manufacturer could not be recognized, or to change it later -->
+                    <Grid x:Name="VendorPanel" Margin="0,16,0,0" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" MaxWidth="320" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Tr Phone.Vendor}" />
+                        <ComboBox x:Name="VendorBox" Grid.Column="1" DisplayMemberPath="Name" />
                     </Grid>
 
                     <!-- Only shown when the phone asks for a login -->
@@ -259,6 +271,22 @@
                 <StackPanel Grid.Column="1">
                     <TextBlock Style="{StaticResource StepTitle}" Text="{loc:Tr Home.StepTest}" />
                     <TextBlock Style="{StaticResource StepText}" Text="{loc:Tr Home.StepTestText}" />
+
+                    <Border x:Name="Step3Hint"
+                            Margin="0,16,0,0"
+                            Padding="12,10"
+                            CornerRadius="4"
+                            Background="{DynamicResource SystemFillColorAttentionBackgroundBrush}"
+                            Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="0,1,10,0" FontFamily="{StaticResource IconFont}" Text="&#xE946;" />
+                            <TextBlock x:Name="Step3HintText" Grid.Column="1" TextWrapping="Wrap" />
+                        </Grid>
+                    </Border>
 
                     <StackPanel Margin="0,20,0,0" Orientation="Horizontal">
                         <TextBox x:Name="TestNumberBox" Width="240" FontSize="16" VerticalAlignment="Center" KeyDown="DialBox_KeyDown" />
