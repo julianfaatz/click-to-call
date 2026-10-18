@@ -214,6 +214,7 @@ public static class Loc
         ["General.TroubleshootingHint"] = ("Das Protokoll hilft, wenn etwas nicht klappt.", "The log helps when something doesn't work."),
         ["General.OpenLog"] = ("Protokoll öffnen", "Open log"),
         ["General.OpenFolder"] = ("Ordner öffnen", "Open folder"),
+        ["General.ReportBug"] = ("Fehler melden", "Report a problem"),
 
         // ---------- Updates ----------
         ["Update.Checking"] = ("Suche …", "Checking …"),

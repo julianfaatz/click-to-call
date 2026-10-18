@@ -6,6 +6,11 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 
 ## [Unreleased]
 
+### Hinzugefügt
+
+- „Fehler melden“ unter *Allgemein* öffnet ein vorausgefülltes Fehlerformular auf GitHub
+- SHA-256-Prüfsummen für die Release-Dateien
+
 ## [0.9.0] - 2026-10-18
 
 Erste öffentliche Version.

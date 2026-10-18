@@ -107,6 +107,7 @@
             <StackPanel Orientation="Horizontal">
                 <Button Click="Log_Click" Content="{loc:Tr General.OpenLog}" />
                 <Button Margin="8,0,0,0" Click="Folder_Click" Content="{loc:Tr General.OpenFolder}" />
+                <Button Margin="8,0,0,0" Click="ReportBug_Click" Content="{loc:Tr General.ReportBug}" />
             </StackPanel>
         </ui:SettingCard>
 

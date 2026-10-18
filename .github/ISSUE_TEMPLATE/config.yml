@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Sicherheitslücke melden
+    url: https://github.com/julianfaatz/click-to-call/security/advisories/new
+    about: Bitte nicht öffentlich als Issue, sondern vertraulich melden.

@@ -1,8 +1,19 @@
+<div align="center">
+
+<img src="docs/logo.png" width="96" alt="">
+
 # Click to Call
 
-Wählt Telefonnummern vom Windows-PC aus auf einem Snom- oder Yealink-Tischtelefon – per Klick auf `tel:`-Links oder per Tastenkombination für markierte Nummern in jedem Programm.
+Telefonnummern am PC anklicken – das Snom- oder Yealink-Tischtelefon wählt.
 
-Die App steuert das Telefon direkt über dessen Web-Schnittstelle im lokalen Netzwerk. Eine Telefonanlagen-Software oder ein Server ist nicht nötig.
+[![Version](https://img.shields.io/github/v/release/julianfaatz/click-to-call?label=Version)](https://github.com/julianfaatz/click-to-call/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/julianfaatz/click-to-call/total?label=Downloads)](https://github.com/julianfaatz/click-to-call/releases)
+
+**Deutsch** · [English](README.en.md)
+
+</div>
+
+Click to Call wählt Nummern vom Windows-PC aus auf deinem Tischtelefon – per Klick auf `tel:`-Links oder per Tastenkombination für markierte Nummern in jedem Programm. Die App steuert das Telefon direkt über dessen Web-Schnittstelle im lokalen Netzwerk, eine Telefonanlagen-Software oder ein Server ist nicht nötig.
 
 ![Startseite](docs/start.png)
 
@@ -33,7 +44,7 @@ Voraussetzung ist die HTTP-Fernsteuerung des Telefons: bei Snom über `command.h
 2. Die App sucht das Telefon im Netzwerk. Gefundenes Telefon anklicken oder die IP-Adresse eingeben. Benötigt werden die Zugangsdaten der Web-Oberfläche des Telefons.
 3. Der Checkliste auf der Startseite folgen. In den Windows-Einstellungen muss bei **TEL** einmal „Click to Call“ ausgewählt werden – das kann Windows nicht automatisch.
 
-Der Installer ist nicht signiert. Zeigt Windows SmartScreen eine Warnung: *Weitere Informationen → Trotzdem ausführen*.
+Der Installer ist nicht signiert. Zeigt Windows SmartScreen eine Warnung: *Weitere Informationen → Trotzdem ausführen*. Prüfsummen (SHA-256) liegen jedem Release bei.
 
 <table>
   <tr>
@@ -42,40 +53,34 @@ Der Installer ist nicht signiert. Zeigt Windows SmartScreen eine Warnung: *Weite
   </tr>
 </table>
 
+## Aus anderen Programmen wählen
+
+Andere Software oder Skripte können die App wie einen Link aufrufen:
+
+```powershell
+ClickToCall.exe "tel:+49301234567"
+```
+
 ## Fehlersuche
 
 | Problem | Lösung |
 |---|---|
 | Telefon wird nicht gefunden | IP-Adresse von Hand eingeben (Telefonmenü → Informationen). Liegt das Telefon in einem anderen Netz, muss es vom PC aus erreichbar sein. |
 | „Benutzername oder Passwort falsch“ | Zugangsdaten der Web-Oberfläche verwenden, nicht die SIP-Zugangsdaten. |
-| „Zugriff verweigert (403)“ | Im Web-Interface prüfen, ob der Benutzer Admin-Rechte hat und HTTP-Steuerung erlaubt ist. |
+| „Das Telefon verweigert den Zugriff“ | Im Web-Interface prüfen, ob der Benutzer Admin-Rechte hat und HTTP-Steuerung erlaubt ist. |
 | Yealink wählt nicht | Beim ersten Anruf „Fernsteuerung erlauben“ am Telefon bestätigen oder unter *Features → Remote Control* die IP des PCs bei **Action URI Allow IP List** eintragen. |
 | Klick auf tel:-Link macht nichts | *Wählen → Links* aktivieren und in den Windows-Einstellungen „Click to Call“ auswählen. |
 | Hotkey geht nicht | Unter *Wählen → Hotkey* eine andere Kombination wählen. |
 
-Einstellungen und Protokoll liegen in `%APPDATA%\ClickToCall`.
+Einstellungen und Protokoll liegen in `%APPDATA%\ClickToCall`. Hilft das nicht weiter: in der App unter *Allgemein → Fehler melden* oder direkt als [Issue](https://github.com/julianfaatz/click-to-call/issues/new/choose).
 
 ## Datenschutz
 
 Die App verbindet sich nur mit dem Telefon und mit GitHub, um nach Updates zu suchen (abschaltbar). Es gibt keine Telemetrie. Das Telefon-Passwort wird mit Windows DPAPI verschlüsselt gespeichert.
 
-## Entwicklung
+## Mitmachen
 
-Benötigt das [.NET 10 SDK](https://dotnet.microsoft.com/download), für den Installer [Inno Setup 6](https://jrsoftware.org/isinfo.php).
-
-```powershell
-dotnet build src/ClickToCall    # bauen
-dotnet test ClickToCall.slnx    # Tests
-./build.ps1                     # Installer und Portable-ZIP nach ./artifacts
-```
-
-Ohne Telefon testen: Debug-Builds mit `--mock` starten (`dotnet run --project src/ClickToCall -- --mock`). Dann läuft ein simuliertes Snom-Telefon auf `127.0.0.1:18080` mit eigenen Einstellungen. Weitere Varianten: `--mock-login`, `--mock-yealink`, `--mock-reset`.
-
-Releases: Abschnitt in [CHANGELOG.md](CHANGELOG.md) anlegen, dann `git tag vX.Y.Z && git push origin vX.Y.Z`. GitHub Actions baut Installer und Release, der Changelog-Abschnitt wird zum Release-Text. Versionen nach [Semantic Versioning](https://semver.org/lang/de/).
-
-## English
-
-Click to Call dials phone numbers on Snom and Yealink desk phones from a Windows PC: click `tel:`/`callto:`/`sip:` links, or select a number anywhere and press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>W</kbd>. It controls the phone directly via its web interface on the local network. Download the installer from [Releases](https://github.com/julianfaatz/click-to-call/releases/latest); the UI is available in English.
+Wie man die App baut, ohne Telefon testet und Releases erstellt, steht in [CONTRIBUTING.md](CONTRIBUTING.md). Änderungen zwischen den Versionen stehen im [Changelog](CHANGELOG.md).
 
 ## Lizenz
 

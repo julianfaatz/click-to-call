@@ -1,0 +1,16 @@
+name: Idee vorschlagen
+description: Neue Funktion oder Unterstützung für ein weiteres Telefon (English welcome)
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Was wünschst du dir?
+      description: Beschreibe kurz, was die App können sollte und wofür du es brauchst.
+    validations:
+      required: true
+  - type: input
+    id: phone
+    attributes:
+      label: Telefon
+      description: Falls es um ein bestimmtes Telefon geht – Hersteller und Modell

@@ -253,6 +253,8 @@ public partial class GeneralPage : UserControl
         Open(SettingsStore.Directory);
     }
 
+    private void ReportBug_Click(object sender, RoutedEventArgs e) => Open(IssueReport.BugReportUrl(Settings));
+
     private void Repo_Click(object sender, RoutedEventArgs e) => Open(UpdateChecker.RepositoryUrl);
 
     private static void Open(string target) => Process.Start(new ProcessStartInfo(target) { UseShellExecute = true });

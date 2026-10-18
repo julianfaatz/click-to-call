@@ -44,6 +44,13 @@ jobs:
           $version = $env:TAG.TrimStart("v")
           ./build.ps1 -Version $version
 
+      - name: Checksums
+        shell: pwsh
+        run: |
+          Get-ChildItem artifacts -File | Get-FileHash -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash.ToLower())  $(Split-Path $_.Path -Leaf)" } |
+            Set-Content artifacts/SHA256SUMS.txt -Encoding ascii
+
       - name: Create GitHub release
         shell: pwsh
         env:
@@ -52,3 +59,19 @@ jobs:
         run: |
           gh release create $env:TAG (Get-ChildItem artifacts -File).FullName `
             --title $env:TAG --notes-file (Join-Path $env:RUNNER_TEMP "release-notes.md")
+
+  # Opens a pull request at microsoft/winget-pkgs. Skipped until the secret WINGET_TOKEN exists
+  # (classic PAT with public_repo and workflow scopes; also needs a fork of microsoft/winget-pkgs
+  # and a first version of the package submitted by hand).
+  winget:
+    needs: release
+    runs-on: ubuntu-latest
+    env:
+      WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+    steps:
+      - uses: vedantmgoyal9/winget-releaser@v2
+        if: env.WINGET_TOKEN != ''
+        with:
+          identifier: JulianFaatz.ClickToCall
+          installers-regex: '-setup\.exe$'
+          token: ${{ secrets.WINGET_TOKEN }}

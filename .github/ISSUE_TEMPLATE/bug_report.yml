@@ -1,0 +1,38 @@
+name: Fehler melden
+description: Etwas funktioniert nicht wie erwartet (English welcome)
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Was ist passiert?
+      description: Was hast du gemacht, was ist passiert, und was hättest du erwartet?
+    validations:
+      required: true
+  - type: input
+    id: phone
+    attributes:
+      label: Telefon
+      description: Hersteller, Modell und wenn bekannt die Firmware-Version
+      placeholder: Snom D385, Firmware 10.1.x
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App-Version
+      description: Steht in der App unter „Allgemein“.
+      placeholder: "0.9.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows-Version
+      placeholder: Windows 11 24H2
+  - type: textarea
+    id: log
+    attributes:
+      label: Protokoll
+      description: Passender Ausschnitt aus dem Protokoll (App → Allgemein → Protokoll öffnen). Rufnummern und IP-Adressen gern unkenntlich machen.
+      render: text
