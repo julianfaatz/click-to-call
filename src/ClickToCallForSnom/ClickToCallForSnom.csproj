@@ -14,10 +14,10 @@
     <RootNamespace>ClickToCallForSnom</RootNamespace>
 
     <Version>0.1.0</Version>
-    <Product>Click to Call for Snom</Product>
+    <Product>Click to Call for Phones</Product>
     <Company>Julian Faatz</Company>
     <Copyright>Copyright © Julian Faatz</Copyright>
-    <Description>Click-to-call for Snom desk phones (tel:, callto:, sip: links and a global dial hotkey).</Description>
+    <Description>Click-to-call for Snom and Yealink desk phones (tel:, callto:, sip: links and a global dial hotkey).</Description>
 
     <!-- WPF Fluent theme (ThemeMode) is still flagged as experimental -->
     <NoWarn>$(NoWarn);WPF0001;WFO0003</NoWarn>

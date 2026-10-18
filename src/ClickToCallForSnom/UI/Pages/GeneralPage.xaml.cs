@@ -20,8 +20,7 @@ public partial class GeneralPage : UserControl
             ["en"] = "English",
         };
 
-        UpdateCard.Description = Loc.T("General.Installed", UpdateChecker.CurrentVersion);
-        AboutCard.Title = $"Click to Call for Snom {UpdateChecker.CurrentVersion}";
+        AboutCard.Title = $"{ProtocolRegistration.RegisteredAppName} {UpdateChecker.CurrentVersion}";
 
         Loaded += (_, _) =>
         {

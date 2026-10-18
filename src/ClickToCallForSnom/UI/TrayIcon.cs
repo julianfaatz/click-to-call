@@ -18,7 +18,7 @@ public sealed class TrayIcon : IDisposable
         _icon = new Forms.NotifyIcon
         {
             Icon = new System.Drawing.Icon(stream, Forms.SystemInformation.SmallIconSize),
-            Text = "Click to Call for Snom",
+            Text = ProtocolRegistration.RegisteredAppName,
             Visible = true,
         };
         _icon.MouseClick += (_, e) =>

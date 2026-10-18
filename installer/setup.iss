@@ -1,4 +1,4 @@
-; Inno Setup script for Click to Call for Snom.
+; Inno Setup script for Click to Call for Phones.
 ; Built by build.ps1:  ISCC.exe /DAppVersion=1.2.3 /DSourceDir=..\artifacts\publish installer\setup.iss
 
 #ifndef AppVersion
@@ -8,7 +8,9 @@
   #define SourceDir "..\artifacts\publish"
 #endif
 
-#define AppName "Click to Call for Snom"
+#define AppName "Click to Call for Phones"
+; Name up to version 0.1 (shortcuts are renamed on update)
+#define LegacyAppName "Click to Call for Snom"
 #define AppExe "ClickToCallForSnom.exe"
 #define AppUrl "https://github.com/julianfaatz/click-to-call-for-snom"
 
@@ -28,6 +30,8 @@ PrivilegesRequired=lowest
 DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
+; Not the start menu folder of the old name
+UsePreviousGroup=no
 DisableDirPage=auto
 
 OutputDir=..\artifacts
@@ -53,12 +57,17 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [CustomMessages]
 german.AutostartTask=Mit Windows starten
 english.AutostartTask=Start with Windows
-german.LaunchApp=Click to Call for Snom jetzt starten
-english.LaunchApp=Launch Click to Call for Snom now
+german.LaunchApp={#AppName} jetzt starten
+english.LaunchApp=Launch {#AppName} now
 
 [Tasks]
 Name: "autostart"; Description: "{cm:AutostartTask}"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+
+[InstallDelete]
+; Start menu folder and desktop shortcut of the old name
+Type: filesandordirs; Name: "{autoprograms}\{#LegacyAppName}"
+Type: files; Name: "{autodesktop}\{#LegacyAppName}.lnk"
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

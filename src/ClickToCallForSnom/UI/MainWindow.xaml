@@ -1,7 +1,7 @@
 <Window x:Class="ClickToCallForSnom.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Click to Call for Snom"
+        Title="Click to Call for Phones"
         Width="1060"
         Height="780"
         MinWidth="900"
@@ -20,7 +20,7 @@
                 <Image Width="28" Height="28" Source="/Assets/app.ico" RenderOptions.BitmapScalingMode="HighQuality" />
                 <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
                     <TextBlock FontWeight="SemiBold" Text="Click to Call" />
-                    <TextBlock FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="for Snom" />
+                    <TextBlock FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="for Phones" />
                 </StackPanel>
             </StackPanel>
 

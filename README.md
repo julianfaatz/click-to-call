@@ -1,4 +1,4 @@
-# Click to Call for Snom
+# Click to Call for Phones
 
 Wählt Telefonnummern direkt auf deinem **Snom- oder Yealink-Tischtelefon** – per Klick auf `tel:`-Links oder per Hotkey für markierte Nummern in jedem beliebigen Programm.
 
@@ -29,7 +29,7 @@ Unterstützte Telefone:
 1. Unter [Releases](https://github.com/julianfaatz/click-to-call-for-snom/releases) die Datei `ClickToCallForSnom-x.y.z-setup.exe` herunterladen und ausführen.
    *Hinweis:* Da der Installer nicht signiert ist, zeigt Windows SmartScreen evtl. eine Warnung → „Weitere Informationen“ → „Trotzdem ausführen“.
 2. Die App öffnet sich und sucht dein Telefon im Netzwerk: auf das gefundene Telefon klicken (oder die IP-Adresse eingeben und **Verbinden**). Fragt das Telefon nach einem Passwort, erscheinen die Anmeldefelder automatisch.
-3. Der Einrichtungs-Checkliste auf der Startseite folgen: bei **Telefonnummern anklickbar machen** auf „Aktivieren“ klicken und in den Windows-Einstellungen bei **TEL** „Click to Call for Snom“ auswählen (Windows erlaubt Programmen nicht, das selbst zu tun). Danach einen Testanruf machen – fertig.
+3. Der Einrichtungs-Checkliste auf der Startseite folgen: bei **Telefonnummern anklickbar machen** auf „Aktivieren“ klicken und in den Windows-Einstellungen bei **TEL** „Click to Call for Phones“ auswählen (Windows erlaubt Programmen nicht, das selbst zu tun). Danach einen Testanruf machen – fertig.
 
 Beim Schließen läuft die App im Infobereich der Taskleiste weiter. Klick auf das Symbol öffnet die App, Rechtsklick das Menü (Nummer wählen, Wahlwiederholung, Auflegen, Updates …). Alle Einstellungen werden automatisch gespeichert.
 
@@ -109,7 +109,7 @@ Installierte Apps bekommen beim nächsten Start (bzw. innerhalb von 12 Stunden) 
 
 ## English
 
-**Click to Call for Snom** dials phone numbers on Snom desk phones: click `tel:`/`callto:`/`sip:` links anywhere, or select a number in any application and press the hotkey (default `Ctrl + Alt + W`). Setup is guided: the app finds the phone on the network on first start, one click connects, and a short checklist covers the rest. It comes with number normalization, identity selection, hang-up button, update notifications and a German/English UI. Download the installer from [Releases](https://github.com/julianfaatz/click-to-call-for-snom/releases); no admin rights required.
+**Click to Call for Phones** dials phone numbers on Snom and Yealink desk phones: click `tel:`/`callto:`/`sip:` links anywhere, or select a number in any application and press the hotkey (default `Ctrl + Alt + W`). Setup is guided: the app finds the phone on the network on first start, one click connects, and a short checklist covers the rest. It comes with number normalization, identity selection, hang-up button, update notifications and a German/English UI. Download the installer from [Releases](https://github.com/julianfaatz/click-to-call-for-snom/releases); no admin rights required.
 
 ## Lizenz
 

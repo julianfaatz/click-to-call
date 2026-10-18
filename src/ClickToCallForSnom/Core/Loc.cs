@@ -35,8 +35,8 @@ public static class Loc
         // ---------- App ----------
         ["App.Description"] = ("Wählt tel:-Links und Rufnummern auf deinem Snom- oder Yealink-Tischtelefon.", "Dials tel: links and phone numbers on your Snom or Yealink desk phone."),
         ["App.Disclaimer"] = (
-            "Kein offizielles Produkt der Snom Technology GmbH. Snom ist eine Marke der Snom Technology GmbH. Open Source unter MIT-Lizenz.",
-            "Not an official product of Snom Technology GmbH. Snom is a trademark of Snom Technology GmbH. Open source under the MIT license."),
+            "Kein offizielles Produkt von Snom oder Yealink. Snom und Yealink sind Marken ihrer jeweiligen Inhaber. Open Source unter MIT-Lizenz.",
+            "Not an official product of Snom or Yealink. Snom and Yealink are trademarks of their respective owners. Open source under the MIT license."),
 
         // ---------- Common ----------
         ["Common.Close"] = ("Schließen", "Close"),
@@ -275,17 +275,17 @@ public static class Loc
             "Dann wählt ein Klick auf eine Telefonnummer – im Browser, in Outlook oder im CRM – direkt auf deinem Telefon.",
             "Then a click on a phone number – in the browser, in Outlook or in your CRM – dials right on your phone."),
         ["Home.StepLinksHow1"] = ("Auf „Windows-Einstellungen öffnen“ klicken", "Click \"Open Windows settings\""),
-        ["Home.StepLinksHow2"] = ("Bei TEL „Click to Call for Snom“ auswählen", "Pick \"Click to Call for Snom\" for TEL"),
+        ["Home.StepLinksHow2"] = ("Bei TEL „Click to Call for Phones“ auswählen", "Pick \"Click to Call for Phones\" for TEL"),
         ["Home.StepLinksHow3"] = ("Hierher zurückkommen – es geht automatisch weiter", "Come back here – the setup continues automatically"),
         ["Home.StepLinksButton"] = ("Windows-Einstellungen öffnen", "Open Windows settings"),
         ["Home.StepLinksButtonAgain"] = ("Erneut öffnen", "Open again"),
         ["Home.StepLinksWaiting"] = (
-            "Noch nicht erkannt. Bitte in den Windows-Einstellungen bei TEL „Click to Call for Snom“ auswählen.",
-            "Not detected yet. Please pick \"Click to Call for Snom\" for TEL in the Windows settings."),
+            "Noch nicht erkannt. Bitte in den Windows-Einstellungen bei TEL „Click to Call for Phones“ auswählen.",
+            "Not detected yet. Please pick \"Click to Call for Phones\" for TEL in the Windows settings."),
         ["Home.StepLinksDone"] = ("✓ Erledigt – Telefonnummern sind jetzt anklickbar.", "✓ Done – phone numbers are now clickable."),
         ["Home.StepLinksTodo"] = (
-            "Öffnet die Windows-Einstellungen – dort bei TEL „Click to Call for Snom“ auswählen.",
-            "Opens the Windows settings – pick \"Click to Call for Snom\" for TEL there."),
+            "Öffnet die Windows-Einstellungen – dort bei TEL „Click to Call for Phones“ auswählen.",
+            "Opens the Windows settings – pick \"Click to Call for Phones\" for TEL there."),
         ["Home.StepTest"] = ("Testanruf", "Test call"),
         ["Home.TestQuestion"] = ("Wählt dein Telefon jetzt {0}?", "Is your phone dialing {0} now?"),
         ["Home.TestYes"] = ("Ja, es wählt", "Yes, it's dialing"),

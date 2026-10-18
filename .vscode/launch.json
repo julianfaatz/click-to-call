@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Click to Call for Snom",
+      "name": "Click to Call for Phones",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
@@ -53,7 +53,7 @@
       "console": "internalConsole"
     },
     {
-      "name": "Click to Call for Snom (tel: link)",
+      "name": "Click to Call for Phones (tel: link)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",

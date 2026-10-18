@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Builds, tests and packages Click to Call for Snom.
+    Builds, tests and packages Click to Call for Phones.
 
 .EXAMPLE
     ./build.ps1                    # version from the .csproj

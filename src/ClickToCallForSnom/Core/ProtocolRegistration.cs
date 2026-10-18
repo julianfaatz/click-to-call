@@ -11,7 +11,9 @@ namespace ClickToCallForSnom.Core;
 /// </summary>
 public static class ProtocolRegistration
 {
-    public const string RegisteredAppName = "Click to Call for Snom";
+    public const string RegisteredAppName = "Click to Call for Phones";
+    // Name up to version 0.1 – removed so "Default apps" does not list the app twice
+    private const string LegacyAppName = "Click to Call for Snom";
     private const string AppKey = @"Software\ClickToCallForSnom";
     private const string CapabilitiesKey = AppKey + @"\Capabilities";
     private const string ClassesKey = @"Software\Classes";
@@ -64,7 +66,10 @@ public static class ProtocolRegistration
         }
 
         using (var registered = Registry.CurrentUser.CreateSubKey(RegisteredApplicationsKey))
+        {
+            registered.DeleteValue(LegacyAppName, throwOnMissingValue: false);
             registered.SetValue(RegisteredAppName, CapabilitiesKey);
+        }
 
         NotifyAssociationsChanged();
     }
@@ -82,7 +87,10 @@ public static class ProtocolRegistration
 
         Registry.CurrentUser.DeleteSubKeyTree(AppKey, throwOnMissingSubKey: false);
         using (var registered = Registry.CurrentUser.OpenSubKey(RegisteredApplicationsKey, writable: true))
+        {
             registered?.DeleteValue(RegisteredAppName, throwOnMissingValue: false);
+            registered?.DeleteValue(LegacyAppName, throwOnMissingValue: false);
+        }
 
         NotifyAssociationsChanged();
     }
