@@ -30,7 +30,7 @@ public sealed partial class SnomDriver : IPhoneDriver
 }
 
 /// <summary>
-/// Talks to the HTTP interface of Snom desk phones (D1xx, D3xx, D7xx, D8xx).
+/// Talks to the HTTP interface of Snom desk phones (D3xx, D7xx; D8xx does not support it).
 /// Dialing:  GET /command.htm?number=...&amp;outgoing_uri=user@host
 /// Hang up:  GET /command.htm?key=CANCEL
 /// </summary>

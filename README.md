@@ -1,121 +1,84 @@
 # Click to Call
 
-**für Snom- und Yealink-Tischtelefone** · *for Snom and Yealink desk phones*
+Wählt Telefonnummern vom Windows-PC aus auf einem Snom- oder Yealink-Tischtelefon – per Klick auf `tel:`-Links oder per Tastenkombination für markierte Nummern in jedem Programm.
 
-Wählt Telefonnummern direkt auf deinem **Snom- oder Yealink-Tischtelefon** – per Klick auf `tel:`-Links oder per Hotkey für markierte Nummern in jedem beliebigen Programm.
+Die App steuert das Telefon direkt über dessen Web-Schnittstelle im lokalen Netzwerk. Eine Telefonanlagen-Software oder ein Server ist nicht nötig.
 
-*English summary below.*
-
-> Kein offizielles Produkt der Snom Technology GmbH oder der Yealink Network Technology Co., Ltd. Snom und Yealink sind Marken ihrer jeweiligen Inhaber.
+![Startseite](docs/start.png)
 
 ## Funktionen
 
-- **tel:-, callto:- und sip:-Links** im Browser, in Outlook, im CRM … öffnen direkt am Telefon
-- **Hotkey** (Standard: `Strg + Alt + W`): Nummer irgendwo markieren, Hotkey drücken, Enter – das Telefon wählt. Ohne Markierung öffnet sich ein leeres Wählfenster.
-- **Bestätigungsfenster** vor dem Wählen – für Links und markierte Nummern getrennt abschaltbar (dann wählt das Telefon sofort)
-- **Benachrichtigung mit Auflegen-Taste**
-- **Rufnummern-Aufbereitung**: `+49 (0)30 / 123-456` → `030123456`, optional Amtsholung
-- **Identitätsauswahl** bei mehreren Leitungen (bei Snom automatisch vom Telefon gelesen)
-- **Einfache Einrichtung**: Die App sucht dein Telefon beim ersten Start automatisch im Netzwerk, ein Klick verbindet – Hersteller, HTTP/HTTPS und Login werden automatisch erkannt. Eine Checkliste führt durch die restlichen Schritte.
-- **Deutsch und Englisch**
-- **Update-Hinweis** bei neuen Versionen auf GitHub, Installation per Klick
-- Installation **ohne Admin-Rechte**, Passwort verschlüsselt (Windows DPAPI)
+- 📞 `tel:`-, `callto:`- und `sip:`-Links öffnen am Telefon (Browser, Outlook, CRM …)
+- ⌨️ Nummer markieren und <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>W</kbd> drücken – funktioniert auch in PDFs und E-Mails
+- Rufnummern werden aufbereitet: `+49 (0)30 123 456-78` → `03012345678`, optional mit Amtsholung
+- Rückfrage vor dem Wählen, Auflegen-Taste, Wahlwiederholung, Auswahl der Leitung
+- Findet das Telefon selbst im Netzwerk
+- Läuft im Infobereich der Taskleiste, Updates per Klick
+- Deutsch und Englisch
 
-Unterstützte Telefone:
+<img src="docs/hotkey-popup.png" width="400" alt="Wählfenster nach Strg+Alt+W">
 
-- **Snom**: getestet mit D385, sollte mit allen aktuellen Snom-Tischtelefonen funktionieren (D1xx, D3xx, D7xx, D8xx).
-- **Yealink** (T3x, T4x, T5x) über die „Action URI“-Schnittstelle – noch nicht auf echter Hardware getestet, Rückmeldungen willkommen. Einmalig nötig: beim ersten Anruf am Telefon „Fernsteuerung erlauben“ mit OK bestätigen bzw. in der Web-Oberfläche unter *Features → Remote Control* die IP-Adresse des PCs bei **Action URI Allow IP List** eintragen. Die App zeigt die IP-Adresse dabei an.
+## Unterstützte Telefone
+
+| Hersteller | Serien | Modelle (Beispiele) |
+|---|---|---|
+| **Snom** | D3xx, D7xx | D305, D315, D335, D345, D385, D713, D715, D717, D735, D785 |
+| **Yealink** | T3x, T4x, T5x | T31, T33, T42, T43, T44, T46, T48, T53, T54, T57 |
+
+Voraussetzung ist die HTTP-Fernsteuerung des Telefons: bei Snom über `command.htm`, bei Yealink über „Action URI“. Snom D8xx unterstützt diese Schnittstelle laut Hersteller nicht.
 
 ## Installation
 
-1. Unter [Releases](https://github.com/julianfaatz/click-to-call/releases) die Datei `ClickToCall-x.y.z-setup.exe` herunterladen und ausführen.
-   *Hinweis:* Da der Installer nicht signiert ist, zeigt Windows SmartScreen evtl. eine Warnung → „Weitere Informationen“ → „Trotzdem ausführen“.
-2. Die App öffnet sich und sucht dein Telefon im Netzwerk: auf das gefundene Telefon klicken (oder die IP-Adresse eingeben und **Verbinden**). Fragt das Telefon nach einem Passwort, erscheinen die Anmeldefelder automatisch.
-3. Der Einrichtungs-Checkliste auf der Startseite folgen: bei **Telefonnummern anklickbar machen** auf „Aktivieren“ klicken und in den Windows-Einstellungen bei **TEL** „Click to Call“ auswählen (Windows erlaubt Programmen nicht, das selbst zu tun). Danach einen Testanruf machen – fertig.
+1. `ClickToCall-x.y.z-setup.exe` unter [Releases](https://github.com/julianfaatz/click-to-call/releases/latest) herunterladen und ausführen (Windows 10/11, keine Admin-Rechte nötig). Alternativ gibt es eine portable ZIP-Datei.
+2. Die App sucht das Telefon im Netzwerk. Gefundenes Telefon anklicken oder die IP-Adresse eingeben. Benötigt werden die Zugangsdaten der Web-Oberfläche des Telefons.
+3. Der Checkliste auf der Startseite folgen. In den Windows-Einstellungen muss bei **TEL** einmal „Click to Call“ ausgewählt werden – das kann Windows nicht automatisch.
 
-Beim Schließen läuft die App im Infobereich der Taskleiste weiter. Klick auf das Symbol öffnet die App, Rechtsklick das Menü (Nummer wählen, Wahlwiederholung, Auflegen, Updates …). Alle Einstellungen werden automatisch gespeichert.
+Der Installer ist nicht signiert. Zeigt Windows SmartScreen eine Warnung: *Weitere Informationen → Trotzdem ausführen*.
+
+<table>
+  <tr>
+    <td><img src="docs/waehlen1.png" alt="Einstellungen: Wählen und Hotkey"></td>
+    <td><img src="docs/waehlen2.png" alt="Einstellungen: Links und Rufnummern"></td>
+  </tr>
+</table>
 
 ## Fehlersuche
 
 | Problem | Lösung |
 |---|---|
-| „Benutzername oder Passwort falsch“ | Zugangsdaten der Web-Oberfläche des Telefons verwenden (nicht die SIP-Zugangsdaten). |
-| Yealink: Wählen meldet Erfolg, aber das Telefon wählt nicht | In der Web-Oberfläche des Telefons unter *Features → Remote Control* die IP-Adresse des PCs bei **Action URI Allow IP List** eintragen. |
-| „Zugriff verweigert (403)“ | Im Web-Interface des Telefons prüfen, ob der Benutzer Admin-Rechte hat und HTTP-Steuerung/Action-URLs erlaubt sind. |
-| Telefon nicht erreichbar | IP-Adresse prüfen (im Telefonmenü unter Informationen bzw. Status), PC und Telefon müssen sich im Netz erreichen. |
-| HTTPS-Fehler | Auf der Startseite „Ändern“ → „Verbinden“ – HTTP/HTTPS wird neu erkannt, selbstsignierte Zertifikate werden akzeptiert. |
-| Klick auf tel:-Link macht nichts | Wählen → Links → „Aktivieren“ und in den Windows-Einstellungen die App auswählen. |
-| Hotkey geht nicht | Wählen → Hotkey: wird dort „schon verwendet“ angezeigt, eine andere Kombination wählen. |
+| Telefon wird nicht gefunden | IP-Adresse von Hand eingeben (Telefonmenü → Informationen). Liegt das Telefon in einem anderen Netz, muss es vom PC aus erreichbar sein. |
+| „Benutzername oder Passwort falsch“ | Zugangsdaten der Web-Oberfläche verwenden, nicht die SIP-Zugangsdaten. |
+| „Zugriff verweigert (403)“ | Im Web-Interface prüfen, ob der Benutzer Admin-Rechte hat und HTTP-Steuerung erlaubt ist. |
+| Yealink wählt nicht | Beim ersten Anruf „Fernsteuerung erlauben“ am Telefon bestätigen oder unter *Features → Remote Control* die IP des PCs bei **Action URI Allow IP List** eintragen. |
+| Klick auf tel:-Link macht nichts | *Wählen → Links* aktivieren und in den Windows-Einstellungen „Click to Call“ auswählen. |
+| Hotkey geht nicht | Unter *Wählen → Hotkey* eine andere Kombination wählen. |
 
-Protokoll und Einstellungen liegen in `%APPDATA%\ClickToCall`.
+Einstellungen und Protokoll liegen in `%APPDATA%\ClickToCall`.
 
-### So funktioniert's
+## Datenschutz
 
-Die App ruft die HTTP-Schnittstelle des Telefons auf:
-
-```
-GET http://<telefon>/command.htm?number=030123456[&outgoing_uri=user@host]
-GET http://<telefon>/command.htm?key=CANCEL        (Auflegen)
-GET http://<telefon>/settings.xml                  (Identitäten lesen)
-```
+Die App verbindet sich nur mit dem Telefon und mit GitHub, um nach Updates zu suchen (abschaltbar). Es gibt keine Telemetrie. Das Telefon-Passwort wird mit Windows DPAPI verschlüsselt gespeichert.
 
 ## Entwicklung
 
-Voraussetzungen: [.NET 10 SDK](https://dotnet.microsoft.com/download), für den Installer [Inno Setup 6](https://jrsoftware.org/isinfo.php) (`winget install JRSoftware.InnoSetup`). Empfohlen: VS Code mit *C# Dev Kit*.
+Benötigt das [.NET 10 SDK](https://dotnet.microsoft.com/download), für den Installer [Inno Setup 6](https://jrsoftware.org/isinfo.php).
 
 ```powershell
 dotnet build src/ClickToCall    # bauen
 dotnet test ClickToCall.slnx    # Tests
-./build.ps1                     # Release-Build + Installer + Portable-ZIP nach ./artifacts
+./build.ps1                     # Installer und Portable-ZIP nach ./artifacts
 ```
 
-In VS Code: `F5` startet die App mit Debugger, `Strg+Umschalt+B` baut.
+Ohne Telefon testen: Debug-Builds mit `--mock` starten (`dotnet run --project src/ClickToCall -- --mock`). Dann läuft ein simuliertes Snom-Telefon auf `127.0.0.1:18080` mit eigenen Einstellungen. Weitere Varianten: `--mock-login`, `--mock-yealink`, `--mock-reset`.
 
-#### Ohne Telefon testen (Mock)
-
-Debug-Builds enthalten ein simuliertes Snom- oder Yealink-Telefon auf `127.0.0.1:18080`, das dieselbe HTTP-Schnittstelle spricht – Verbinden, Login, Netzwerksuche, Wählen, Auflegen und Leitungen laufen durch den echten Code. Ein kleines Fenster „Mock-Telefon“ zeigt, was das Telefon gerade tun würde, und kann ein ausgeschaltetes Telefon simulieren.
-
-| Argument | Wirkung |
-|---|---|
-| `--mock` | Mock-Telefon ohne Login |
-| `--mock-login` | Mock-Telefon mit Login `admin` / `1234` |
-| `--mock-yealink` | Yealink-Mock (immer mit Login `admin` / `1234`, eigene Einstellungen in `mock-yealink`) |
-| `--mock-reset` | zusätzlich: Einrichtung von vorn (Mock-Einstellungen löschen) |
-
-In VS Code gibt es dafür fertige Startkonfigurationen („Mock-Telefon …“). Der Mock nutzt eigene Einstellungen in `%APPDATA%\ClickToCall\mock`, die echte Konfiguration bleibt unberührt. Läuft die App bereits normal, vorher beenden (es darf nur eine Instanz laufen). In Release-Builds ist der Mock nicht enthalten.
-
-### Projektstruktur
-
-```
-src/ClickToCall/
-  Core/        Logik ohne UI: Telefon-Treiber (Snom, Yealink), Nummern-Aufbereitung, Einstellungen, Registry, Hotkey, Updates
-  Services/    CallController – alles, was zu einem Anruf führt
-  UI/          App-Fenster, Wählfenster, Benachrichtigungen, Tray-Icon, Einstellungszeile (SettingCard), (?)-Hilfesymbol
-  UI/Pages/    Seiten des App-Fensters (Start, Wählen, Allgemein)
-tests/         xUnit-Tests
-installer/     Inno-Setup-Skript
-```
-
-Texte (DE/EN) stehen in `Core/Loc.cs`.
-
-### Release erstellen
-
-Versionsnummern folgen [Semantic Versioning](https://semver.org/lang/de/): Fehlerbehebungen erhöhen die letzte Stelle (0.9.**1**), neue Funktionen die mittlere (0.**10**.0).
-
-1. In [CHANGELOG.md](CHANGELOG.md) die Einträge unter `[Unreleased]` in einen neuen Abschnitt `## [x.y.z] - JJJJ-MM-TT` verschieben, die Links am Ende ergänzen und committen.
-2. Tag setzen und pushen – der Workflow baut Installer und Release automatisch und übernimmt den Changelog-Abschnitt als Release-Text (ohne Abschnitt bricht er ab):
-
-```powershell
-git tag v0.9.0
-git push origin v0.9.0
-```
-
-Installierte Apps bekommen beim nächsten Start (bzw. innerhalb von 12 Stunden) einen Update-Hinweis.
+Releases: Abschnitt in [CHANGELOG.md](CHANGELOG.md) anlegen, dann `git tag vX.Y.Z && git push origin vX.Y.Z`. GitHub Actions baut Installer und Release, der Changelog-Abschnitt wird zum Release-Text. Versionen nach [Semantic Versioning](https://semver.org/lang/de/).
 
 ## English
 
-**Click to Call** dials phone numbers on Snom and Yealink desk phones: click `tel:`/`callto:`/`sip:` links anywhere, or select a number in any application and press the hotkey (default `Ctrl + Alt + W`). Setup is guided: the app finds the phone on the network on first start, one click connects, and a short checklist covers the rest. It comes with number normalization, identity selection, hang-up button, update notifications and a German/English UI. Download the installer from [Releases](https://github.com/julianfaatz/click-to-call/releases); no admin rights required.
+Click to Call dials phone numbers on Snom and Yealink desk phones from a Windows PC: click `tel:`/`callto:`/`sip:` links, or select a number anywhere and press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>W</kbd>. It controls the phone directly via its web interface on the local network. Download the installer from [Releases](https://github.com/julianfaatz/click-to-call/releases/latest); the UI is available in English.
 
 ## Lizenz
 
 [MIT](LICENSE) © Julian Faatz
+
+Kein offizielles Produkt von Snom oder Yealink. Snom und Yealink sind Marken ihrer jeweiligen Inhaber.
