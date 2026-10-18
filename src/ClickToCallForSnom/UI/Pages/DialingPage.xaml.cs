@@ -45,6 +45,8 @@ public partial class DialingPage : UserControl, ISectionPage
             HotkeySection.BringIntoView(new Rect(0, 0, 1, 400));
         else if (section == "Links")
             LinksSection.BringIntoView(new Rect(0, 0, 1, 400));
+        else if (section == "Numbers")
+            NumbersSection.BringIntoView(new Rect(0, 0, 1, 400));
     }
 
     private void Settings_PropertyChanged(object? sender, PropertyChangedEventArgs e) => UpdateFormatting();

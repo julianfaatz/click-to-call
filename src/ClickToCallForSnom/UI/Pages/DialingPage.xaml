@@ -100,7 +100,7 @@
         </ui:SettingCard>
 
         <!-- ===== Number formatting ===== -->
-        <TextBlock Style="{StaticResource SectionHeader}" Text="{loc:Tr Dialing.NormalizeTitle}" />
+        <TextBlock x:Name="NumbersSection" Style="{StaticResource SectionHeader}" Text="{loc:Tr Dialing.NormalizeTitle}" />
 
         <ui:SettingCard x:Name="CountryCard" Icon="&#xE909;" Title="{loc:Tr Dialing.ConvertOwnCountry}">
             <StackPanel Orientation="Horizontal">

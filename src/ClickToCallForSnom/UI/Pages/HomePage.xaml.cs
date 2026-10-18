@@ -95,7 +95,9 @@ public partial class HomePage : UserControl
         PhoneHintTip.Help = hint ?? "";
         PhoneHintTip.Visibility = hint is null ? Visibility.Collapsed : Visibility.Visible;
         Step3HintText.Text = hint ?? "";
-        Step3Hint.Visibility = hint is null ? Visibility.Collapsed : Visibility.Visible;
+        Step3Hint.Visibility = hint is null || TestHelpPanel.IsVisible ? Visibility.Collapsed : Visibility.Visible;
+        TestHelpVendor.Text = hint ?? "";
+        TestHelpVendor.Visibility = hint is null ? Visibility.Collapsed : Visibility.Visible;
 
         RefreshLines();
     }
@@ -250,6 +252,12 @@ public partial class HomePage : UserControl
             switch (result.Status)
             {
                 case ConnectStatus.Connected:
+                    if (host != Settings.PhoneHost || result.Vendor != Settings.Vendor)
+                    {
+                        Settings.Identities.Clear();
+                        Settings.DefaultIdentityUri = "";
+                    }
+
                     Settings.Vendor = result.Vendor!.Value;
                     Settings.PhoneHost = host;
                     Settings.UseHttps = result.UseHttps;
@@ -419,7 +427,8 @@ public partial class HomePage : UserControl
     private readonly List<(Border Circle, TextBlock Glyph, TextBlock Label, FrameworkElement Item)> _steps = [];
     private readonly List<Border> _stepLines = [];
 
-    private static bool IsReady => Settings.IsPhoneConfigured && (Settings.SetupCompleted || Settings.RecentNumbers.Count > 0);
+    // Not "a number was dialed": the phone accepting the request does not mean it dialed (see the test call)
+    private static bool IsReady => Settings.IsPhoneConfigured && Settings.SetupCompleted;
 
     private static bool LinksDone => ProtocolRegistration.IsDefaultHandler("tel");
 
@@ -606,6 +615,30 @@ public partial class HomePage : UserControl
 
     private void SkipTest_Click(object sender, RoutedEventArgs e) => CompleteSetup();
 
+    private void TestWorked_Click(object sender, RoutedEventArgs e)
+    {
+        TestNumberBox.Clear();
+        CompleteSetup();
+    }
+
+    private void TestFailed_Click(object sender, RoutedEventArgs e)
+    {
+        var sent = PhoneNumberNormalizer.Normalize(TestNumberBox.Text, NormalizationOptions.From(Settings));
+        TestHelpNumber.Text = Loc.T("Home.TestFailedNumber", sent);
+        ShowTestPanels(confirm: false, help: true);
+        RefreshPhoneCard(); // vendor hint moves into the help panel
+    }
+
+    private void TestRetry_Click(object sender, RoutedEventArgs e) => Call_Click(TestCallButton, e);
+
+    private void NumberSettings_Click(object sender, RoutedEventArgs e) => MainWindow.ShowSingle(AppPage.Dialing, "Numbers");
+
+    private void ShowTestPanels(bool confirm, bool help)
+    {
+        TestConfirmPanel.Visibility = confirm ? Visibility.Visible : Visibility.Collapsed;
+        TestHelpPanel.Visibility = help ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private void CompleteSetup()
     {
         Settings.SetupCompleted = true;
@@ -632,16 +665,29 @@ public partial class HomePage : UserControl
             return;
         }
 
+        var isTest = button == TestCallButton;
+        if (isTest)
+            ShowTestPanels(confirm: false, help: false);
+
         button.IsEnabled = false;
         var identity = string.IsNullOrEmpty(Settings.DefaultIdentityUri) ? null : Settings.DefaultIdentityUri;
         var success = await App.Services.Calls.DialAsync(box.Text, identity);
         button.IsEnabled = true;
 
-        if (success)
+        if (!success)
+            return; // the error is shown as a notification
+
+        if (isTest)
+        {
+            // Keep the number: it is needed for "try again"
+            var sent = PhoneNumberNormalizer.Normalize(box.Text, NormalizationOptions.From(Settings));
+            TestConfirmText.Text = Loc.T("Home.TestQuestion", sent);
+            ShowTestPanels(confirm: true, help: false);
+            RefreshPhoneCard();
+        }
+        else
         {
             box.Clear();
-            if (button == TestCallButton)
-                CompleteSetup();
         }
     }
 }

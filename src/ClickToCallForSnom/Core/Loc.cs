@@ -280,6 +280,15 @@ public static class Loc
             "Öffnet die Windows-Einstellungen – dort bei TEL „Click to Call for Snom“ auswählen.",
             "Opens the Windows settings – pick \"Click to Call for Snom\" for TEL there."),
         ["Home.StepTest"] = ("Testanruf", "Test call"),
+        ["Home.TestQuestion"] = ("Wählt dein Telefon jetzt {0}?", "Is your phone dialing {0} now?"),
+        ["Home.TestYes"] = ("Ja, es wählt", "Yes, it's dialing"),
+        ["Home.TestNo"] = ("Nein", "No"),
+        ["Home.TestFailedTitle"] = ("Daran kann es liegen:", "Possible causes:"),
+        ["Home.TestFailedNumber"] = (
+            "Das Telefon hat die Nummer {0} bekommen. Braucht deine Telefonanlage für Gespräche nach draußen eine Amtsholung (z. B. eine 0 davor), lässt sich das in den Rufnummern-Einstellungen eintragen.",
+            "The phone received the number {0}. If your PBX needs a prefix for outside calls (e.g. a leading 0), you can set it in the number settings."),
+        ["Home.TestRetry"] = ("Erneut versuchen", "Try again"),
+        ["Home.TestNumberSettings"] = ("Rufnummern-Einstellungen", "Number settings"),
         ["Home.StepTestText"] = (
             "Gib z. B. deine Handynummer ein. Dein Tischtelefon wählt sofort – wenn dein Handy klingelt, klappt alles.",
             "Enter e.g. your mobile number. Your desk phone dials right away – if your mobile rings, everything works."),

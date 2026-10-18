@@ -54,6 +54,9 @@ public sealed class AppServices : IDisposable
     {
         var settings = SettingsStore.Current;
         settings.Autostart = Autostart.IsEnabled;
+        // Older versions had no SetupCompleted for users who simply started calling
+        if (!settings.SetupCompleted && settings.IsPhoneConfigured && settings.RecentNumbers.Count > 0)
+            settings.SetupCompleted = true;
         settings.PropertyChanged += Settings_PropertyChanged;
         settings.Identities.CollectionChanged += (_, _) => ScheduleSave();
 
