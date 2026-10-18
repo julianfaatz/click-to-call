@@ -11,11 +11,11 @@ Telefonnummern am PC anklicken – das Snom- oder Yealink-Tischtelefon wählt.
 
 **Deutsch** · [English](README.en.md)
 
+<img src="docs/demo.gif" alt="Klick auf eine Telefonnummer – das Telefon wählt">
+
 </div>
 
 Click to Call wählt Nummern vom Windows-PC aus auf deinem Tischtelefon – per Klick auf `tel:`-Links oder per Tastenkombination für markierte Nummern in jedem Programm. Die App steuert das Telefon direkt über dessen Web-Schnittstelle im lokalen Netzwerk, eine Telefonanlagen-Software oder ein Server ist nicht nötig.
-
-![Klick auf eine Telefonnummer – das Telefon wählt](docs/demo.gif)
 
 ## Funktionen
 

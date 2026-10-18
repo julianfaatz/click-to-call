@@ -11,13 +11,13 @@ Click a phone number on your PC – your Snom or Yealink desk phone dials it.
 
 [Deutsch](README.md) · **English**
 
+<img src="docs/demo.gif" alt="Clicking a phone number – the phone dials">
+
 </div>
 
 Click to Call dials numbers on your desk phone from a Windows PC – by clicking `tel:` links or by pressing a hotkey on a selected number in any application. The app controls the phone directly through its web interface on the local network; no PBX software or server is needed.
 
 The screenshots show the German UI; the app is also available in English.
-
-![Clicking a phone number – the phone dials](docs/demo.gif)
 
 ## Features
 
