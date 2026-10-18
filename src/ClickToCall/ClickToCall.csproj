@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <StartupObject>ClickToCall.Program</StartupObject>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>ClickToCall</AssemblyName>
+    <RootNamespace>ClickToCall</RootNamespace>
+
+    <Version>0.9.0</Version>
+    <Product>Click to Call</Product>
+    <Company>Julian Faatz</Company>
+    <Copyright>Copyright © Julian Faatz</Copyright>
+    <Description>Click-to-call for Snom and Yealink desk phones (tel:, callto:, sip: links and a global dial hotkey).</Description>
+
+    <!-- WPF Fluent theme (ThemeMode) is still flagged as experimental -->
+    <NoWarn>$(NoWarn);WPF0001;WFO0003</NoWarn>
+
+    <!-- Only ship framework translations we actually use -->
+    <SatelliteResourceLanguages>de;en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <!-- Avoid ambiguities between WPF and WinForms (WinForms is only used for the tray icon) -->
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\app.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ClickToCall.Tests" />
+  </ItemGroup>
+
+</Project>

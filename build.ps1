@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Builds, tests and packages Click to Call for Phones.
+    Builds, tests and packages Click to Call.
 
 .EXAMPLE
     ./build.ps1                    # version from the .csproj
@@ -15,7 +15,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
-$project = Join-Path $root "src\ClickToCallForSnom\ClickToCallForSnom.csproj"
+$project = Join-Path $root "src\ClickToCall\ClickToCall.csproj"
 $artifacts = Join-Path $root "artifacts"
 $publish = Join-Path $artifacts "publish"
 
@@ -27,7 +27,7 @@ Write-Host "Version $Version" -ForegroundColor Cyan
 if (Test-Path $artifacts) { Remove-Item $artifacts -Recurse -Force }
 
 if (-not $SkipTests) {
-    dotnet test (Join-Path $root "ClickToCallForSnom.slnx") -c Release
+    dotnet test (Join-Path $root "ClickToCall.slnx") -c Release
     if ($LASTEXITCODE) { throw "Tests failed" }
 }
 
@@ -36,7 +36,7 @@ dotnet publish $project -c Release -r win-x64 --self-contained true -o $publish 
     -p:Version=$Version -p:DebugType=none
 if ($LASTEXITCODE) { throw "Publish failed" }
 
-Compress-Archive -Path "$publish\*" -DestinationPath (Join-Path $artifacts "ClickToCallForSnom-$Version-portable.zip")
+Compress-Archive -Path "$publish\*" -DestinationPath (Join-Path $artifacts "ClickToCall-$Version-portable.zip")
 
 if (-not $SkipInstaller) {
     $iscc = @(

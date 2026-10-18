@@ -5,7 +5,7 @@
       "label": "build",
       "type": "process",
       "command": "dotnet",
-      "args": ["build", "src/ClickToCallForSnom", "/property:GenerateFullPaths=true", "/consoleloggerparameters:NoSummary"],
+      "args": ["build", "src/ClickToCall", "/property:GenerateFullPaths=true", "/consoleloggerparameters:NoSummary"],
       "group": { "kind": "build", "isDefault": true },
       "problemMatcher": "$msCompile"
     },
@@ -13,7 +13,7 @@
       "label": "test",
       "type": "process",
       "command": "dotnet",
-      "args": ["test", "ClickToCallForSnom.slnx"],
+      "args": ["test", "ClickToCall.slnx"],
       "group": { "kind": "test", "isDefault": true },
       "problemMatcher": "$msCompile"
     },

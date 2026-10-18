@@ -1,6 +1,6 @@
-# Generates src/ClickToCallForSnom/Assets/app.ico (blue rounded square with a white handset).
+# Generates src/ClickToCall/Assets/app.ico (blue rounded square with a white handset).
 # Requires Windows 11 (Segoe Fluent Icons) or Windows 10 (Segoe MDL2 Assets).
-param([string]$OutFile = "$PSScriptRoot\..\src\ClickToCallForSnom\Assets\app.ico")
+param([string]$OutFile = "$PSScriptRoot\..\src\ClickToCall\Assets\app.ico")
 
 Add-Type -AssemblyName System.Drawing
 

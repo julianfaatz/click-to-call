@@ -16,7 +16,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Test
-        run: dotnet test ClickToCallForSnom.slnx -c Release
+        run: dotnet test ClickToCall.slnx -c Release
 
       - name: Build
-        run: dotnet build src/ClickToCallForSnom -c Release
+        run: dotnet build src/ClickToCall -c Release

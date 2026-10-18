@@ -2,11 +2,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Click to Call for Phones",
+      "name": "Click to Call",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/src/ClickToCallForSnom/bin/Debug/net10.0-windows/ClickToCallForSnom.exe",
+      "program": "${workspaceFolder}/src/ClickToCall/bin/Debug/net10.0-windows/ClickToCall.exe",
       "args": [],
       "cwd": "${workspaceFolder}",
       "console": "internalConsole",
@@ -17,7 +17,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/src/ClickToCallForSnom/bin/Debug/net10.0-windows/ClickToCallForSnom.exe",
+      "program": "${workspaceFolder}/src/ClickToCall/bin/Debug/net10.0-windows/ClickToCall.exe",
       "args": ["--mock"],
       "cwd": "${workspaceFolder}",
       "console": "internalConsole"
@@ -27,7 +27,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/src/ClickToCallForSnom/bin/Debug/net10.0-windows/ClickToCallForSnom.exe",
+      "program": "${workspaceFolder}/src/ClickToCall/bin/Debug/net10.0-windows/ClickToCall.exe",
       "args": ["--mock-login"],
       "cwd": "${workspaceFolder}",
       "console": "internalConsole"
@@ -37,7 +37,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/src/ClickToCallForSnom/bin/Debug/net10.0-windows/ClickToCallForSnom.exe",
+      "program": "${workspaceFolder}/src/ClickToCall/bin/Debug/net10.0-windows/ClickToCall.exe",
       "args": ["--mock-login", "--mock-reset"],
       "cwd": "${workspaceFolder}",
       "console": "internalConsole"
@@ -47,17 +47,17 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/src/ClickToCallForSnom/bin/Debug/net10.0-windows/ClickToCallForSnom.exe",
+      "program": "${workspaceFolder}/src/ClickToCall/bin/Debug/net10.0-windows/ClickToCall.exe",
       "args": ["--mock-yealink"],
       "cwd": "${workspaceFolder}",
       "console": "internalConsole"
     },
     {
-      "name": "Click to Call for Phones (tel: link)",
+      "name": "Click to Call (tel: link)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/src/ClickToCallForSnom/bin/Debug/net10.0-windows/ClickToCallForSnom.exe",
+      "program": "${workspaceFolder}/src/ClickToCall/bin/Debug/net10.0-windows/ClickToCall.exe",
       "args": ["tel:+49 30 1234567"],
       "cwd": "${workspaceFolder}",
       "console": "internalConsole"

@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/ClickToCallForSnom/ClickToCallForSnom.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/ClickToCallForSnom.Tests/ClickToCallForSnom.Tests.csproj" />
-  </Folder>
-</Solution>

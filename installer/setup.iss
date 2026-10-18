@@ -1,4 +1,4 @@
-; Inno Setup script for Click to Call for Phones.
+; Inno Setup script for Click to Call.
 ; Built by build.ps1:  ISCC.exe /DAppVersion=1.2.3 /DSourceDir=..\artifacts\publish installer\setup.iss
 
 #ifndef AppVersion
@@ -8,11 +8,9 @@
   #define SourceDir "..\artifacts\publish"
 #endif
 
-#define AppName "Click to Call for Phones"
-; Name up to version 0.1 (shortcuts are renamed on update)
-#define LegacyAppName "Click to Call for Snom"
-#define AppExe "ClickToCallForSnom.exe"
-#define AppUrl "https://github.com/julianfaatz/click-to-call-for-snom"
+#define AppName "Click to Call"
+#define AppExe "ClickToCall.exe"
+#define AppUrl "https://github.com/julianfaatz/click-to-call"
 
 [Setup]
 AppId={{6F1C7A52-3E2B-4C1D-9A5E-8B7D2F4C1A93}
@@ -30,13 +28,11 @@ PrivilegesRequired=lowest
 DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
-; Not the start menu folder of the old name
-UsePreviousGroup=no
 DisableDirPage=auto
 
 OutputDir=..\artifacts
-OutputBaseFilename=ClickToCallForSnom-{#AppVersion}-setup
-SetupIconFile=..\src\ClickToCallForSnom\Assets\app.ico
+OutputBaseFilename=ClickToCall-{#AppVersion}-setup
+SetupIconFile=..\src\ClickToCall\Assets\app.ico
 UninstallDisplayIcon={app}\{#AppExe}
 UninstallDisplayName={#AppName}
 LicenseFile=..\LICENSE
@@ -64,11 +60,6 @@ english.LaunchApp=Launch {#AppName} now
 Name: "autostart"; Description: "{cm:AutostartTask}"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
-[InstallDelete]
-; Start menu folder and desktop shortcut of the old name
-Type: filesandordirs; Name: "{autoprograms}\{#LegacyAppName}"
-Type: files; Name: "{autodesktop}\{#LegacyAppName}.lnk"
-
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
@@ -79,7 +70,7 @@ Name: "{group}\{#AppName} – Settings"; Filename: "{app}\{#AppExe}"; Parameters
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopicon
 
 [Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "ClickToCallForSnom"; \
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "ClickToCall"; \
     ValueData: """{app}\{#AppExe}"" --autostart"; Tasks: autostart; Flags: uninsdeletevalue; Check: not WizardSilent
 
 [Run]
