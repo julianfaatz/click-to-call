@@ -15,7 +15,7 @@ Click a phone number on your PC – your Snom or Yealink desk phone dials it.
 
 </div>
 
-Click to Call dials numbers on your desk phone from a Windows PC – by clicking `tel:` links or by pressing a hotkey on a selected number in any application. The app controls the phone directly through its web interface on the local network; no PBX software or server is needed.
+The app controls the phone directly on the local network – no server, no PBX software.
 
 The screenshots show the German UI; the app is also available in English.
 
@@ -42,11 +42,11 @@ The phone's HTTP remote control is required: `command.htm` on Snom, “Action UR
 
 ## Installation
 
-1. Download and run `ClickToCall-x.y.z-setup.exe` from [Releases](https://github.com/julianfaatz/click-to-call/releases/latest) (Windows 10/11, no admin rights required). A portable ZIP is available as well.
-2. The app looks for the phone on the network. Click the phone it finds or enter its IP address. You need the login of the phone's web interface.
-3. Follow the checklist on the start page. In the Windows settings, pick “Click to Call” for **TEL** once – Windows does not let apps do this themselves.
+1. **Download:** run `ClickToCall-x.y.z-setup.exe` from [Releases](https://github.com/julianfaatz/click-to-call/releases/latest). Windows 10/11, no admin rights needed. Also available as a portable ZIP.
+2. **Connect the phone:** click the phone the app finds or enter its IP address. Then enter the username and password of the phone's web interface.
+3. **Enable links:** in the Windows settings, pick “Click to Call” for **TEL**. The checklist on the start page takes you there.
 
-The installer is not code-signed yet. If Windows SmartScreen shows a warning: *More info → Run anyway*. Every release includes SHA-256 checksums.
+> **SmartScreen warning?** *More info → Run anyway.* The installer is not code-signed; every release includes SHA-256 checksums.
 
 ![Start page after setup](docs/start.png)
 
@@ -59,7 +59,7 @@ The installer is not code-signed yet. If Windows SmartScreen shows a warning: *M
 
 ## Dialing from other programs
 
-Other software or scripts can call the app like a link:
+Other programs or scripts just call the app with the number:
 
 ```powershell
 ClickToCall.exe "tel:+49301234567"
@@ -69,22 +69,25 @@ ClickToCall.exe "tel:+49301234567"
 
 | Problem | Solution |
 |---|---|
-| Phone not found | Enter the IP address manually (phone menu → Information). If the phone is on a different network, it must be reachable from the PC. |
-| “Wrong username or password” | Use the login of the phone's web interface, not the SIP credentials. |
-| “The phone denied access” | Check in the web interface that the user has admin rights and HTTP control is allowed. |
-| Yealink does not dial | Confirm “Allow remote control” on the phone at the first call, or add the PC's IP under *Features → Remote Control* → **Action URI Allow IP List**. |
-| Clicking a tel: link does nothing | Enable *Dialing → Links* and pick “Click to Call” in the Windows settings. |
+| Phone not found | Enter the IP address manually (phone menu → *Information*). |
+| “Wrong username or password” | Use the web interface login, not the SIP credentials. |
+| “The phone denied access” | The user needs admin rights and HTTP control must be allowed. |
+| Yealink does not dial | Confirm “Allow remote control” on the phone at the first call. Or add the PC's IP under *Features → Remote Control* → **Action URI Allow IP List**. |
+| Clicking a tel: link does nothing | Enable *Dialing → Links* and pick “Click to Call” for **TEL** in Windows. |
 | Hotkey does not work | Choose a different combination under *Dialing → Hotkey*. |
 
-Settings and the log are in `%APPDATA%\ClickToCall`. Still stuck? Use *General → Report a problem* in the app or open an [issue](https://github.com/julianfaatz/click-to-call/issues/new/choose).
+Still stuck? Use *General → Report a problem* in the app or open an [issue](https://github.com/julianfaatz/click-to-call/issues/new/choose). Settings and the log are in `%APPDATA%\ClickToCall`.
 
 ## Privacy
 
-The app only talks to your phone and to GitHub to check for updates (can be turned off). There is no telemetry. The phone password is stored encrypted with Windows DPAPI.
+- Only talks to your phone and to GitHub (update check, can be turned off)
+- No telemetry
+- Phone password is stored encrypted (Windows DPAPI)
 
 ## Contributing
 
-How to build, test without a phone and create releases is described in [CONTRIBUTING.md](CONTRIBUTING.md) (German). Changes between versions are listed in the [changelog](CHANGELOG.md).
+- Building, testing without a phone, releases: [CONTRIBUTING.md](CONTRIBUTING.md) (German)
+- Changes per version: [changelog](CHANGELOG.md)
 
 ## License
 

@@ -15,7 +15,7 @@ Telefonnummern am PC anklicken – das Snom- oder Yealink-Tischtelefon wählt.
 
 </div>
 
-Click to Call wählt Nummern vom Windows-PC aus auf deinem Tischtelefon – per Klick auf `tel:`-Links oder per Tastenkombination für markierte Nummern in jedem Programm. Die App steuert das Telefon direkt über dessen Web-Schnittstelle im lokalen Netzwerk, eine Telefonanlagen-Software oder ein Server ist nicht nötig.
+Die App steuert das Telefon direkt im lokalen Netzwerk – ohne Server und ohne Telefonanlagen-Software.
 
 ## Funktionen
 
@@ -40,11 +40,11 @@ Voraussetzung ist die HTTP-Fernsteuerung des Telefons: bei Snom über `command.h
 
 ## Installation
 
-1. `ClickToCall-x.y.z-setup.exe` unter [Releases](https://github.com/julianfaatz/click-to-call/releases/latest) herunterladen und ausführen (Windows 10/11, keine Admin-Rechte nötig). Alternativ gibt es eine portable ZIP-Datei.
-2. Die App sucht das Telefon im Netzwerk. Gefundenes Telefon anklicken oder die IP-Adresse eingeben. Benötigt werden die Zugangsdaten der Web-Oberfläche des Telefons.
-3. Der Checkliste auf der Startseite folgen. In den Windows-Einstellungen muss bei **TEL** einmal „Click to Call“ ausgewählt werden – das kann Windows nicht automatisch.
+1. **Herunterladen:** `ClickToCall-x.y.z-setup.exe` von [Releases](https://github.com/julianfaatz/click-to-call/releases/latest) starten. Windows 10/11, keine Admin-Rechte nötig. Auch als portable ZIP.
+2. **Telefon verbinden:** Gefundenes Telefon anklicken oder IP-Adresse eingeben. Dann Benutzer und Passwort der Web-Oberfläche des Telefons eintragen.
+3. **Links aktivieren:** In den Windows-Einstellungen bei **TEL** „Click to Call“ auswählen. Die Checkliste auf der Startseite führt dorthin.
 
-Der Installer ist nicht signiert. Zeigt Windows SmartScreen eine Warnung: *Weitere Informationen → Trotzdem ausführen*. Prüfsummen (SHA-256) liegen jedem Release bei.
+> **SmartScreen-Warnung?** *Weitere Informationen → Trotzdem ausführen.* Der Installer ist nicht signiert, jedem Release liegen SHA-256-Prüfsummen bei.
 
 ![Startseite nach der Einrichtung](docs/start.png)
 
@@ -57,7 +57,7 @@ Der Installer ist nicht signiert. Zeigt Windows SmartScreen eine Warnung: *Weite
 
 ## Aus anderen Programmen wählen
 
-Andere Software oder Skripte können die App wie einen Link aufrufen:
+Andere Programme oder Skripte rufen die App einfach mit der Nummer auf:
 
 ```powershell
 ClickToCall.exe "tel:+49301234567"
@@ -67,22 +67,25 @@ ClickToCall.exe "tel:+49301234567"
 
 | Problem | Lösung |
 |---|---|
-| Telefon wird nicht gefunden | IP-Adresse von Hand eingeben (Telefonmenü → Informationen). Liegt das Telefon in einem anderen Netz, muss es vom PC aus erreichbar sein. |
-| „Benutzername oder Passwort falsch“ | Zugangsdaten der Web-Oberfläche verwenden, nicht die SIP-Zugangsdaten. |
-| „Das Telefon verweigert den Zugriff“ | Im Web-Interface prüfen, ob der Benutzer Admin-Rechte hat und HTTP-Steuerung erlaubt ist. |
-| Yealink wählt nicht | Beim ersten Anruf „Fernsteuerung erlauben“ am Telefon bestätigen oder unter *Features → Remote Control* die IP des PCs bei **Action URI Allow IP List** eintragen. |
-| Klick auf tel:-Link macht nichts | *Wählen → Links* aktivieren und in den Windows-Einstellungen „Click to Call“ auswählen. |
+| Telefon wird nicht gefunden | IP-Adresse von Hand eingeben (steht im Telefonmenü unter *Informationen*). |
+| „Benutzername oder Passwort falsch“ | Login der Web-Oberfläche verwenden, nicht die SIP-Daten. |
+| „Das Telefon verweigert den Zugriff“ | Benutzer braucht Admin-Rechte, HTTP-Steuerung muss erlaubt sein. |
+| Yealink wählt nicht | Beim ersten Anruf am Telefon „Fernsteuerung erlauben“ bestätigen. Oder PC-IP unter *Features → Remote Control* → **Action URI Allow IP List** eintragen. |
+| Klick auf tel:-Link macht nichts | *Wählen → Links* aktivieren und in Windows „Click to Call“ für **TEL** auswählen. |
 | Hotkey geht nicht | Unter *Wählen → Hotkey* eine andere Kombination wählen. |
 
-Einstellungen und Protokoll liegen in `%APPDATA%\ClickToCall`. Hilft das nicht weiter: in der App unter *Allgemein → Fehler melden* oder direkt als [Issue](https://github.com/julianfaatz/click-to-call/issues/new/choose).
+Immer noch Probleme? In der App *Allgemein → Fehler melden* oder ein [Issue](https://github.com/julianfaatz/click-to-call/issues/new/choose) öffnen. Einstellungen und Protokoll liegen in `%APPDATA%\ClickToCall`.
 
 ## Datenschutz
 
-Die App verbindet sich nur mit dem Telefon und mit GitHub, um nach Updates zu suchen (abschaltbar). Es gibt keine Telemetrie. Das Telefon-Passwort wird mit Windows DPAPI verschlüsselt gespeichert.
+- Verbindet sich nur mit dem Telefon und mit GitHub (Update-Suche, abschaltbar)
+- Keine Telemetrie
+- Telefon-Passwort wird verschlüsselt gespeichert (Windows DPAPI)
 
 ## Mitmachen
 
-Wie man die App baut, ohne Telefon testet und Releases erstellt, steht in [CONTRIBUTING.md](CONTRIBUTING.md). Änderungen zwischen den Versionen stehen im [Changelog](CHANGELOG.md).
+- Bauen, ohne Telefon testen, Releases: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Änderungen je Version: [Changelog](CHANGELOG.md)
 
 ## Lizenz
 
