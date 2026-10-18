@@ -79,6 +79,10 @@ public sealed class AppSettings : ObservableObject
     private bool _confirmLinkCalls = true;
     public bool ConfirmLinkCalls { get => _confirmLinkCalls; set => Set(ref _confirmLinkCalls, value); }
 
+    /// <summary>Show the dial window for a selected number (hotkey). Off = dial a clearly selected number right away.</summary>
+    private bool _confirmHotkeyCalls = true;
+    public bool ConfirmHotkeyCalls { get => _confirmHotkeyCalls; set => Set(ref _confirmHotkeyCalls, value); }
+
     private bool _showCallNotification = true;
     public bool ShowCallNotification { get => _showCallNotification; set => Set(ref _showCallNotification, value); }
 

@@ -135,10 +135,15 @@ public static class Loc
 
         // ---------- Dialing page ----------
         ["Dialing.Title"] = ("Wählen", "Dialing"),
-        ["Dialing.ConfirmLinks"] = ("Vor dem Wählen nachfragen", "Ask before dialing"),
-        ["Dialing.ConfirmLinksHint"] = (
-            "Bei Klick auf einen Telefon-Link erst die Nummer zeigen – Enter wählt, Esc bricht ab.",
-            "When clicking a phone link, show the number first – Enter dials, Esc cancels."),
+        ["Dialing.Confirm"] = ("Vor dem Wählen nachfragen", "Ask before dialing"),
+        ["Dialing.ConfirmHint"] = (
+            "Erst die Nummer zeigen – Enter wählt, Esc bricht ab. Ausgeschaltet wählt das Telefon sofort.",
+            "Show the number first – Enter dials, Esc cancels. Turned off, the phone dials right away."),
+        ["Dialing.ConfirmLinks"] = ("Bei Klick auf einen Telefon-Link", "When clicking a phone link"),
+        ["Dialing.ConfirmHotkey"] = ("Bei markierter Nummer (Tastenkombination)", "For a selected number (key combination)"),
+        ["Dialing.ConfirmHotkeyHelp"] = (
+            "Ohne Nachfrage wird nur gewählt, wenn genau eine Nummer markiert ist. Bei mehr Text, ohne Markierung oder bei Nummern aus der Zwischenablage erscheint weiterhin das Wählfenster.",
+            "Without asking, the phone only dials if exactly one number is selected. With more text, without a selection or for numbers from the clipboard the dial window still appears."),
         ["Dialing.ShowNotification"] = ("Benachrichtigung mit Auflegen-Taste", "Notification with hang-up button"),
         ["Dialing.ShowNotificationHint"] = ("Erscheint unten rechts, während das Telefon wählt.", "Appears in the bottom right corner while the phone dials."),
         ["Dialing.SecondsOption"] = ("{0} Sekunden", "{0} seconds"),
@@ -160,8 +165,8 @@ public static class Loc
         // ---------- Hotkey ----------
         ["Hotkey.Title"] = ("Hotkey", "Hotkey"),
         ["Hotkey.Intro"] = (
-            "Nummer in einem beliebigen Programm markieren und Tastenkombination drücken – das Wählfenster öffnet sich.",
-            "Select a number in any application and press the key combination – the dial window opens."),
+            "Nummer in einem beliebigen Programm markieren und Tastenkombination drücken – das Telefon wählt (je nach Einstellung oben nach Rückfrage).",
+            "Select a number in any application and press the key combination – the phone dials (asking first, depending on the setting above)."),
         ["Hotkey.Enabled"] = ("Wählen per Tastenkombination", "Dial with a key combination"),
         ["Hotkey.Combination"] = ("Tastenkombination", "Key combination"),
         ["Hotkey.BoxHint"] = ("Ins Feld klicken und die neue Kombination drücken.", "Click the box and press the new combination."),

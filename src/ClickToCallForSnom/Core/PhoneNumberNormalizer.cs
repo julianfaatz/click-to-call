@@ -86,11 +86,21 @@ public static partial class PhoneNumberNormalizer
             return "";
 
         var trimmed = text.Trim();
-        if (trimmed.Length <= 40 && LooksLikeNumber(trimmed))
+        if (IsSingleNumber(trimmed))
             return trimmed;
 
         var match = NumberInText().Match(trimmed);
         return match.Success ? match.Value.Trim() : "";
+    }
+
+    /// <summary>
+    /// True when the whole text is one phone number (e.g. a selection of "+49 30 1234-56"),
+    /// not a text that merely contains one ("Tel.: 030 1234", a signature).
+    /// </summary>
+    public static bool IsSingleNumber(string text)
+    {
+        var trimmed = text.Trim();
+        return trimmed.Length <= 40 && LooksLikeNumber(trimmed);
     }
 
     /// <summary>True when the text consists only of characters that appear in written phone numbers.</summary>

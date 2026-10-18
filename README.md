@@ -10,7 +10,7 @@ Wählt Telefonnummern direkt auf deinem **Snom- oder Yealink-Tischtelefon** – 
 
 - **tel:-, callto:- und sip:-Links** im Browser, in Outlook, im CRM … öffnen direkt am Telefon
 - **Hotkey** (Standard: `Strg + Alt + W`): Nummer irgendwo markieren, Hotkey drücken, Enter – das Telefon wählt. Ohne Markierung öffnet sich ein leeres Wählfenster.
-- **Bestätigungsfenster** vor dem Wählen (abschaltbar)
+- **Bestätigungsfenster** vor dem Wählen – für Links und markierte Nummern getrennt abschaltbar (dann wählt das Telefon sofort)
 - **Benachrichtigung mit Auflegen-Taste**
 - **Rufnummern-Aufbereitung**: `+49 (0)30 / 123-456` → `030123456`, optional Amtsholung
 - **Identitätsauswahl** bei mehreren Leitungen (bei Snom automatisch vom Telefon gelesen)

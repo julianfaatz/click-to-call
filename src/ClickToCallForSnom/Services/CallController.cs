@@ -49,7 +49,17 @@ public sealed class CallController
         _hotkeyBusy = true;
         try
         {
-            var text = PhoneNumberNormalizer.ExtractFromText(await SelectionGrabber.GetSelectedTextAsync());
+            var selection = await SelectionGrabber.GetSelectedTextAsync();
+            var text = PhoneNumberNormalizer.ExtractFromText(selection);
+
+            // Like a link without confirmation – but only for a selection that is exactly one plain number.
+            // Anything ambiguous (a whole signature, the clipboard fallback, feature codes) still shows the dial window.
+            if (!Settings.ConfirmHotkeyCalls && PhoneNumberNormalizer.IsSingleNumber(selection) && IsPlainNumber(text))
+            {
+                _ = DialAsync(text, NullIfEmpty(Settings.DefaultIdentityUri));
+                return;
+            }
+
             if (text.Length == 0 && Settings.HotkeyUseClipboardFallback)
             {
                 var clipboard = SelectionGrabber.GetClipboardText().Trim();

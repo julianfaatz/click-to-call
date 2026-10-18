@@ -7,8 +7,32 @@
         <TextBlock Style="{StaticResource PageTitle}" Text="{loc:Tr Dialing.Title}" />
 
         <!-- ===== Calls ===== -->
-        <ui:SettingCard Icon="&#xE8BD;" Title="{loc:Tr Dialing.ConfirmLinks}" Description="{loc:Tr Dialing.ConfirmLinksHint}">
-            <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding ConfirmLinkCalls}" />
+        <ui:SettingCard Icon="&#xE8BD;" Title="{loc:Tr Dialing.Confirm}" Description="{loc:Tr Dialing.ConfirmHint}">
+            <ui:SettingCard.Footer>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock VerticalAlignment="Center" Text="{loc:Tr Dialing.ConfirmLinks}" TextWrapping="Wrap" />
+                    <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding ConfirmLinkCalls}" />
+
+                    <ui:LabelWithHelp Grid.Row="2"
+                                      Label="{loc:Tr Dialing.ConfirmHotkey}"
+                                      Help="{loc:Tr Dialing.ConfirmHotkeyHelp}"
+                                      IsEnabled="{Binding HotkeyEnabled}" />
+                    <CheckBox Grid.Row="2"
+                              Grid.Column="1"
+                              Style="{StaticResource ToggleSwitch}"
+                              IsChecked="{Binding ConfirmHotkeyCalls}"
+                              IsEnabled="{Binding HotkeyEnabled}" />
+                </Grid>
+            </ui:SettingCard.Footer>
         </ui:SettingCard>
 
         <ui:SettingCard Icon="&#xEA8F;" Title="{loc:Tr Dialing.ShowNotification}" Description="{loc:Tr Dialing.ShowNotificationHint}">

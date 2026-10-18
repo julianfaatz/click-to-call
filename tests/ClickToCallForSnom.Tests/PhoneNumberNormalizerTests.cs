@@ -77,6 +77,17 @@ public class PhoneNumberNormalizerTests
         Assert.Equal("0301234", PhoneNumberNormalizer.Normalize("+49301234@pbx.example.com", German));
 
     [Theory]
+    [InlineData("030 1234567", true)]
+    [InlineData("  +49 (0)30 / 123-45 67\r\n", true)]
+    [InlineData("1234", true)]
+    [InlineData("Tel.: 030 1234567", false)]
+    [InlineData("Max Muster\n030 1234567\nFax 030 99", false)]
+    [InlineData("", false)]
+    [InlineData("1", false)]
+    public void Recognizes_a_selection_that_is_exactly_one_number(string selection, bool expected) =>
+        Assert.Equal(expected, PhoneNumberNormalizer.IsSingleNumber(selection));
+
+    [Theory]
     [InlineData("+49 30 1234567", "+49 30 1234567")]
     [InlineData("Tel.: +49 (0)30 123 456-78\nFax: 030 99", "+49 (0)30 123 456-78")]
     [InlineData("Ruf mich an unter 0171 1234567, danke!", "0171 1234567")]
