@@ -60,7 +60,7 @@ Voraussetzung ist die HTTP-Fernsteuerung des Telefons: bei Snom über `command.h
 Andere Programme oder Skripte rufen die App einfach mit der Nummer auf:
 
 ```powershell
-ClickToCall.exe "tel:+49301234567"
+& "$env:LOCALAPPDATA\Programs\Click to Call\ClickToCall.exe" "tel:+49301234567"
 ```
 
 ## Fehlersuche

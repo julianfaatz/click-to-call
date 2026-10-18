@@ -6,6 +6,8 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-10-18
+
 ### Hinzugefügt
 
 - „Fehler melden“ unter *Allgemein* öffnet ein vorausgefülltes Fehlerformular auf GitHub
@@ -29,5 +31,6 @@ Erste öffentliche Version.
 - Update-Hinweis und Installation neuer Versionen per Klick
 - Installer ohne Admin-Rechte und portable ZIP
 
-[Unreleased]: https://github.com/julianfaatz/click-to-call/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/julianfaatz/click-to-call/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/julianfaatz/click-to-call/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/julianfaatz/click-to-call/releases/tag/v0.9.0

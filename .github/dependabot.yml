@@ -1,0 +1,15 @@
+# Pull requests when GitHub Actions or the test packages have new versions
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      test-packages:
+        patterns: ["*"]

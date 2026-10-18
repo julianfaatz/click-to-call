@@ -62,7 +62,7 @@ The phone's HTTP remote control is required: `command.htm` on Snom, “Action UR
 Other programs or scripts just call the app with the number:
 
 ```powershell
-ClickToCall.exe "tel:+49301234567"
+& "$env:LOCALAPPDATA\Programs\Click to Call\ClickToCall.exe" "tel:+49301234567"
 ```
 
 ## Troubleshooting
