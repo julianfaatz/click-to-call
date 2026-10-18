@@ -181,7 +181,7 @@ public sealed class AppServices : IDisposable
             ToastKind.Update, null, [.. actions]);
     }
 
-    private async Task InstallUpdateAsync(UpdateInfo update)
+    public async Task InstallUpdateAsync(UpdateInfo update)
     {
         var toast = ToastWindow.ShowToast(Loc.T("Update.Downloading"), $"Version {update.Version}", ToastKind.Update, null);
         try

@@ -23,36 +23,123 @@ public partial class GeneralPage : UserControl
         UpdateCard.Description = Loc.T("General.Installed", UpdateChecker.CurrentVersion);
         AboutCard.Title = $"Click to Call for Snom {UpdateChecker.CurrentVersion}";
 
-        // Identities may have been read on the start page in the meantime
-        Loaded += (_, _) => RefreshIdentities();
+        Loaded += (_, _) =>
+        {
+            // Identities may have been read on the start page in the meantime
+            RefreshIdentities();
+
+            UpdateChecker.Checked += UpdateChecker_Checked;
+            ShowLastUpdateCheck();
+        };
+        Unloaded += (_, _) => UpdateChecker.Checked -= UpdateChecker_Checked;
     }
 
     private static AppSettings Settings => SettingsStore.Current;
 
-    private async void CheckNow_Click(object sender, RoutedEventArgs e)
+    // ---------- Updates ----------
+
+    private enum UpdateState
+    {
+        UpToDate,
+        Available,
+        Checking,
+        Failed,
+        NotChecked,
+    }
+
+    private UpdateInfo? _availableUpdate;
+
+    private void UpdateChecker_Checked() => Dispatcher.InvokeAsync(ShowLastUpdateCheck);
+
+    /// <summary>Shows the result of the last check; checks right away if it is old (the page should never claim a stale "up to date").</summary>
+    private void ShowLastUpdateCheck()
+    {
+        if (UpdateChecker.LastCheck is { } last && DateTime.Now - last.CheckedAt < TimeSpan.FromHours(1))
+        {
+            _availableUpdate = last.Update;
+            SetUpdateState(last.Update is null ? UpdateState.UpToDate : UpdateState.Available, last.CheckedAt);
+        }
+        else if (Settings.CheckForUpdates && CheckNowButton.IsEnabled)
+        {
+            _ = CheckForUpdatesAsync(showToast: false);
+        }
+        else if (CheckNowButton.IsEnabled)
+        {
+            SetUpdateState(UpdateState.NotChecked);
+        }
+    }
+
+    private void SetUpdateState(UpdateState state, DateTime? checkedAt = null)
+    {
+        var (background, iconBrush, icon, title, detail) = state switch
+        {
+            UpdateState.UpToDate => ("SystemFillColorSuccessBackgroundBrush", "SystemFillColorSuccessBrush", "\uE930",
+                Loc.T("Update.UpToDate"), Loc.T("Update.UpToDateDetail", UpdateChecker.CurrentVersion, CheckedText(checkedAt))),
+            UpdateState.Available => ("SystemFillColorAttentionBackgroundBrush", "AccentTextFillColorPrimaryBrush", "\uE896",
+                Loc.T("Update.Available", _availableUpdate?.Version ?? new Version()), Loc.T("General.Installed", UpdateChecker.CurrentVersion)),
+            UpdateState.Checking => ("SubtleFillColorSecondaryBrush", "TextFillColorSecondaryBrush", "\uE895",
+                Loc.T("Update.Checking"), Loc.T("General.Installed", UpdateChecker.CurrentVersion)),
+            UpdateState.Failed => ("SystemFillColorCautionBackgroundBrush", "SystemFillColorCautionBrush", "\uE7BA",
+                Loc.T("Update.CheckFailed"), Loc.T("Update.CheckFailedDetail")),
+            _ => ("SubtleFillColorSecondaryBrush", "TextFillColorSecondaryBrush", "\uE946",
+                Loc.T("Update.NotChecked"), Loc.T("General.Installed", UpdateChecker.CurrentVersion)),
+        };
+
+        UpdateStatusBanner.SetResourceReference(Border.BackgroundProperty, background);
+        UpdateStatusIcon.SetResourceReference(TextBlock.ForegroundProperty, iconBrush);
+        UpdateStatusIcon.Text = icon;
+        UpdateStatusTitle.Text = title;
+        UpdateStatusDetail.Text = detail;
+        InstallUpdateButton.Visibility = state == UpdateState.Available && _availableUpdate?.InstallerUrl is not null
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        // The card's own icon turns green as well: visible without reading
+        if (state == UpdateState.UpToDate)
+        {
+            UpdateCard.Icon = "\uE930";
+            UpdateCard.SetResourceReference(SettingCard.IconBrushProperty, "SystemFillColorSuccessBrush");
+        }
+        else
+        {
+            UpdateCard.Icon = "\uE895";
+            UpdateCard.ClearValue(SettingCard.IconBrushProperty);
+        }
+    }
+
+    private static string CheckedText(DateTime? checkedAt) =>
+        checkedAt is not { } time ? ""
+        : time.Date == DateTime.Today ? Loc.T("Update.CheckedToday", time.ToString("HH:mm"))
+        : Loc.T("Update.CheckedOn", time.ToString(Loc.Language == "de" ? "dd.MM.yyyy HH:mm" : "yyyy-MM-dd HH:mm"));
+
+    private void CheckNow_Click(object sender, RoutedEventArgs e) => _ = CheckForUpdatesAsync(showToast: true);
+
+    private async Task CheckForUpdatesAsync(bool showToast)
     {
         CheckNowButton.IsEnabled = false;
-        UpdateCard.Description = Loc.T("Update.Checking");
+        SetUpdateState(UpdateState.Checking);
         try
         {
-            var update = await UpdateChecker.CheckAsync();
-            if (update is null)
-            {
-                UpdateCard.Description = "✓ " + Loc.T("Update.UpToDate");
-                return;
-            }
-
-            UpdateCard.Description = Loc.T("Update.Available", update.Version);
-            App.Services?.ShowUpdate(update);
+            var update = await UpdateChecker.CheckAsync(); // shows the result via UpdateChecker.Checked
+            if (update is not null && showToast)
+                App.Services?.ShowUpdate(update);
         }
         catch (Exception ex)
         {
             Log.Error("Update check failed", ex);
-            UpdateCard.Description = Loc.T("Update.CheckFailed");
+            SetUpdateState(UpdateState.Failed);
         }
         finally
         {
             CheckNowButton.IsEnabled = true;
+        }
+    }
+
+    private void InstallUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        if (_availableUpdate is { } update && App.Services is { } services)
+        {
+            InstallUpdateButton.IsEnabled = false;
+            _ = services.InstallUpdateAsync(update);
         }
     }
 

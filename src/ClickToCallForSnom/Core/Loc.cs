@@ -211,6 +211,13 @@ public static class Loc
         // ---------- Updates ----------
         ["Update.Checking"] = ("Suche …", "Checking …"),
         ["Update.UpToDate"] = ("Du verwendest die neueste Version", "You are using the latest version"),
+        ["Update.UpToDateDetail"] = ("Version {0} · {1}", "Version {0} · {1}"),
+        ["Update.CheckedToday"] = ("heute um {0} geprüft", "checked today at {0}"),
+        ["Update.CheckedOn"] = ("geprüft am {0}", "checked on {0}"),
+        ["Update.CheckFailedDetail"] = (
+            "GitHub war nicht erreichbar. Bitte später erneut prüfen – deine Version funktioniert weiter.",
+            "GitHub could not be reached. Please check again later – your version keeps working."),
+        ["Update.NotChecked"] = ("Automatische Prüfung ist ausgeschaltet", "Automatic checking is turned off"),
         ["Update.Available"] = ("Version {0} ist verfügbar", "Version {0} is available"),
         ["Update.CheckFailed"] = ("Update-Prüfung fehlgeschlagen", "Update check failed"),
         ["Update.AvailableTitle"] = ("Update verfügbar", "Update available"),

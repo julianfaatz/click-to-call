@@ -21,14 +21,44 @@
         <ui:SettingCard x:Name="UpdateCard" Icon="&#xE895;" Title="{loc:Tr General.UpdatesTitle}">
             <Button x:Name="CheckNowButton" MinWidth="110" Click="CheckNow_Click" Content="{loc:Tr General.CheckNow}" />
             <ui:SettingCard.Footer>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center" Text="{loc:Tr General.CheckUpdates}" TextWrapping="Wrap" />
-                    <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding CheckForUpdates}" />
-                </Grid>
+                <StackPanel>
+                    <!-- Update status: green when this is the newest version (filled in code) -->
+                    <Border x:Name="UpdateStatusBanner" Margin="0,0,0,12" Padding="12,10" CornerRadius="4">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="UpdateStatusIcon"
+                                       Margin="0,1,12,0"
+                                       VerticalAlignment="Top"
+                                       FontFamily="{StaticResource IconFont}"
+                                       FontSize="16" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Name="UpdateStatusTitle" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock x:Name="UpdateStatusDetail" Margin="0,2,0,0" Style="{StaticResource CardDescription}" />
+                            </StackPanel>
+                            <Button x:Name="InstallUpdateButton"
+                                    Grid.Column="2"
+                                    Margin="12,0,0,0"
+                                    MinWidth="110"
+                                    VerticalAlignment="Center"
+                                    Style="{DynamicResource AccentButtonStyle}"
+                                    Click="InstallUpdate_Click"
+                                    Content="{loc:Tr Update.Install}"
+                                    Visibility="Collapsed" />
+                        </Grid>
+                    </Border>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Center" Text="{loc:Tr General.CheckUpdates}" TextWrapping="Wrap" />
+                        <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding CheckForUpdates}" />
+                    </Grid>
+                </StackPanel>
             </ui:SettingCard.Footer>
         </ui:SettingCard>
 

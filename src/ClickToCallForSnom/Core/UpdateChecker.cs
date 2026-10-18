@@ -9,6 +9,9 @@ namespace ClickToCallForSnom.Core;
 
 public sealed record UpdateInfo(Version Version, string HtmlUrl, string? InstallerUrl, string Notes);
 
+/// <summary>Result of a successful check. <see cref="Update"/> null = this is the newest version.</summary>
+public sealed record UpdateCheckResult(DateTime CheckedAt, UpdateInfo? Update);
+
 /// <summary>Checks GitHub Releases for a newer version and runs the new installer.</summary>
 public static class UpdateChecker
 {
@@ -25,12 +28,29 @@ public static class UpdateChecker
         }
     }
 
+    /// <summary>The last successful check (manual or automatic), null if there was none yet.</summary>
+    public static UpdateCheckResult? LastCheck { get; private set; }
+
+    /// <summary>Raised after every successful check.</summary>
+    public static event Action? Checked;
+
+    /// <returns>The newer version, or null if this is the newest one. Throws if GitHub could not be asked.</returns>
     public static async Task<UpdateInfo?> CheckAsync(CancellationToken ct = default)
+    {
+        var update = await FetchAsync(ct);
+        LastCheck = new UpdateCheckResult(DateTime.Now, update);
+        Checked?.Invoke();
+        return update;
+    }
+
+    private static async Task<UpdateInfo?> FetchAsync(CancellationToken ct)
     {
         using var http = CreateClient();
         using var response = await http.GetAsync($"https://api.github.com/repos/{Owner}/{Repository}/releases/latest", ct);
-        if (!response.IsSuccessStatusCode)
-            return null; // e.g. 404 when nothing is released yet
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            return null; // nothing released yet
+        // Anything else (rate limit, server error) must not look like "you are up to date"
+        response.EnsureSuccessStatusCode();
 
         using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
         var root = doc.RootElement;
