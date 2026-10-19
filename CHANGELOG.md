@@ -6,6 +6,10 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 
 ## [Unreleased]
 
+### Behoben
+
+- Snom: Lehnt das Telefon das Wählen ab, weil „Use hidden security tags“ aktiv ist, erklärt die Fehlermeldung jetzt, was zu tun ist, statt „Telefon nicht erreichbar“ anzuzeigen
+
 ## [0.9.1] - 2026-10-18
 
 ### Hinzugefügt

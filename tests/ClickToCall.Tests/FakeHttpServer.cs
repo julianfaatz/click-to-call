@@ -7,6 +7,7 @@ namespace ClickToCall.Tests;
 
 public sealed record FakeRequest(string Method, string Target, IReadOnlyDictionary<string, string> Headers, string Body);
 
+/// <param name="Status">0 = close the connection without sending a response.</param>
 public sealed record FakeResponse(int Status, string Body = "", string ContentType = "text/html", string ExtraHeaders = "");
 
 /// <summary>Minimal HTTP/1.1 server on 127.0.0.1 that records requests and answers with a callback.</summary>
@@ -74,6 +75,9 @@ public sealed class FakeHttpServer : IDisposable
                 Requests.Add(request);
 
             var response = _respond(request);
+            if (response.Status == 0)
+                return;
+
             var content = Encoding.UTF8.GetBytes(response.Body);
             var head = $"HTTP/1.1 {response.Status} X\r\nContent-Type: {response.ContentType}; charset=utf-8\r\n" +
                        $"Content-Length: {content.Length}\r\n{response.ExtraHeaders}Connection: close\r\n\r\n";

@@ -62,6 +62,11 @@ public static class Loc
             "Die sichere Verbindung (HTTPS) zum Telefon ist fehlgeschlagen. Bitte auf der Startseite neu verbinden.",
             "The secure connection (HTTPS) to the phone failed. Please connect again on the home page."),
         ["Error.HttpError"] = ("Das Telefon meldet einen Fehler (HTTP {0}).", "The phone reported an error (HTTP {0})."),
+        ["Error.RemoteControlBlocked"] = (
+            "Das Telefon lehnt das Wählen ab. Bitte im Web-Interface des Telefons unter Erweitert → QoS/Sicherheit "
+                + "die versteckten Sicherheits-Tags („Use hidden security tags“) ausschalten und speichern.",
+            "The phone refuses to dial. Please turn off \"Use hidden security tags\" in the phone's web interface "
+                + "under Advanced → QoS/Security and save."),
 
         // ---------- Phone specific ----------
         ["Yealink.RemoteControlHint"] = (

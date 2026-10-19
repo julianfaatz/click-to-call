@@ -60,6 +60,51 @@ public class SnomPhoneClientTests
         Assert.Equal("201@pbx", Assert.Single(SnomPhoneClient.ParseIdentities(xml)).Uri);
     }
 
+    [Fact]
+    public async Task Dials_via_command_htm()
+    {
+        using var server = new FakeHttpServer(_ => new FakeResponse(200));
+        using var client = new SnomPhoneClient(new PhoneConnection(server.Host, false, true, "", ""));
+
+        await client.DialAsync("0301234567", "201@pbx");
+
+        Assert.Equal("/command.htm?number=0301234567&outgoing_uri=201%40pbx", Assert.Single(server.Requests).Target);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Reports_blocked_remote_control_when_phone_drops_command(bool withLogin)
+    {
+        // Hidden tags on: the pages work, command.htm is closed without a response
+        using var server = new FakeHttpServer(request =>
+            withLogin && !request.Headers.ContainsKey("Authorization")
+                ? new FakeResponse(401, ExtraHeaders: "WWW-Authenticate: Basic realm=\"snom\"\r\n")
+                : request.Target.StartsWith("/command.htm") ? new FakeResponse(0) : new FakeResponse(200, "<title>snom D385</title>"));
+        using var client = new SnomPhoneClient(new PhoneConnection(server.Host, false, true, withLogin ? "admin" : "", withLogin ? "pw" : ""));
+
+        Assert.Equal("snom D385", await client.TestConnectionAsync());
+        var dial = await Assert.ThrowsAsync<PhoneException>(() => client.DialAsync("0301234567"));
+        var hangUp = await Assert.ThrowsAsync<PhoneException>(() => client.HangUpAsync());
+
+        Assert.Equal(PhoneErrorKind.RemoteControlBlocked, dial.Kind);
+        Assert.Equal(PhoneErrorKind.RemoteControlBlocked, hangUp.Kind);
+    }
+
+    [Fact]
+    public async Task Unreachable_phone_is_not_reported_as_blocked()
+    {
+        using var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+        listener.Start();
+        var host = listener.LocalEndpoint.ToString()!;
+        listener.Stop(); // nothing listens on the port anymore
+
+        using var client = new SnomPhoneClient(new PhoneConnection(host, false, true, "", ""));
+        var ex = await Assert.ThrowsAsync<PhoneException>(() => client.DialAsync("0301234567"));
+
+        Assert.Equal(PhoneErrorKind.Unreachable, ex.Kind);
+    }
+
     [Theory]
     [InlineData("192.168.1.50", false, "http://192.168.1.50/")]
     [InlineData("http://192.168.1.50/", false, "http://192.168.1.50/")]

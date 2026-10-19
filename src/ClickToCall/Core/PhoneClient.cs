@@ -30,6 +30,8 @@ public enum PhoneErrorKind
     Forbidden,
     Certificate,
     HttpError,
+    /// <summary>The phone answers, but refuses remote control commands (Snom: "hidden tags").</summary>
+    RemoteControlBlocked,
 }
 
 public sealed class PhoneException(PhoneErrorKind kind, string? detail = null, Exception? inner = null)
@@ -138,6 +140,19 @@ public abstract class HttpPhoneClient : IPhoneClient
 
     public virtual Task<IReadOnlyList<PhoneIdentity>> GetIdentitiesAsync(CancellationToken ct = default) =>
         Task.FromResult<IReadOnlyList<PhoneIdentity>>([]);
+
+    /// <summary>The phone accepted the connection, but closed it without sending a response.</summary>
+    protected static bool IsClosedWithoutResponse(PhoneException ex)
+    {
+        for (var inner = ex.InnerException; inner is not null; inner = inner.InnerException)
+        {
+            if (inner is HttpRequestException { HttpRequestError: HttpRequestError.ResponseEnded }
+                or HttpIOException { HttpRequestError: HttpRequestError.ResponseEnded })
+                return true;
+        }
+
+        return false;
+    }
 
     protected Task<string> GetStringAsync(string relativeUrl, CancellationToken ct) =>
         SendAsync(() => new HttpRequestMessage(HttpMethod.Get, relativeUrl), ct);

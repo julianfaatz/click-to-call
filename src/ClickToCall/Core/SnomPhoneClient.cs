@@ -43,10 +43,26 @@ public sealed partial class SnomPhoneClient(PhoneConnection connection, TimeSpan
         if (!string.IsNullOrWhiteSpace(outgoingUri))
             query += "&outgoing_uri=" + Uri.EscapeDataString(outgoingUri);
 
-        await GetStringAsync(query, ct);
+        await SendCommandAsync(query, ct);
     }
 
-    public override Task HangUpAsync(CancellationToken ct = default) => GetStringAsync("command.htm?key=CANCEL", ct);
+    public override Task HangUpAsync(CancellationToken ct = default) => SendCommandAsync("command.htm?key=CANCEL", ct);
+
+    /// <summary>
+    /// With "Use hidden security tags" on and a changed web login, the phone serves its pages but
+    /// closes the connection on command.htm without any response.
+    /// </summary>
+    private async Task SendCommandAsync(string query, CancellationToken ct)
+    {
+        try
+        {
+            await GetStringAsync(query, ct);
+        }
+        catch (PhoneException ex) when (ex.Kind == PhoneErrorKind.Unreachable && IsClosedWithoutResponse(ex))
+        {
+            throw new PhoneException(PhoneErrorKind.RemoteControlBlocked, ex.Detail, ex);
+        }
+    }
 
     /// <summary>Returns the phone's page title (usually contains the model).</summary>
     public override async Task<string> TestConnectionAsync(CancellationToken ct = default)
