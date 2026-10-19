@@ -24,16 +24,38 @@ public enum ProbeStatus
 /// </summary>
 public static class PhoneScanner
 {
-    public static async Task<IReadOnlyList<FoundPhone>> ScanAsync(CancellationToken ct = default)
+    /// <param name="progress">Share of the addresses checked so far, 0 to 1.</param>
+    public static async Task<IReadOnlyList<FoundPhone>> ScanAsync(IProgress<double>? progress = null, CancellationToken ct = default)
     {
         var local = LocalSubnets().ToList();
         var networks = NetworksToScan(local.Select(s => (s.Network, s.PrefixLength)).ToList());
         var own = local.Select(s => s.Own).ToHashSet();
         var targets = networks.SelectMany(n => SubnetAddresses(n.Network, n.PrefixLength)).Where(ip => !own.Contains(ip)).Distinct().ToList();
         var found = new ConcurrentBag<FoundPhone>();
+        var done = 0;
+        var lastPercent = 0;
 
         using var http = CreateProbeClient(TimeSpan.FromMilliseconds(800));
-        await Parallel.ForEachAsync(targets, new ParallelOptions { MaxDegreeOfParallelism = 128, CancellationToken = ct }, ProbeAddressAsync);
+        await Parallel.ForEachAsync(targets, new ParallelOptions { MaxDegreeOfParallelism = 128, CancellationToken = ct }, async (ip, token) =>
+        {
+            try
+            {
+                await ProbeAddressAsync(ip, token);
+            }
+            finally
+            {
+                // Only whole percents: Progress<T> posts every report to the UI thread
+                var percent = Interlocked.Increment(ref done) * 100 / targets.Count;
+                for (var last = Volatile.Read(ref lastPercent); last < percent; last = Volatile.Read(ref lastPercent))
+                {
+                    if (Interlocked.CompareExchange(ref lastPercent, percent, last) == last)
+                    {
+                        progress?.Report(percent / 100.0);
+                        break;
+                    }
+                }
+            }
+        });
 
         var phones = found.OrderBy(p => ToUInt32(IPAddress.Parse(p.Address))).ToList();
         Log.Info($"Network scan: {targets.Count} addresses in {string.Join(", ", networks.Select(n => $"{n.Network}/{n.PrefixLength}"))}, "
@@ -44,7 +66,7 @@ public static class PhoneScanner
 #endif
         return phones;
 
-        async ValueTask ProbeAddressAsync(IPAddress ip, CancellationToken token)
+        async Task ProbeAddressAsync(IPAddress ip, CancellationToken token)
         {
             // Most addresses have no device: find that out without an HTTP request, whose timeout
             // would throw (thousands of first chance exceptions per scan in the debugger)

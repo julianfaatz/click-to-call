@@ -355,11 +355,17 @@ public partial class HomePage : UserControl
         ScanButton.IsEnabled = false;
         ScanPanel.Visibility = Visibility.Visible;
         ScanProgress.Visibility = Visibility.Visible;
+        ScanProgress.Value = 0;
         ScanResults.Children.Clear();
         ScanStatus.Text = Loc.T("Home.Scanning");
         try
         {
-            var phones = await PhoneScanner.ScanAsync(ct);
+            var progress = new Progress<double>(value =>
+            {
+                if (!ct.IsCancellationRequested)
+                    ScanProgress.Value = value;
+            });
+            var phones = await PhoneScanner.ScanAsync(progress, ct);
             _foundPhones = phones;
             ScanStatus.Text = phones.Count switch
             {
