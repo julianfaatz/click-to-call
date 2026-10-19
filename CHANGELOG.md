@@ -6,6 +6,8 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-10-19
+
 ### Behoben
 
 - Snom: Lehnt das Telefon das Wählen ab, weil „Use hidden security tags“ aktiv ist, erklärt die Fehlermeldung jetzt, was zu tun ist, statt „Telefon nicht erreichbar“ anzuzeigen
@@ -42,6 +44,7 @@ Erste öffentliche Version.
 - Update-Hinweis und Installation neuer Versionen per Klick
 - Installer ohne Admin-Rechte und portable ZIP
 
-[Unreleased]: https://github.com/julianfaatz/click-to-call/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/julianfaatz/click-to-call/compare/v0.9.2...HEAD
+[0.9.2]: https://github.com/julianfaatz/click-to-call/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/julianfaatz/click-to-call/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/julianfaatz/click-to-call/releases/tag/v0.9.0

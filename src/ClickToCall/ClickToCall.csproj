@@ -13,7 +13,7 @@
     <AssemblyName>ClickToCall</AssemblyName>
     <RootNamespace>ClickToCall</RootNamespace>
 
-    <Version>0.9.1</Version>
+    <Version>0.9.2</Version>
     <Product>Click to Call</Product>
     <Company>Julian Faatz</Company>
     <Copyright>Copyright © Julian Faatz</Copyright>
