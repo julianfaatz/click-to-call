@@ -10,6 +10,11 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 
 - Snom: Lehnt das Telefon das Wählen ab, weil „Use hidden security tags“ aktiv ist, erklärt die Fehlermeldung jetzt, was zu tun ist, statt „Telefon nicht erreichbar“ anzuzeigen
 - Die Einrichtung überspringt den Schritt „Telefonnummern anklickbar machen“ nicht mehr, solange Click to Call in den Windows-Einstellungen nicht als Standard-App gewählt ist
+- Die Telefonsuche findet Telefone auch in Netzen, die größer als /24 sind (bis /22)
+
+### Geändert
+
+- Die Telefonsuche durchsucht zusätzlich die Standardnetze gängiger Router (FRITZ!Box `192.168.178.x`, `192.168.0.x`, `192.168.1.x`, Speedport `192.168.2.x`) – z. B. für Telefone an einer FRITZ!Box als Telefonanlage, während der PC in einem anderen Netz hängt
 
 ## [0.9.1] - 2026-10-18
 

@@ -18,16 +18,33 @@ public enum ProbeStatus
     Found,
 }
 
-/// <summary>Looks for supported phones in the local /24 network(s) by asking each address for its web page.</summary>
+/// <summary>
+/// Looks for supported phones in the local network(s) and the default networks of common routers
+/// by asking each address for its web page.
+/// </summary>
 public static class PhoneScanner
 {
     public static async Task<IReadOnlyList<FoundPhone>> ScanAsync(CancellationToken ct = default)
     {
-        var targets = LocalSubnetAddresses().Distinct().ToList();
+        var local = LocalSubnets().ToList();
+        var networks = NetworksToScan(local.Select(s => (s.Network, s.PrefixLength)).ToList());
+        var own = local.Select(s => s.Own).ToHashSet();
+        var targets = networks.SelectMany(n => SubnetAddresses(n.Network, n.PrefixLength)).Where(ip => !own.Contains(ip)).Distinct().ToList();
         var found = new ConcurrentBag<FoundPhone>();
 
         using var http = CreateProbeClient(TimeSpan.FromMilliseconds(800));
-        await Parallel.ForEachAsync(targets, new ParallelOptions { MaxDegreeOfParallelism = 64, CancellationToken = ct }, async (ip, token) =>
+        await Parallel.ForEachAsync(targets, new ParallelOptions { MaxDegreeOfParallelism = 128, CancellationToken = ct }, ProbeAddressAsync);
+
+        var phones = found.OrderBy(p => ToUInt32(IPAddress.Parse(p.Address))).ToList();
+        Log.Info($"Network scan: {targets.Count} addresses in {string.Join(", ", networks.Select(n => $"{n.Network}/{n.PrefixLength}"))}, "
+            + $"found {(phones.Count == 0 ? "nothing" : string.Join(", ", phones.Select(p => p.DisplayName)))}");
+#if DEBUG
+        if (MockPhone.Address is { } mock)
+            phones.Insert(0, new FoundPhone(mock, MockPhone.Model + " (Mock)", MockPhone.Vendor));
+#endif
+        return phones;
+
+        async ValueTask ProbeAddressAsync(IPAddress ip, CancellationToken token)
         {
             // Most addresses have no device: find that out without an HTTP request, whose timeout
             // would throw (thousands of first chance exceptions per scan in the debugger)
@@ -37,14 +54,7 @@ public static class PhoneScanner
 
             if (url is not null && Recognize(await ProbeAsync(http, url, token)) is { } phone)
                 found.Add(phone with { Address = ip.ToString() });
-        });
-
-        var phones = found.OrderBy(p => IPAddress.Parse(p.Address).GetAddressBytes()[3]).ToList();
-#if DEBUG
-        if (MockPhone.Address is { } mock)
-            phones.Insert(0, new FoundPhone(mock, MockPhone.Model + " (Mock)", MockPhone.Vendor));
-#endif
-        return phones;
+        }
     }
 
     /// <summary>Finds out which phone (if any) answers at a typed address.</summary>
@@ -138,7 +148,35 @@ public static class PhoneScanner
         }
     }
 
-    private static IEnumerable<IPAddress> LocalSubnetAddresses()
+    /// <summary>Smallest prefix length that is scanned completely (/22 = 1022 addresses, a few seconds).</summary>
+    private const int MinPrefixLength = 22;
+
+    /// <summary>
+    /// Default networks of common routers. Phones are often connected to the router acting as PBX
+    /// (e.g. a FRITZ!Box) while the PC is in another network – still reachable, but not in its own subnet.
+    /// </summary>
+    private static readonly IPAddress[] CommonNetworks =
+    [
+        IPAddress.Parse("192.168.178.0"), // AVM FRITZ!Box
+        IPAddress.Parse("192.168.0.0"),
+        IPAddress.Parse("192.168.1.0"),
+        IPAddress.Parse("192.168.2.0"), // Telekom Speedport
+    ];
+
+    /// <summary>The own networks first, then the common router networks (/24) they don't already cover.</summary>
+    internal static List<(IPAddress Network, int PrefixLength)> NetworksToScan(IReadOnlyCollection<(IPAddress Network, int PrefixLength)> local)
+    {
+        var networks = local.Distinct().ToList();
+        foreach (var common in CommonNetworks)
+        {
+            if (!networks.Any(n => NetworkAddress(common, n.PrefixLength).Equals(n.Network)))
+                networks.Add((common, 24));
+        }
+
+        return networks;
+    }
+
+    private static IEnumerable<(IPAddress Network, int PrefixLength, IPAddress Own)> LocalSubnets()
     {
         foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
         {
@@ -156,14 +194,30 @@ public static class PhoneScanner
                 if (unicast.Address.AddressFamily != AddressFamily.InterNetwork)
                     continue;
 
-                var bytes = unicast.Address.GetAddressBytes();
-                for (var i = 1; i < 255; i++)
-                {
-                    if (i == bytes[3])
-                        continue;
-                    yield return new IPAddress([bytes[0], bytes[1], bytes[2], (byte)i]);
-                }
+                // Company networks are often larger than /24 (phone in 10.0.1.x, PC in 10.0.0.x).
+                // Larger ones are only scanned around the own address, smaller ones still as /24 as before.
+                var prefix = Math.Clamp(unicast.PrefixLength, MinPrefixLength, 24);
+                yield return (NetworkAddress(unicast.Address, prefix), prefix, unicast.Address);
             }
         }
     }
+
+    internal static IPAddress NetworkAddress(IPAddress address, int prefixLength)
+    {
+        var mask = prefixLength == 0 ? 0 : uint.MaxValue << (32 - prefixLength);
+        return ToAddress(ToUInt32(address) & mask);
+    }
+
+    /// <summary>All host addresses of the subnet, without network and broadcast address.</summary>
+    internal static IEnumerable<IPAddress> SubnetAddresses(IPAddress network, int prefixLength)
+    {
+        var first = ToUInt32(network);
+        var count = 1u << (32 - prefixLength);
+        for (var i = 1u; i < count - 1; i++)
+            yield return ToAddress(first + i);
+    }
+
+    private static uint ToUInt32(IPAddress address) => BitConverter.ToUInt32(address.GetAddressBytes().Reverse().ToArray());
+
+    private static IPAddress ToAddress(uint value) => new(BitConverter.GetBytes(value).Reverse().ToArray());
 }
