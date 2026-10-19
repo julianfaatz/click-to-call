@@ -87,15 +87,14 @@ public static class ProtocolRegistration
         NotifyAssociationsChanged();
     }
 
-    /// <summary>True if Windows currently opens links of this scheme with this app.</summary>
-    public static bool IsDefaultHandler(string scheme)
-    {
-        if (ReadUserChoice(scheme) is { } progId)
-            return progId == ProgId(scheme) || (progId == scheme && ReadCommand(Registry.ClassesRoot, scheme) is { } c && IsOurCommand(c));
-
-        // No explicit user choice: Windows uses the class registration
-        return ReadCommand(Registry.ClassesRoot, scheme) is { } cmd && IsOurCommand(cmd);
-    }
+    /// <summary>True if the user picked this app for links of this scheme in the Windows settings.</summary>
+    /// <remarks>
+    /// Our own class registration alone does not count: without a user choice Windows may still ask
+    /// which app to use, and the setup would skip the step that asks the user to pick us.
+    /// </remarks>
+    public static bool IsDefaultHandler(string scheme) =>
+        ReadUserChoice(scheme) is { } progId
+        && (progId == ProgId(scheme) || (progId == scheme && ReadCommand(Registry.ClassesRoot, scheme) is { } cmd && IsOurCommand(cmd)));
 
     /// <summary>
     /// The ProgId the user picked in the Windows settings. Newer Windows 11 builds store it in
