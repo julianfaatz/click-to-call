@@ -15,7 +15,7 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 ### Geändert
 
 - Die Telefonsuche durchsucht zusätzlich die Standardnetze gängiger Router (FRITZ!Box `192.168.178.x`, `192.168.0.x`, `192.168.1.x`, Speedport `192.168.2.x`) – z. B. für Telefone an einer FRITZ!Box als Telefonanlage, während der PC in einem anderen Netz hängt
-- Fortschrittsbalken bei der Telefonsuche
+- Die Telefonsuche zeigt als Radar live, welche Geräte antworten und welche Telefone gefunden wurden – ein gefundenes Telefon lässt sich direkt anklicken
 
 ## [0.9.1] - 2026-10-18
 

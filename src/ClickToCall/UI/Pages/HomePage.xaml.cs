@@ -26,6 +26,7 @@ public partial class HomePage : UserControl
     public HomePage()
     {
         InitializeComponent();
+        ScanRadar.PhoneClicked += ScanRadar_PhoneClicked;
         VendorBox.ItemsSource = new[] { new VendorOption(null, Loc.T("Phone.VendorAuto")) }
             .Concat(PhoneDrivers.All.Select(d => new VendorOption(d.Vendor, d.Name)))
             .ToList();
@@ -354,16 +355,33 @@ public partial class HomePage : UserControl
 
         ScanButton.IsEnabled = false;
         ScanPanel.Visibility = Visibility.Visible;
-        ScanProgress.Visibility = Visibility.Visible;
-        ScanProgress.Value = 0;
         ScanResults.Children.Clear();
         ScanStatus.Text = Loc.T("Home.Scanning");
+        ScanDetail.Text = "";
+        ScanRadar.Start();
+
+        var networks = new HashSet<string>();
+        var devices = 0;
         try
         {
-            var progress = new Progress<double>(value =>
+            var progress = new Progress<ScanUpdate>(update =>
             {
-                if (!ct.IsCancellationRequested)
-                    ScanProgress.Value = value;
+                if (ct.IsCancellationRequested)
+                    return;
+
+                if (update.Network.Length > 0)
+                    networks.Add(update.Network);
+                if (update.Device is { } device)
+                {
+                    devices++;
+                    ScanRadar.AddDevice(device, update.Phone);
+                    if (update.Phone is { } spotted)
+                        ScanStatus.Text = Loc.T("Home.ScanSpotted", spotted.Model);
+                    return;
+                }
+
+                ScanRadar.SetProgress(update.Fraction);
+                ScanDetail.Text = Loc.T("Home.ScanNetwork", update.Network, (int)(update.Fraction * 100));
             });
             var phones = await PhoneScanner.ScanAsync(progress, ct);
             _foundPhones = phones;
@@ -373,6 +391,7 @@ public partial class HomePage : UserControl
                 1 => Loc.T("Home.ScanFoundOne"),
                 _ => Loc.T("Home.ScanFound"),
             };
+            ScanDetail.Text = Loc.T("Home.ScanSummary", networks.Count, devices);
 
             foreach (var phone in phones)
                 ScanResults.Children.Add(CreateScanResult(phone, highlight: phones.Count == 1));
@@ -389,13 +408,21 @@ public partial class HomePage : UserControl
         {
             Log.Error("Network scan failed", ex);
             ScanStatus.Text = Loc.T("Home.ScanNone");
+            ScanDetail.Text = "";
         }
         finally
         {
-            ScanProgress.Visibility = Visibility.Collapsed;
+            if (!ct.IsCancellationRequested) // otherwise a new scan already took over the radar
+                ScanRadar.Finish();
             ScanButton.IsEnabled = true;
             ScanButtonText.Text = Loc.T("Home.ScanAgain");
         }
+    }
+
+    private void ScanRadar_PhoneClicked(FoundPhone phone)
+    {
+        HostBox.Text = phone.Address;
+        Connect_Click(ScanRadar, new RoutedEventArgs());
     }
 
     private Button CreateScanResult(FoundPhone phone, bool highlight)

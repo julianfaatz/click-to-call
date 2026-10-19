@@ -18,29 +18,39 @@ public enum ProbeStatus
     Found,
 }
 
+/// <summary>What the scan just did, for showing it live.</summary>
+/// <param name="Fraction">Share of the addresses checked so far, 0 to 1.</param>
+/// <param name="Network">The network being scanned, e.g. "192.168.178.x".</param>
+/// <param name="Device">Set once for every address with a web server (phone or not).</param>
+/// <param name="Phone">Set once for every phone found.</param>
+public sealed record ScanUpdate(double Fraction, string Network, IPAddress? Device = null, FoundPhone? Phone = null);
+
 /// <summary>
 /// Looks for supported phones in the local network(s) and the default networks of common routers
 /// by asking each address for its web page.
 /// </summary>
 public static class PhoneScanner
 {
-    /// <param name="progress">Share of the addresses checked so far, 0 to 1.</param>
-    public static async Task<IReadOnlyList<FoundPhone>> ScanAsync(IProgress<double>? progress = null, CancellationToken ct = default)
+    public static async Task<IReadOnlyList<FoundPhone>> ScanAsync(IProgress<ScanUpdate>? progress = null, CancellationToken ct = default)
     {
         var local = LocalSubnets().ToList();
         var networks = NetworksToScan(local.Select(s => (s.Network, s.PrefixLength)).ToList());
         var own = local.Select(s => s.Own).ToHashSet();
-        var targets = networks.SelectMany(n => SubnetAddresses(n.Network, n.PrefixLength)).Where(ip => !own.Contains(ip)).Distinct().ToList();
+        var targets = networks
+            .SelectMany(n => SubnetAddresses(n.Network, n.PrefixLength).Select(ip => (Ip: ip, Network: NetworkLabel(n.Network, n.PrefixLength))))
+            .Where(t => !own.Contains(t.Ip))
+            .DistinctBy(t => t.Ip)
+            .ToList();
         var found = new ConcurrentBag<FoundPhone>();
         var done = 0;
-        var lastPercent = 0;
+        var lastPercent = -1;
 
         using var http = CreateProbeClient(TimeSpan.FromMilliseconds(800));
-        await Parallel.ForEachAsync(targets, new ParallelOptions { MaxDegreeOfParallelism = 128, CancellationToken = ct }, async (ip, token) =>
+        await Parallel.ForEachAsync(targets, new ParallelOptions { MaxDegreeOfParallelism = 128, CancellationToken = ct }, async (target, token) =>
         {
             try
             {
-                await ProbeAddressAsync(ip, token);
+                await ProbeAddressAsync(target.Ip, target.Network, token);
             }
             finally
             {
@@ -50,7 +60,7 @@ public static class PhoneScanner
                 {
                     if (Interlocked.CompareExchange(ref lastPercent, percent, last) == last)
                     {
-                        progress?.Report(percent / 100.0);
+                        progress?.Report(new ScanUpdate(percent / 100.0, target.Network));
                         break;
                     }
                 }
@@ -62,22 +72,34 @@ public static class PhoneScanner
             + $"found {(phones.Count == 0 ? "nothing" : string.Join(", ", phones.Select(p => p.DisplayName)))}");
 #if DEBUG
         if (MockPhone.Address is { } mock)
-            phones.Insert(0, new FoundPhone(mock, MockPhone.Model + " (Mock)", MockPhone.Vendor));
+        {
+            var mockPhone = new FoundPhone(mock, MockPhone.Model + " (Mock)", MockPhone.Vendor);
+            phones.Insert(0, mockPhone);
+            progress?.Report(new ScanUpdate(1, "", IPAddress.Loopback, mockPhone));
+        }
 #endif
         return phones;
 
-        async Task ProbeAddressAsync(IPAddress ip, CancellationToken token)
+        async Task ProbeAddressAsync(IPAddress ip, string network, CancellationToken token)
         {
             // Most addresses have no device: find that out without an HTTP request, whose timeout
             // would throw (thousands of first chance exceptions per scan in the debugger)
             var http80 = IsPortOpenAsync(ip, 80, token);
             var https443 = IsPortOpenAsync(ip, 443, token);
             var url = await http80 ? $"http://{ip}/" : await https443 ? $"https://{ip}/" : null;
+            if (url is null)
+                return;
 
-            if (url is not null && Recognize(await ProbeAsync(http, url, token)) is { } phone)
-                found.Add(phone with { Address = ip.ToString() });
+            var phone = Recognize(await ProbeAsync(http, url, token)) is { } recognized ? recognized with { Address = ip.ToString() } : null;
+            if (phone is not null)
+                found.Add(phone);
+            progress?.Report(new ScanUpdate(Volatile.Read(ref done) / (double)targets.Count, network, ip, phone));
         }
     }
+
+    /// <summary>"192.168.178.x" for a /24 network, otherwise "10.0.0.0/22".</summary>
+    internal static string NetworkLabel(IPAddress network, int prefixLength) =>
+        prefixLength == 24 ? network.ToString()[..network.ToString().LastIndexOf('.')] + ".x" : $"{network}/{prefixLength}";
 
     /// <summary>Finds out which phone (if any) answers at a typed address.</summary>
     public static async Task<(ProbeStatus Status, FoundPhone? Phone)> IdentifyAsync(string host, CancellationToken ct = default)

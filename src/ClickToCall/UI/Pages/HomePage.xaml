@@ -135,8 +135,17 @@
 
                         <!-- Scan results -->
                         <StackPanel x:Name="ScanPanel" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,12,0,0" Visibility="Collapsed">
-                            <ProgressBar x:Name="ScanProgress" Height="3" Maximum="1" />
-                            <TextBlock x:Name="ScanStatus" Margin="0,6,0,0" Style="{StaticResource CardDescription}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ui:ScanRadar x:Name="ScanRadar" Margin="0,4,20,4" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock x:Name="ScanStatus" TextWrapping="Wrap" Style="{StaticResource CardDescription}" />
+                                    <TextBlock x:Name="ScanDetail" Margin="0,6,0,0" Style="{StaticResource Hint}" />
+                                </StackPanel>
+                            </Grid>
                             <WrapPanel x:Name="ScanResults" Margin="0,8,0,0" />
                         </StackPanel>
                     </Grid>
