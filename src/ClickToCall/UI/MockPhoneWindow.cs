@@ -61,6 +61,15 @@ public sealed class MockPhoneWindow : Window
         DockPanel.SetDock(offline, Dock.Top);
         root.Children.Add(offline);
 
+        if (MockPhone.Vendor == PhoneVendor.Snom)
+        {
+            var hiddenTags = new CheckBox { Content = "Versteckte Sicherheits-Tags an (blockiert das Wählen)", Margin = new Thickness(0, 0, 0, 12) };
+            hiddenTags.Checked += (_, _) => MockPhone.HiddenTags = true;
+            hiddenTags.Unchecked += (_, _) => MockPhone.HiddenTags = false;
+            DockPanel.SetDock(hiddenTags, Dock.Top);
+            root.Children.Add(hiddenTags);
+        }
+
         _log = new ListBox { FontSize = 12 };
         root.Children.Add(_log);
 

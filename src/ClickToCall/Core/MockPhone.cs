@@ -14,6 +14,7 @@ public sealed record MockPhoneEvent(DateTime Time, string Text, string? Display 
 /// <para>
 /// Start the app with <c>--mock</c> (Snom, no login), <c>--mock-login</c> (Snom, user "admin", password "1234")
 /// or <c>--mock-yealink</c> (Yealink, always with that login). <c>--mock-reset</c> starts the setup from scratch.
+/// The mock window can switch the phone off or turn on Snom's hidden security tags.
 /// Mock settings live in %APPDATA%\ClickToCall\mock (or mock-yealink), the real configuration is not touched.
 /// </para>
 /// </summary>
@@ -31,6 +32,12 @@ public static class MockPhone
 
     /// <summary>While true the phone does not answer (simulates a switched off phone).</summary>
     public static bool Offline { get; set; }
+
+    /// <summary>
+    /// Snom: "Use hidden security tags" is on. A real phone then closes the connection on command.htm
+    /// without a response (if the web login was changed) – the pages still work.
+    /// </summary>
+    public static bool HiddenTags { get; set; }
 
     /// <summary>Raised on a background thread for every request the phone handled.</summary>
     public static event Action<MockPhoneEvent>? Activity;
@@ -120,6 +127,12 @@ public static class MockPhone
                         Raise($"Login abgelehnt ({uri.AbsolutePath})");
                     await WriteAsync(stream, "401 Unauthorized", "text/html", "<html><body>snom: login required</body></html>",
                         "WWW-Authenticate: Basic realm=\"snom\"\r\n");
+                    return;
+                }
+
+                if (HiddenTags && Vendor == PhoneVendor.Snom && uri.AbsolutePath.Equals("/command.htm", StringComparison.OrdinalIgnoreCase))
+                {
+                    Raise("command.htm abgewiesen (versteckte Sicherheits-Tags) – Verbindung ohne Antwort geschlossen");
                     return;
                 }
 
