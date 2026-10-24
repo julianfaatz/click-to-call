@@ -82,11 +82,14 @@ public abstract class HttpPhoneClient : IPhoneClient
         if (string.IsNullOrWhiteSpace(host))
             throw new PhoneException(PhoneErrorKind.NotConfigured);
 
+        // e.g. typos with spaces or other characters that are not allowed in a host name
+        if (!Uri.TryCreate($"{(connection.UseHttps ? "https" : "http")}://{host}/", UriKind.Absolute, out var baseAddress))
+            throw new PhoneException(PhoneErrorKind.InvalidAddress, host);
+
         var hasLogin = !string.IsNullOrEmpty(connection.Username);
         var handler = new HttpClientHandler
         {
-            // Supports both Basic and Digest authentication
-            Credentials = hasLogin && !sendBasicAuthUpfront ? new NetworkCredential(connection.Username, connection.Password) : null,
+            Credentials = hasLogin && !sendBasicAuthUpfront ? CreateCredentials(baseAddress, connection) : null,
             PreAuthenticate = true,
             UseProxy = false,
             // .NET drops a preset Authorization header on redirects, so we follow them ourselves then
@@ -97,13 +100,6 @@ public abstract class HttpPhoneClient : IPhoneClient
         // Also needed for HTTP: phones set to HTTPS only redirect there
         if (connection.IgnoreCertificateErrors)
             handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-
-        // e.g. typos with spaces or other characters that are not allowed in a host name
-        if (!Uri.TryCreate($"{(connection.UseHttps ? "https" : "http")}://{host}/", UriKind.Absolute, out var baseAddress))
-        {
-            handler.Dispose();
-            throw new PhoneException(PhoneErrorKind.InvalidAddress, host);
-        }
 
         _http = new HttpClient(handler)
         {
@@ -121,6 +117,21 @@ public abstract class HttpPhoneClient : IPhoneClient
     }
 
     public Uri BaseAddress => _http.BaseAddress!;
+
+    /// <summary>
+    /// Basic and Digest login for the phone's address only. .NET drops a plain <see cref="NetworkCredential"/>
+    /// on redirects, but keeps a <see cref="CredentialCache"/> (it is tied to URIs). Without that, a phone that
+    /// redirects after command.htm dials, but the redirected page answers "Unauthorized".
+    /// </summary>
+    private static CredentialCache CreateCredentials(Uri baseAddress, PhoneConnection connection)
+    {
+        var credential = new NetworkCredential(connection.Username, connection.Password);
+        return new CredentialCache
+        {
+            { baseAddress, "Basic", credential },
+            { baseAddress, "Digest", credential },
+        };
+    }
 
     /// <summary>"http://192.168.1.50/" → "192.168.1.50".</summary>
     internal static string NormalizeHost(string host)
@@ -201,7 +212,10 @@ public abstract class HttpPhoneClient : IPhoneClient
                 switch (response.StatusCode)
                 {
                     case HttpStatusCode.Unauthorized:
-                        throw new PhoneException(PhoneErrorKind.Unauthorized);
+                        // For the log: which page refused (after redirects) and which logins the phone offers
+                        var schemes = string.Join(", ", response.Headers.WwwAuthenticate.Select(h => h.Scheme));
+                        throw new PhoneException(PhoneErrorKind.Unauthorized,
+                            $"401 from {response.RequestMessage?.RequestUri?.AbsolutePath} ({(schemes.Length > 0 ? schemes : "no challenge")})");
                     case HttpStatusCode.Forbidden:
                         throw new PhoneException(PhoneErrorKind.Forbidden);
                     case var code when !response.IsSuccessStatusCode:

@@ -6,6 +6,10 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 
 ## [Unreleased]
 
+### Behoben
+
+- Snom mit Web-Login: Das Telefon wählte, die App meldete aber „Benutzername oder Passwort falsch“ – leitet das Telefon nach dem Befehl weiter, wird der Login jetzt mitgeschickt
+
 ## [0.9.2] - 2026-10-19
 
 ### Behoben

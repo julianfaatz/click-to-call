@@ -91,6 +91,23 @@ public class SnomPhoneClientTests
         Assert.Equal(PhoneErrorKind.RemoteControlBlocked, hangUp.Kind);
     }
 
+    [Theory]
+    [InlineData("Basic realm=\"snom\"")]
+    [InlineData("Digest realm=\"snom\", nonce=\"abc\", qop=\"auth\"")]
+    public async Task Keeps_login_when_phone_redirects_after_command(string challenge)
+    {
+        // The phone runs the command and redirects to its start page, which needs the login as well
+        using var server = new FakeHttpServer(request =>
+            !request.Headers.ContainsKey("Authorization")
+                ? new FakeResponse(401, ExtraHeaders: $"WWW-Authenticate: {challenge}\r\n")
+                : request.Target.StartsWith("/command.htm") ? new FakeResponse(302, ExtraHeaders: "Location: /\r\n") : new FakeResponse(200));
+        using var client = new SnomPhoneClient(new PhoneConnection(server.Host, false, true, "admin", "pw"));
+
+        await client.DialAsync("0301234567");
+
+        Assert.Equal("/", server.Requests[^1].Target);
+    }
+
     [Fact]
     public async Task Unreachable_phone_is_not_reported_as_blocked()
     {
