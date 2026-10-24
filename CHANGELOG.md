@@ -6,6 +6,8 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 
 ## [Unreleased]
 
+## [0.9.3] - 2026-10-24
+
 ### Behoben
 
 - Snom mit Web-Login: Das Telefon wählte, die App meldete aber „Benutzername oder Passwort falsch“ – leitet das Telefon nach dem Befehl weiter, wird der Login jetzt mitgeschickt
@@ -48,7 +50,8 @@ Erste öffentliche Version.
 - Update-Hinweis und Installation neuer Versionen per Klick
 - Installer ohne Admin-Rechte und portable ZIP
 
-[Unreleased]: https://github.com/julianfaatz/click-to-call/compare/v0.9.2...HEAD
+[Unreleased]: https://github.com/julianfaatz/click-to-call/compare/v0.9.3...HEAD
+[0.9.3]: https://github.com/julianfaatz/click-to-call/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/julianfaatz/click-to-call/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/julianfaatz/click-to-call/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/julianfaatz/click-to-call/releases/tag/v0.9.0
