@@ -16,6 +16,7 @@ public class YealinkPhoneClientTests
     [InlineData("Yealink T54W Web", "Yealink T54W")]
     [InlineData("Copyright Yealink Network Technology", "Yealink")]
     [InlineData("<script>var g_strFirmware = \"66.86.0.180\"; var g_phonetype = \"T48S\";</script>", "Yealink T48S")]
+    [InlineData("https://192.168.2.9:443/servlet?m=mod_listener&p=login&q=loginForm&jumpto=status <html><body><div id=\"_RES_INFO_\"></div></body></html>", "Yealink")]
     public void Detects_yealink_phones(string probeText, string expectedModel) =>
         Assert.Equal(expectedModel, PhoneDrivers.For(PhoneVendor.Yealink).Detect(probeText));
 

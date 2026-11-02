@@ -15,7 +15,9 @@ public sealed partial class YealinkDriver : IPhoneDriver
         if (PhoneTypeRegex().Match(probeText) is { Success: true } phoneType)
             return "Yealink " + phoneType.Groups[1].Value.ToUpperInvariant();
 
-        if (!probeText.Contains("yealink", StringComparison.OrdinalIgnoreCase))
+        // Without a login, the T4xS start page only redirects to the login page (/servlet?m=mod_listener&p=login…)
+        if (!probeText.Contains("yealink", StringComparison.OrdinalIgnoreCase)
+            && !probeText.Contains("/servlet?m=mod_listener", StringComparison.OrdinalIgnoreCase))
             return null;
 
         var match = ModelRegex().Match(probeText);
