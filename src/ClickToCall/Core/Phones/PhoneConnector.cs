@@ -1,4 +1,4 @@
-namespace ClickToCall.Core;
+namespace ClickToCall.Core.Phones;
 
 public enum ConnectStatus
 {

@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using ClickToCall.Core;
+using ClickToCall.Core.Phones;
 
 namespace ClickToCall.UI.Pages;
 

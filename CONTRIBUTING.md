@@ -35,12 +35,14 @@ In VS Code gibt es dafür Startkonfigurationen („Mock-Telefon …“). Der Moc
 
 ```
 src/ClickToCall/
-  Core/        Logik ohne UI: Telefon-Treiber, Nummern-Aufbereitung, Einstellungen, Registry, Hotkey, Updates
-  Services/    CallController – alles, was zu einem Anruf führt
-  UI/          Fenster, Benachrichtigungen, Tray-Icon
-  UI/Pages/    Seiten des App-Fensters (Start, Wählen, Allgemein)
-tests/         xUnit-Tests
-installer/     Inno-Setup-Skript
+  Core/          Logik ohne UI: Nummern-Aufbereitung, Einstellungen, Registry, Hotkey, Updates
+  Core/Phones/   Telefon-Treiber (Snom, Yealink), Verbinden, Telefonsuche
+  Core/Network/  Netzwerk-Hilfen ohne Telefon-Bezug: Subnetze, Port- und Webseiten-Abfrage
+  Services/      Abläufe über mehrere Teile: Anruf (CallController), Telefon einrichten, Einrichtungsschritte
+  UI/            Fenster, Benachrichtigungen, Tray-Icon, wiederverwendbare Controls
+  UI/Pages/      Seiten des App-Fensters (Start, Wählen, Allgemein)
+tests/           xUnit-Tests
+installer/       Inno-Setup-Skript
 ```
 
 Texte (Deutsch/Englisch) stehen in `Core/Loc.cs`.
@@ -55,7 +57,7 @@ Yealink  GET /servlet?key=number=030123456[&outgoing_uri=user@host]   Wählen
          GET /servlet?key=CALLEND                                     Auflegen
 ```
 
-Ein weiterer Hersteller braucht einen eigenen Treiber in `Core/` (siehe `PhoneDrivers.cs`).
+Ein weiterer Hersteller braucht einen eigenen Treiber und Client in `Core/Phones/` (siehe `PhoneDrivers.cs`).
 
 ## Release
 

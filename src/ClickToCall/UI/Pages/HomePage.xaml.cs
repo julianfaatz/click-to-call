@@ -4,6 +4,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using ClickToCall.Core;
+using ClickToCall.Core.Phones;
+using ClickToCall.Services;
 
 namespace ClickToCall.UI.Pages;
 
@@ -13,23 +15,16 @@ namespace ClickToCall.UI.Pages;
 /// </summary>
 public partial class HomePage : UserControl
 {
-    private CancellationTokenSource? _scanCts;
     private CancellationTokenSource? _statusCts;
     private bool _updatingLines;
-    private bool _autoScanDone;
     private Window? _window; // Window.GetWindow() is already null in Unloaded
-    private IReadOnlyList<FoundPhone> _foundPhones = [];
-
-    /// <summary>Entry of the manufacturer selection. Vendor null = recognize automatically.</summary>
-    private sealed record VendorOption(PhoneVendor? Vendor, string Name);
 
     public HomePage()
     {
         InitializeComponent();
-        ScanRadar.PhoneClicked += ScanRadar_PhoneClicked;
-        VendorBox.ItemsSource = new[] { new VendorOption(null, Loc.T("Phone.VendorAuto")) }
-            .Concat(PhoneDrivers.All.Select(d => new VendorOption(d.Vendor, d.Name)))
-            .ToList();
+        ConnectForm.Connected += ConnectForm_Connected;
+        ConnectForm.Cancelled += RefreshAll;
+        Stepper.StepClicked += GoToStep;
         Loaded += (_, _) =>
         {
             Settings.PropertyChanged += Settings_PropertyChanged;
@@ -37,7 +32,7 @@ public partial class HomePage : UserControl
             RefreshAll();
             if (Settings.IsPhoneConfigured)
                 _ = CheckStatusAsync();
-            else if (ConnectForm.Visibility != Visibility.Visible)
+            else if (!ConnectForm.IsOpen)
                 OpenConnectForm();
 
             _window = Window.GetWindow(this);
@@ -51,7 +46,6 @@ public partial class HomePage : UserControl
             if (_window is not null)
                 _window.Activated -= Window_Activated;
             _window = null;
-            _scanCts?.Cancel();
             _statusCts?.Cancel();
         };
     }
@@ -87,9 +81,8 @@ public partial class HomePage : UserControl
 
         PhoneIcon.Foreground = configured ? (Brush)FindResource("AccentTextFillColorPrimaryBrush") : (Brush)FindResource("TextFillColorSecondaryBrush");
         StatusPill.Visibility = configured ? Visibility.Visible : Visibility.Collapsed;
-        var formOpen = ConnectForm.Visibility == Visibility.Visible;
-        ChangeButton.Visibility = configured && !formOpen ? Visibility.Visible : Visibility.Collapsed;
-        RecheckButton.Visibility = configured && !formOpen ? Visibility.Visible : Visibility.Collapsed;
+        ChangeButton.Visibility = configured && !ConnectForm.IsOpen ? Visibility.Visible : Visibility.Collapsed;
+        RecheckButton.Visibility = configured && !ConnectForm.IsOpen ? Visibility.Visible : Visibility.Collapsed;
 
         // e.g. Yealink: the PC has to be allowed to control the phone
         var hint = configured ? PhoneDrivers.For(Settings.Vendor).UsageHint(Settings.PhoneHost) : null;
@@ -150,17 +143,9 @@ public partial class HomePage : UserControl
         SetStatus(PhoneState.Checking);
         try
         {
-            using var client = PhoneDrivers.CreateClient(PhoneConnection.From(Settings), TimeSpan.FromSeconds(5));
-            var model = await client.TestConnectionAsync(ct);
-            if (ct.IsCancellationRequested)
-                return;
-
+            await PhoneSetup.CheckAsync(ct);
             SetStatus(PhoneState.Online);
-            if (model != Settings.PhoneModel)
-            {
-                Settings.PhoneModel = model;
-                RefreshPhoneCard();
-            }
+            RefreshPhoneCard(); // the model name may have changed
         }
         catch (PhoneException ex)
         {
@@ -174,389 +159,71 @@ public partial class HomePage : UserControl
 
     private void Recheck_Click(object sender, RoutedEventArgs e) => _ = CheckStatusAsync();
 
-    // ---------- Connect form ----------
+    // ---------- Connecting a phone ----------
 
     private void ShowConnectForm_Click(object sender, RoutedEventArgs e) => OpenConnectForm();
 
     private void OpenConnectForm()
     {
-        HostBox.Text = Settings.PhoneHost;
-        UserBox.Text = Settings.Username;
-        PasswordBox.Password = Settings.Password;
-        CredentialsPanel.Visibility = Settings.Username.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
-        // The manufacturer is recognized automatically; changing it is offered once a phone is connected
-        VendorBox.SelectedIndex = 0;
-        VendorPanel.Visibility = Settings.IsPhoneConfigured ? Visibility.Visible : Visibility.Collapsed;
-        CancelConnectButton.Visibility = Settings.IsPhoneConfigured ? Visibility.Visible : Visibility.Collapsed;
-        SetConnectMessage("", StatusText.Kind.Neutral);
-
-        ConnectForm.Visibility = Visibility.Visible;
-        RefreshAll();
-
-        Dispatcher.BeginInvoke(() =>
-        {
-            HostBox.Focus();
-            HostBox.SelectAll();
-        }, System.Windows.Threading.DispatcherPriority.Input);
-
-        // Most people don't know their phone's IP address: on the first start just look for it
-        if (!Settings.IsPhoneConfigured && !_autoScanDone)
-        {
-            _autoScanDone = true;
-            Scan_Click(ScanButton, new RoutedEventArgs());
-        }
-    }
-
-    private void CloseConnectForm()
-    {
-        _scanCts?.Cancel();
-        ConnectForm.Visibility = Visibility.Collapsed;
-        ScanPanel.Visibility = Visibility.Collapsed;
+        ConnectForm.Open();
         RefreshAll();
     }
 
-    private void CancelConnect_Click(object sender, RoutedEventArgs e) => CloseConnectForm();
-
-    private void SetConnectMessage(string text, StatusText.Kind kind)
+    private async void ConnectForm_Connected(ConnectResult result)
     {
-        StatusText.Set(ConnectMessage, text, kind);
-        ConnectMessage.Visibility = text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
-    }
+        _viewStep = null; // continue with the next setup step
+        RefreshAll();
+        SetStatus(PhoneState.Online);
+        ToastWindow.ShowToast(Loc.T("Home.ConnectedTitle"), Loc.T("Home.ConnectedText", result.Model), ToastKind.Success, TimeSpan.FromSeconds(5));
 
-    private void FormBox_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter)
-            Connect_Click(sender, e);
-    }
-
-    private async void Connect_Click(object sender, RoutedEventArgs e)
-    {
-        if (!DoConnectButton.IsEnabled)
-            return; // already connecting (Enter in a text box, a scan result)
-
-        var host = HostBox.Text.Trim();
-        if (host.Length == 0)
-        {
-            SetConnectMessage(Loc.T("Home.HostRequired"), StatusText.Kind.Error);
-            HostBox.Focus();
-            return;
-        }
-
-        var user = CredentialsPanel.IsVisible ? UserBox.Text.Trim() : "";
-        var password = CredentialsPanel.IsVisible ? PasswordBox.Password : "";
-
-        DoConnectButton.IsEnabled = false;
-        SetConnectMessage(Loc.T("Phone.Testing"), StatusText.Kind.Neutral);
-        try
-        {
-            var result = await PhoneConnector.ConnectAsync(VendorFor(host), host, user, password, Settings.UseHttps && host == Settings.PhoneHost);
-            switch (result.Status)
-            {
-                case ConnectStatus.Connected:
-                    if (host != Settings.PhoneHost || result.Vendor != Settings.Vendor)
-                    {
-                        Settings.Identities.Clear();
-                        Settings.DefaultIdentityUri = "";
-                    }
-
-                    Settings.Vendor = result.Vendor!.Value;
-                    Settings.PhoneHost = host;
-                    Settings.UseHttps = result.UseHttps;
-                    Settings.IgnoreCertificateErrors = true;
-                    Settings.Username = user;
-                    Settings.Password = password;
-                    Settings.PhoneModel = result.Model;
-                    _viewStep = null; // continue with the next setup step
-                    CloseConnectForm();
-                    SetStatus(PhoneState.Online);
-                    ToastWindow.ShowToast(Loc.T("Home.ConnectedTitle"), Loc.T("Home.ConnectedText", result.Model), ToastKind.Success, TimeSpan.FromSeconds(5));
-                    await LoadIdentitiesAsync();
-
-                    // The user clicked a link before the phone was set up: continue with it
-                    if (App.Services?.Calls.TakePendingNumber() is { } pending)
-                        App.Services.Calls.ShowDialWindow(pending, fromLink: true);
-                    break;
-
-                case ConnectStatus.UnknownVendor:
-                    VendorPanel.Visibility = Visibility.Visible;
-                    SetConnectMessage(Loc.T("Home.VendorUnknown"), StatusText.Kind.Error);
-                    VendorBox.Focus();
-                    VendorBox.IsDropDownOpen = true;
-                    break;
-
-                case ConnectStatus.NeedsCredentials:
-                    SetConnectMessage("", StatusText.Kind.Neutral);
-                    CredentialsPanel.Visibility = Visibility.Visible;
-                    if (UserBox.Text.Length == 0)
-                        UserBox.Text = "admin";
-                    PasswordBox.Focus();
-                    break;
-
-                case ConnectStatus.WrongCredentials:
-                    CredentialsPanel.Visibility = Visibility.Visible;
-                    SetConnectMessage(Loc.T("Error.Unauthorized"), StatusText.Kind.Error);
-                    PasswordBox.Focus();
-                    PasswordBox.SelectAll();
-                    break;
-
-                default:
-                    SetConnectMessage(result.Error?.UserMessage ?? Loc.T("Error.Unreachable"), StatusText.Kind.Error);
-                    break;
-            }
-        }
-        finally
-        {
-            DoConnectButton.IsEnabled = true;
-        }
-    }
-
-    /// <summary>The manufacturer to connect with, or null to recognize it from the phone.</summary>
-    private PhoneVendor? VendorFor(string host)
-    {
-        if (VendorPanel.IsVisible && (VendorBox.SelectedItem as VendorOption)?.Vendor is { } chosen)
-            return chosen;
-        if (_foundPhones.FirstOrDefault(p => p.Address == host) is { } found)
-            return found.Vendor;
-        // Reconnecting the same phone (e.g. new password): it is known to work
-        return Settings.IsPhoneConfigured && host == Settings.PhoneHost ? Settings.Vendor : null;
-    }
-
-    /// <summary>Reads the phone's identities silently – only relevant if there is more than one.</summary>
-    private async Task LoadIdentitiesAsync()
-    {
-        if (!PhoneDrivers.For(Settings.Vendor).CanReadIdentities)
-            return;
-
-        try
-        {
-            using var client = PhoneDrivers.CreateClient(PhoneConnection.From(Settings));
-            var identities = await client.GetIdentitiesAsync();
-            Settings.Identities.Clear();
-            foreach (var identity in identities)
-                Settings.Identities.Add(identity);
-            if (identities.All(i => i.Uri != Settings.DefaultIdentityUri))
-                Settings.DefaultIdentityUri = "";
-        }
-        catch (Exception ex)
-        {
-            Log.Error("Could not read identities", ex);
-        }
-
+        await PhoneSetup.LoadIdentitiesAsync();
         RefreshLines();
-    }
 
-    // ---------- Network scan ----------
-
-    private async void Scan_Click(object sender, RoutedEventArgs e)
-    {
-        _scanCts?.Cancel();
-        _scanCts = new CancellationTokenSource();
-        var ct = _scanCts.Token;
-
-        ScanButton.IsEnabled = false;
-        ScanPanel.Visibility = Visibility.Visible;
-        ScanResults.Children.Clear();
-        ScanStatus.Text = Loc.T("Home.Scanning");
-        ScanDetail.Text = "";
-        ScanRadar.Start();
-
-        var networks = new HashSet<string>();
-        var devices = 0;
-        try
-        {
-            var progress = new Progress<ScanUpdate>(update =>
-            {
-                if (ct.IsCancellationRequested)
-                    return;
-
-                if (update.Network.Length > 0)
-                    networks.Add(update.Network);
-                if (update.Device is { } device)
-                {
-                    devices++;
-                    ScanRadar.AddDevice(device, update.Phone);
-                    if (update.Phone is { } spotted)
-                        ScanStatus.Text = Loc.T("Home.ScanSpotted", spotted.Model);
-                    return;
-                }
-
-                ScanRadar.SetProgress(update.Fraction);
-                ScanDetail.Text = Loc.T("Home.ScanNetwork", update.Network, (int)(update.Fraction * 100));
-            });
-            var phones = await PhoneScanner.ScanAsync(progress, ct);
-            _foundPhones = phones;
-            ScanStatus.Text = phones.Count switch
-            {
-                0 => Loc.T("Home.ScanNone"),
-                1 => Loc.T("Home.ScanFoundOne"),
-                _ => Loc.T("Home.ScanFound"),
-            };
-            ScanDetail.Text = Loc.T("Home.ScanSummary", networks.Count, devices);
-
-            foreach (var phone in phones)
-                ScanResults.Children.Add(CreateScanResult(phone, highlight: phones.Count == 1));
-
-            // Exactly one phone and nothing typed yet: it is almost certainly the right one
-            if (phones.Count == 1 && HostBox.Text.Trim().Length == 0)
-                HostBox.Text = phones[0].Address;
-        }
-        catch (OperationCanceledException)
-        {
-            ScanPanel.Visibility = Visibility.Collapsed;
-        }
-        catch (Exception ex)
-        {
-            Log.Error("Network scan failed", ex);
-            ScanStatus.Text = Loc.T("Home.ScanNone");
-            ScanDetail.Text = "";
-        }
-        finally
-        {
-            if (!ct.IsCancellationRequested) // otherwise a new scan already took over the radar
-                ScanRadar.Finish();
-            ScanButton.IsEnabled = true;
-            ScanButtonText.Text = Loc.T("Home.ScanAgain");
-        }
-    }
-
-    private void ScanRadar_PhoneClicked(FoundPhone phone)
-    {
-        HostBox.Text = phone.Address;
-        Connect_Click(ScanRadar, new RoutedEventArgs());
-    }
-
-    private Button CreateScanResult(FoundPhone phone, bool highlight)
-    {
-        var content = new StackPanel { Orientation = Orientation.Horizontal };
-        content.Children.Add(new TextBlock
-        {
-            Text = "",
-            FontFamily = (FontFamily)FindResource("IconFont"),
-            Margin = new Thickness(0, 0, 8, 0),
-            VerticalAlignment = VerticalAlignment.Center,
-        });
-        content.Children.Add(new TextBlock { Text = phone.DisplayName, VerticalAlignment = VerticalAlignment.Center });
-
-        var button = new Button { Content = content, Margin = new Thickness(0, 0, 8, 8), Padding = new Thickness(12, 6, 12, 6) };
-        if (highlight && TryFindResource("AccentButtonStyle") is Style accent)
-            button.Style = accent;
-
-        button.Click += (_, _) =>
-        {
-            HostBox.Text = phone.Address;
-            Connect_Click(button, new RoutedEventArgs());
-        };
-        return button;
+        // The user clicked a link before the phone was set up: continue with it
+        if (App.Services?.Calls.TakePendingNumber() is { } pending)
+            App.Services.Calls.ShowDialWindow(pending, fromLink: true);
     }
 
     // ---------- Guided setup ----------
-
-    private const int StepCount = 3;
 
     /// <summary>Step the user explicitly went back to (null = the next open step).</summary>
     private int? _viewStep;
     private bool _justCompleted;
     private bool _linksSettingsOpened;
-    private readonly List<(Border Circle, TextBlock Glyph, TextBlock Label, FrameworkElement Item)> _steps = [];
-    private readonly List<Border> _stepLines = [];
-
-    // Not "a number was dialed": the phone accepting the request does not mean it dialed (see the test call)
-    private static bool IsReady => Settings.IsPhoneConfigured && Settings.SetupCompleted;
-
-    private static bool LinksDone => ProtocolRegistration.IsDefaultHandler("tel");
-
-    private static bool IsStepDone(int step) => step switch
-    {
-        1 => Settings.IsPhoneConfigured,
-        2 => LinksDone,
-        _ => IsReady,
-    };
-
-    /// <summary>The first step that still has to be done.</summary>
-    private static int NextOpenStep =>
-        !Settings.IsPhoneConfigured ? 1
-        : !LinksDone && !Settings.SetupLinksSkipped ? 2
-        : 3;
-
-    private static string StepLabel(int step, bool skipped = false) => step switch
-    {
-        1 => Loc.T("Home.StepPhone"),
-        2 => Loc.T("Home.StepLinksShort") + (skipped ? " " + Loc.T("Home.Skipped") : ""),
-        _ => Loc.T("Home.StepTest"),
-    };
-
-    private void BuildStepper()
-    {
-        for (var i = 0; i < StepCount; i++)
-        {
-            Stepper.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            if (i < StepCount - 1)
-                Stepper.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-            var glyph = new TextBlock
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                FontWeight = FontWeights.SemiBold,
-            };
-            var circle = new Border { Width = 32, Height = 32, CornerRadius = new CornerRadius(16), BorderThickness = new Thickness(2), Child = glyph };
-            var label = new TextBlock { Margin = new Thickness(10, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, FontSize = 14 };
-            var panel = new StackPanel { Orientation = Orientation.Horizontal, Background = Brushes.Transparent };
-            panel.Children.Add(circle);
-            panel.Children.Add(label);
-
-            var step = i + 1;
-            panel.MouseLeftButtonUp += (_, _) => GoToStep(step);
-            Grid.SetColumn(panel, i * 2);
-            Stepper.Children.Add(panel);
-            _steps.Add((circle, glyph, label, panel));
-
-            if (i < StepCount - 1)
-            {
-                var line = new Border { Height = 2, Margin = new Thickness(16, 0, 16, 0), CornerRadius = new CornerRadius(1), VerticalAlignment = VerticalAlignment.Center };
-                Grid.SetColumn(line, i * 2 + 1);
-                Stepper.Children.Add(line);
-                _stepLines.Add(line);
-            }
-        }
-    }
 
     private void GoToStep(int step)
     {
-        if (step > NextOpenStep)
+        var next = SetupProgress.Current().NextOpenStep;
+        if (step > next)
             return; // steps can only be done in order
-        _viewStep = step == NextOpenStep ? null : step;
+        _viewStep = step == next ? null : step;
         RefreshAll();
     }
 
     private void RefreshSetup()
     {
-        if (_steps.Count == 0)
-            BuildStepper();
-
-        var ready = IsReady;
+        var progress = SetupProgress.Current();
+        var ready = progress.IsReady;
         TitleText.Text = Loc.T(ready ? "Home.Title" : "Home.SetupTitle");
         SubtitleText.Visibility = ready ? Visibility.Collapsed : Visibility.Visible;
         Stepper.Visibility = ready ? Visibility.Collapsed : Visibility.Visible;
         ReadyPanel.Visibility = ready ? Visibility.Visible : Visibility.Collapsed;
         DoneBanner.Visibility = ready && _justCompleted ? Visibility.Visible : Visibility.Collapsed;
 
-        var next = NextOpenStep;
-        if (_viewStep > next)
+        if (_viewStep > progress.NextOpenStep)
             _viewStep = null;
-        var current = ready ? 0 : _viewStep ?? next;
+        var current = ready ? 0 : _viewStep ?? progress.NextOpenStep;
 
         PhoneCard.Visibility = ready || current == 1 ? Visibility.Visible : Visibility.Collapsed;
-        Step1Next.Visibility = current == 1 && Settings.IsPhoneConfigured && ConnectForm.Visibility != Visibility.Visible
-            ? Visibility.Visible : Visibility.Collapsed;
+        Step1Next.Visibility = current == 1 && Settings.IsPhoneConfigured && !ConnectForm.IsOpen ? Visibility.Visible : Visibility.Collapsed;
         Step2Card.Visibility = current == 2 ? Visibility.Visible : Visibility.Collapsed;
         Step3Card.Visibility = current == 3 ? Visibility.Visible : Visibility.Collapsed;
 
         if (!ready)
-            RefreshStepper(current, next);
+            Stepper.Update(progress, current);
 
         // Step 2 content
-        var linksDone = LinksDone;
+        var linksDone = progress.LinksDone;
         Step2Instructions.Visibility = linksDone ? Visibility.Collapsed : Visibility.Visible;
         Step2Done.Visibility = linksDone ? Visibility.Visible : Visibility.Collapsed;
         Step2Waiting.Visibility = !linksDone && _linksSettingsOpened ? Visibility.Visible : Visibility.Collapsed;
@@ -570,57 +237,6 @@ public partial class HomePage : UserControl
         LinksTipButton.Visibility = linksDone ? Visibility.Collapsed : Visibility.Visible;
         HotkeyTip.Title = Settings.HotkeyEnabled ? Loc.T("Home.HotkeyTitle", Settings.Hotkey) : Loc.T("Home.HotkeyOffTitle");
         HotkeyTip.Description = Loc.T(Settings.HotkeyEnabled ? "Home.HotkeyDescription" : "Home.HotkeyOff");
-    }
-
-    private void RefreshStepper(int current, int next)
-    {
-        var accent = (Brush)FindResource("AccentFillColorDefaultBrush");
-        var success = (Brush)FindResource("SystemFillColorSuccessBrush");
-        var onAccent = (Brush)FindResource("TextOnAccentFillColorPrimaryBrush");
-        var accentText = (Brush)FindResource("AccentTextFillColorPrimaryBrush");
-        var muted = (Brush)FindResource("TextFillColorSecondaryBrush");
-        var stroke = (Brush)FindResource("ControlStrongStrokeColorDefaultBrush");
-        var divider = (Brush)FindResource("DividerStrokeColorDefaultBrush");
-        var normal = (Brush)FindResource("TextFillColorPrimaryBrush");
-
-        for (var i = 0; i < _steps.Count; i++)
-        {
-            var step = i + 1;
-            var (circle, glyph, label, item) = _steps[i];
-            // Shown as done only in order, so the steps never look like "2 done, 1 open"
-            var done = Enumerable.Range(1, step).All(IsStepDone);
-            var isCurrent = step == current;
-
-            if (done)
-            {
-                circle.Background = success;
-                circle.BorderBrush = success;
-                glyph.Text = ""; // check mark
-                glyph.FontFamily = (FontFamily)FindResource("IconFont");
-                glyph.FontSize = 14;
-                glyph.Foreground = onAccent;
-            }
-            else
-            {
-                circle.Background = Brushes.Transparent;
-                circle.BorderBrush = isCurrent ? accent : stroke;
-                glyph.Text = step.ToString();
-                glyph.ClearValue(TextBlock.FontFamilyProperty);
-                glyph.FontSize = 14;
-                glyph.Foreground = isCurrent ? accentText : muted;
-            }
-
-            label.FontWeight = isCurrent ? FontWeights.SemiBold : FontWeights.Normal;
-            label.Foreground = isCurrent || done ? normal : muted;
-            label.Text = StepLabel(step, skipped: step == 2 && !done && Settings.SetupLinksSkipped);
-
-            var reachable = step <= next;
-            item.Cursor = reachable && !isCurrent ? Cursors.Hand : null;
-            item.ToolTip = reachable && !isCurrent ? Loc.T("Home.StepGoTo") : null;
-
-            if (i < _stepLines.Count)
-                _stepLines[i].Background = done ? success : divider;
-        }
     }
 
     private void Next_Click(object sender, RoutedEventArgs e)
@@ -645,6 +261,16 @@ public partial class HomePage : UserControl
         _viewStep = null;
         RefreshAll();
     }
+
+    private void CompleteSetup()
+    {
+        Settings.SetupCompleted = true;
+        _viewStep = null;
+        _justCompleted = true;
+        RefreshAll();
+    }
+
+    // ---------- Test call (setup step 3) ----------
 
     private void SkipTest_Click(object sender, RoutedEventArgs e) => CompleteSetup();
 
@@ -672,13 +298,7 @@ public partial class HomePage : UserControl
         TestHelpPanel.Visibility = help ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    private void CompleteSetup()
-    {
-        Settings.SetupCompleted = true;
-        _viewStep = null;
-        _justCompleted = true;
-        RefreshAll();
-    }
+    // ---------- Dialing (test call and everyday use) ----------
 
     private void Hotkey_Click(object sender, RoutedEventArgs e) => MainWindow.ShowSingle(AppPage.Dialing, "Hotkey");
 

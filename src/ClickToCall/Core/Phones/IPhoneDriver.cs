@@ -1,4 +1,4 @@
-namespace ClickToCall.Core;
+namespace ClickToCall.Core.Phones;
 
 /// <summary>Everything that differs between phone manufacturers: recognizing their phones and talking to them.</summary>
 public interface IPhoneDriver
@@ -21,14 +21,4 @@ public interface IPhoneDriver
     string? UsageHint(string phoneHost);
 
     IPhoneClient CreateClient(PhoneConnection connection, TimeSpan? timeout = null);
-}
-
-public static class PhoneDrivers
-{
-    public static IReadOnlyList<IPhoneDriver> All { get; } = [new SnomDriver(), new YealinkDriver()];
-
-    public static IPhoneDriver For(PhoneVendor vendor) => All.First(d => d.Vendor == vendor);
-
-    public static IPhoneClient CreateClient(PhoneConnection connection, TimeSpan? timeout = null) =>
-        For(connection.Vendor).CreateClient(connection, timeout);
 }

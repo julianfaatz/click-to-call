@@ -1,4 +1,5 @@
 using ClickToCall.Core;
+using ClickToCall.Core.Phones;
 
 namespace ClickToCall.Tests;
 

@@ -4,63 +4,7 @@ using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Text;
 
-namespace ClickToCall.Core;
-
-/// <summary>Phone manufacturers the app can talk to. Stored in the settings, so never rename a value.</summary>
-public enum PhoneVendor
-{
-    Snom,
-    Yealink,
-}
-
-public sealed record PhoneConnection(
-    string Host, bool UseHttps, bool IgnoreCertificateErrors, string Username, string Password, PhoneVendor Vendor = PhoneVendor.Snom)
-{
-    public static PhoneConnection From(AppSettings s) =>
-        new(s.PhoneHost, s.UseHttps, s.IgnoreCertificateErrors, s.Username, s.Password, s.Vendor);
-}
-
-public enum PhoneErrorKind
-{
-    NotConfigured,
-    InvalidAddress,
-    Unreachable,
-    Timeout,
-    Unauthorized,
-    Forbidden,
-    Certificate,
-    HttpError,
-    /// <summary>The phone answers, but refuses remote control commands (Snom: "hidden tags").</summary>
-    RemoteControlBlocked,
-}
-
-public sealed class PhoneException(PhoneErrorKind kind, string? detail = null, Exception? inner = null)
-    : Exception(detail ?? kind.ToString(), inner)
-{
-    public PhoneErrorKind Kind { get; } = kind;
-    public string? Detail { get; } = detail;
-
-    public string UserMessage => Kind switch
-    {
-        PhoneErrorKind.HttpError => Loc.T("Error.HttpError", Detail ?? "?"),
-        PhoneErrorKind.InvalidAddress => Loc.T("Error.InvalidAddress", Detail ?? ""),
-        _ => Loc.T("Error." + Kind),
-    };
-}
-
-/// <summary>What the app needs from a phone. Create one with <see cref="PhoneDrivers.CreateClient"/>.</summary>
-public interface IPhoneClient : IDisposable
-{
-    Task DialAsync(string number, string? outgoingUri = null, CancellationToken ct = default);
-
-    Task HangUpAsync(CancellationToken ct = default);
-
-    /// <summary>Checks reachability and credentials. Returns the phone's model name for display.</summary>
-    Task<string> TestConnectionAsync(CancellationToken ct = default);
-
-    /// <summary>The phone's SIP identities (lines). Only called if <see cref="IPhoneDriver.CanReadIdentities"/>.</summary>
-    Task<IReadOnlyList<PhoneIdentity>> GetIdentitiesAsync(CancellationToken ct = default);
-}
+namespace ClickToCall.Core.Phones;
 
 /// <summary>
 /// Base for phones with an HTTP interface: Basic/Digest login, self-signed certificates and
