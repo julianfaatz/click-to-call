@@ -1,5 +1,6 @@
 using System.Text;
 using ClickToCall.Core;
+using ClickToCall.Core.Phones;
 
 namespace ClickToCall.Tests;
 
@@ -14,6 +15,7 @@ public class YealinkPhoneClientTests
     [InlineData("<title>Yealink SIP-T46U</title>", "Yealink T46U")]
     [InlineData("Yealink T54W Web", "Yealink T54W")]
     [InlineData("Copyright Yealink Network Technology", "Yealink")]
+    [InlineData("<script>var g_strFirmware = \"66.86.0.180\"; var g_phonetype = \"T48S\";</script>", "Yealink T48S")]
     public void Detects_yealink_phones(string probeText, string expectedModel) =>
         Assert.Equal(expectedModel, PhoneDrivers.For(PhoneVendor.Yealink).Detect(probeText));
 

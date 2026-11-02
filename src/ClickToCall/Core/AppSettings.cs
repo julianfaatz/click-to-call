@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
+using ClickToCall.Core.Phones;
 
 namespace ClickToCall.Core;
 

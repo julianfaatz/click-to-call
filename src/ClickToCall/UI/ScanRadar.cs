@@ -7,6 +7,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using ClickToCall.Core;
+using ClickToCall.Core.Phones;
 
 namespace ClickToCall.UI;
 

@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using ClickToCall.Core;
+using ClickToCall.Core.Phones;
 
 namespace ClickToCall.UI;
 

@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using ClickToCall.Core;
+using ClickToCall.Core.Phones;
 
 namespace ClickToCall.UI;
 
