@@ -22,7 +22,7 @@ Die App steuert das Telefon direkt im lokalen Netzwerk – ohne Server und ohne 
 - 📞 `tel:`-, `callto:`- und `sip:`-Links öffnen am Telefon (Browser, Outlook, CRM …)
 - ⌨️ Nummer markieren und <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>W</kbd> drücken – funktioniert auch in PDFs und E-Mails
 - Rufnummern werden aufbereitet: `+49 (0)30 123 456-78` → `03012345678`, optional mit Amtsholung
-- Rückfrage vor dem Wählen, Auflegen-Taste, Wahlwiederholung, Auswahl der Leitung
+- Rückfrage vor dem Wählen, Auflegen per Taste oder <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>, Wahlwiederholung, Auswahl der Leitung
 - Findet das Telefon selbst im Netzwerk
 - Läuft im Infobereich der Taskleiste, Updates per Klick
 - Deutsch und Englisch

@@ -54,6 +54,7 @@ public sealed class TrayIcon : IDisposable
         menu.Items.Add(new Forms.ToolStripMenuItem(Loc.T("Call.HangUp"), null, (_, _) => _ = _services.Calls.HangUpAsync())
         {
             Enabled = settings.IsPhoneConfigured,
+            ShortcutKeyDisplayString = settings.HangUpHotkeyEnabled ? settings.HangUpHotkey.ToString() : null,
         });
 
         menu.Items.Add(new Forms.ToolStripSeparator());

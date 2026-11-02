@@ -23,7 +23,7 @@ public sealed class AppServices : IDisposable
     public AppServices()
     {
         Tray = new TrayIcon(this);
-        Hotkeys.Pressed += (_, _) => _ = Calls.HandleHotkeyAsync();
+        Hotkeys.Pressed += action => _ = action == HotkeyAction.HangUp ? Calls.HangUpAsync() : Calls.HandleHotkeyAsync();
         Calls.SetupRequired += (_, _) =>
         {
             MainWindow.ShowSingle(AppPage.Home);
@@ -39,14 +39,14 @@ public sealed class AppServices : IDisposable
         };
     }
 
-    /// <summary>While the user records a new hotkey in the settings, the global hotkey must not fire.</summary>
+    /// <summary>While the user records a new hotkey in the settings, the global hotkeys must not fire.</summary>
     public bool HotkeyRecording
     {
         get => _hotkeyRecording;
         set
         {
             _hotkeyRecording = value;
-            RegisterHotkey();
+            RegisterHotkeys();
         }
     }
 
@@ -60,7 +60,7 @@ public sealed class AppServices : IDisposable
         settings.PropertyChanged += Settings_PropertyChanged;
         settings.Identities.CollectionChanged += (_, _) => ScheduleSave();
 
-        RegisterHotkey(notifyConflict: true);
+        RegisterHotkeys(notifyConflict: true);
         RegisterProtocols();
 
         // First update check shortly after start, then periodically
@@ -93,8 +93,9 @@ public sealed class AppServices : IDisposable
     {
         switch (e.PropertyName)
         {
-            case nameof(AppSettings.Hotkey) or nameof(AppSettings.HotkeyEnabled):
-                RegisterHotkey();
+            case nameof(AppSettings.Hotkey) or nameof(AppSettings.HotkeyEnabled)
+                or nameof(AppSettings.HangUpHotkey) or nameof(AppSettings.HangUpHotkeyEnabled):
+                RegisterHotkeys();
                 break;
             case nameof(AppSettings.HandleTel) or nameof(AppSettings.HandleCallto) or nameof(AppSettings.HandleSip):
                 RegisterProtocols();
@@ -120,19 +121,23 @@ public sealed class AppServices : IDisposable
         _saveTimer.Start();
     }
 
-    public void RegisterHotkey(bool notifyConflict = false)
+    public void RegisterHotkeys(bool notifyConflict = false)
     {
         var settings = SettingsStore.Current;
-        if (!settings.HotkeyEnabled || _hotkeyRecording)
+        foreach (var action in Enum.GetValues<HotkeyAction>())
         {
-            Hotkeys.Unregister();
-            return;
-        }
+            if (!settings.IsHotkeyEnabled(action) || _hotkeyRecording)
+            {
+                Hotkeys.Unregister(action);
+                continue;
+            }
 
-        if (!Hotkeys.Register(settings.Hotkey) && notifyConflict)
-        {
-            ToastWindow.ShowToast(Loc.T("Hotkey.InUseTitle"), Loc.T("Hotkey.InUseText", settings.Hotkey), ToastKind.Error,
-                TimeSpan.FromSeconds(15), new ToastAction(Loc.T("Home.Change"), () => MainWindow.ShowSingle(AppPage.Dialing, "Hotkey")));
+            var hotkey = settings.HotkeyFor(action);
+            if (!Hotkeys.Register(action, hotkey) && notifyConflict)
+            {
+                ToastWindow.ShowToast(Loc.T("Hotkey.InUseTitle"), Loc.T("Hotkey.InUseText", hotkey), ToastKind.Error,
+                    TimeSpan.FromSeconds(15), new ToastAction(Loc.T("Home.Change"), () => MainWindow.ShowSingle(AppPage.Dialing, "Hotkey")));
+            }
         }
     }
 

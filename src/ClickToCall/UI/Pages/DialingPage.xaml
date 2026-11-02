@@ -60,34 +60,25 @@
         </ui:SettingCard>
 
         <ui:SettingCard Icon="&#xE92E;" Title="{loc:Tr Hotkey.Combination}" Description="{loc:Tr Hotkey.BoxHint}" IsEnabled="{Binding HotkeyEnabled}">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBox x:Name="HotkeyBox"
-                             Width="170"
-                             IsReadOnly="True"
-                             IsReadOnlyCaretVisible="False"
-                             FontWeight="SemiBold"
-                             HorizontalContentAlignment="Center"
-                             Cursor="Hand"
-                             GotKeyboardFocus="HotkeyBox_GotKeyboardFocus"
-                             LostKeyboardFocus="HotkeyBox_LostKeyboardFocus"
-                             PreviewKeyDown="HotkeyBox_PreviewKeyDown" />
-                    <Button Margin="8,0,0,0" Click="ResetHotkey_Click" ToolTip="{loc:Tr Hotkey.Reset}">
-                        <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE7A7;" />
-                    </Button>
-                </StackPanel>
-                <TextBlock x:Name="HotkeyStatus" Margin="0,6,0,0" FontSize="12" MaxWidth="220" HorizontalAlignment="Left" TextWrapping="Wrap" />
-            </StackPanel>
+            <ui:HotkeyRecorder Action="Dial" />
         </ui:SettingCard>
 
         <ui:SettingCard Icon="&#xE77F;" Title="{loc:Tr Hotkey.ClipboardFallback}" Description="{loc:Tr Hotkey.ClipboardFallbackHelp}" IsEnabled="{Binding HotkeyEnabled}">
             <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding HotkeyUseClipboardFallback}" />
         </ui:SettingCard>
 
+        <ui:SettingCard Margin="0,16,0,4" Icon="&#xE778;" Title="{loc:Tr Hotkey.HangUpEnabled}" Description="{loc:Tr Hotkey.HangUpIntro}">
+            <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding HangUpHotkeyEnabled}" />
+        </ui:SettingCard>
+
+        <ui:SettingCard Icon="&#xE92E;" Title="{loc:Tr Hotkey.Combination}" Description="{loc:Tr Hotkey.BoxHint}" IsEnabled="{Binding HangUpHotkeyEnabled}">
+            <ui:HotkeyRecorder Action="HangUp" />
+        </ui:SettingCard>
+
         <!-- ===== Links ===== -->
         <TextBlock x:Name="LinksSection" Style="{StaticResource SectionHeader}" Text="{loc:Tr Protocols.Title}" />
 
-        <ui:SettingCard x:Name="DefaultAppCard" Icon="&#xE71B;" Title="{loc:Tr Protocols.DefaultTitle}">
+        <ui:SettingCard x:Name="DefaultAppCard" Icon="&#xE815;" Title="{loc:Tr Protocols.DefaultTitle}">
             <Button x:Name="DefaultAppButton" MinWidth="110" Click="OpenDefaultApps_Click" />
             <ui:SettingCard.Footer>
                 <Grid>

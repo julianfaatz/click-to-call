@@ -98,6 +98,24 @@ public sealed class AppSettings : ObservableObject
     private Hotkey _hotkey = Hotkey.Default;
     public Hotkey Hotkey { get => _hotkey; set => Set(ref _hotkey, value); }
 
+    private bool _hangUpHotkeyEnabled = true;
+    public bool HangUpHotkeyEnabled { get => _hangUpHotkeyEnabled; set => Set(ref _hangUpHotkeyEnabled, value); }
+
+    private Hotkey _hangUpHotkey = Hotkey.DefaultHangUp;
+    public Hotkey HangUpHotkey { get => _hangUpHotkey; set => Set(ref _hangUpHotkey, value); }
+
+    public bool IsHotkeyEnabled(HotkeyAction action) => action == HotkeyAction.HangUp ? HangUpHotkeyEnabled : HotkeyEnabled;
+
+    public Hotkey HotkeyFor(HotkeyAction action) => action == HotkeyAction.HangUp ? HangUpHotkey : Hotkey;
+
+    public void SetHotkey(HotkeyAction action, Hotkey hotkey)
+    {
+        if (action == HotkeyAction.HangUp)
+            HangUpHotkey = hotkey;
+        else
+            Hotkey = hotkey;
+    }
+
     /// <summary>When nothing is selected, prefill the dial window from the clipboard (if it looks like a number).</summary>
     private bool _hotkeyUseClipboardFallback;
     public bool HotkeyUseClipboardFallback { get => _hotkeyUseClipboardFallback; set => Set(ref _hotkeyUseClipboardFallback, value); }

@@ -187,6 +187,12 @@ public static class Loc
         ["Hotkey.ClipboardFallbackHelp"] = (
             "Ist nichts markiert, wird eine Nummer aus der Zwischenablage ins Wählfenster übernommen.",
             "If nothing is selected, a number from the clipboard is put into the dial window."),
+        ["Hotkey.HangUpEnabled"] = ("Auflegen per Tastenkombination", "Hang up with a key combination"),
+        ["Hotkey.HangUpIntro"] = (
+            "Beendet das Gespräch oder den Wählvorgang – egal, in welchem Programm du gerade bist.",
+            "Ends the call or the dialing – whichever application you are in."),
+        ["Hotkey.UsedForDial"] = ("Schon zum Wählen vergeben", "Already used for dialing"),
+        ["Hotkey.UsedForHangUp"] = ("Schon zum Auflegen vergeben", "Already used for hanging up"),
         ["Hotkey.InUseTitle"] = ("Hotkey nicht verfügbar", "Hotkey not available"),
         ["Hotkey.InUseText"] = (
             "{0} wird bereits von einem anderen Programm verwendet. Bitte wähle eine andere Tastenkombination.",
@@ -256,7 +262,6 @@ public static class Loc
         ["Home.Online"] = ("Verbunden", "Connected"),
         ["Home.Offline"] = ("Nicht erreichbar", "Not reachable"),
         ["Home.Checking"] = ("Prüfe Verbindung …", "Checking connection …"),
-        ["Home.ConnectedTitle"] = ("Telefon verbunden", "Phone connected"),
         ["Home.ConnectedText"] = ("{0} ist bereit.", "{0} is ready."),
         ["Home.HostRequired"] = ("Bitte die IP-Adresse des Telefons eingeben.", "Please enter the phone's IP address."),
         ["Home.Scan"] = ("Im Netzwerk suchen", "Search network"),
@@ -265,12 +270,20 @@ public static class Loc
         ["Home.ScanNetwork"] = ("Suche in {0} … {1} %", "Searching {0} … {1} %"),
         ["Home.ScanSpotted"] = ("{0} entdeckt – suche noch weiter …", "{0} spotted – still looking …"),
         ["Home.ScanSummary"] = ("{0} Netze durchsucht, {1} Geräte haben geantwortet.", "Searched {0} networks, {1} devices answered."),
-        ["Home.ScanFoundOne"] = ("Gefunden! Klicke auf dein Telefon, um es zu verbinden:", "Found it! Click your phone to connect:"),
-        ["Home.ScanFound"] = ("Mehrere Telefone gefunden – klicke auf deins:", "Several phones found – click yours:"),
-        ["Home.ScanNone"] = ("Kein Snom- oder Yealink-Telefon gefunden. Bitte die IP-Adresse oben eintragen.", "No Snom or Yealink phone found. Please enter the IP address above."),
+        ["Home.ScanFoundOne"] = ("Telefon gefunden – klicke es an, um es zu verbinden", "Phone found – click it to connect"),
+        ["Home.ScanFound"] = ("Mehrere Telefone gefunden – klicke auf deins", "Several phones found – click yours"),
+        ["Home.ScanNoneTitle"] = ("Kein Snom- oder Yealink-Telefon im Netzwerk gefunden", "No Snom or Yealink phone found on the network"),
+        ["Home.ScanConnectTip"] = ("{0} verbinden", "Connect {0}"),
+        ["Home.ManualLink"] = ("IP-Adresse manuell eingeben", "Enter IP address manually"),
+        ["Home.ManualTitle"] = ("IP-Adresse des Telefons", "The phone's IP address"),
+        ["Home.ConnectingTo"] = ("Verbinde mit {0} …", "Connecting to {0} …"),
+        ["Home.Back"] = ("Zurück", "Back"),
+        ["Home.VendorTitle"] = ("Welcher Hersteller?", "Which manufacturer?"),
         ["Home.VendorUnknown"] = (
-            "Unter dieser Adresse antwortet ein Gerät, der Hersteller wurde aber nicht erkannt. Bitte auswählen und erneut verbinden.",
-            "A device answers at this address, but its manufacturer was not recognized. Please select it and connect again."),
+            "Unter dieser Adresse antwortet ein Gerät, der Hersteller wurde aber nicht erkannt. Von wem ist dein Telefon?",
+            "A device answers at this address, but its manufacturer was not recognized. Who made your phone?"),
+        ["Home.LoginTitle"] = ("Anmeldung am Telefon", "Sign in to the phone"),
+        ["Home.SignIn"] = ("Anmelden", "Sign in"),
         ["Home.NeedsLogin"] = (
             "Dein Telefon ist passwortgeschützt. Bitte die Zugangsdaten der Web-Oberfläche eingeben (nicht die SIP-Daten).",
             "Your phone is password protected. Please enter the web interface credentials (not the SIP credentials)."),
@@ -298,7 +311,7 @@ public static class Loc
         ["Home.StepLinksWaiting"] = (
             "Noch nicht erkannt. Bitte in den Windows-Einstellungen bei TEL „Click to Call“ auswählen.",
             "Not detected yet. Please pick \"Click to Call\" for TEL in the Windows settings."),
-        ["Home.StepLinksDone"] = ("✓ Erledigt – Telefonnummern sind jetzt anklickbar.", "✓ Done – phone numbers are now clickable."),
+        ["Home.StepLinksDone"] = ("Erledigt – Telefonnummern sind jetzt anklickbar.", "Done – phone numbers are now clickable."),
         ["Home.StepLinksTodo"] = (
             "Öffnet die Windows-Einstellungen – dort bei TEL „Click to Call“ auswählen.",
             "Opens the Windows settings – pick \"Click to Call\" for TEL there."),
