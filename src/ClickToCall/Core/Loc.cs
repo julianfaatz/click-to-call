@@ -92,6 +92,9 @@ public static class Loc
         ["Dial.Cancel"] = ("Abbrechen (Esc)", "Cancel (Esc)"),
         ["Dial.Preview"] = ("Wird gewählt als: {0}", "Will be dialed as: {0}"),
         ["Dial.Recent"] = ("Zuletzt gewählt", "Recently dialed"),
+        ["Dial.NoSelection"] = (
+            "Keine markierte Nummer gefunden. Tippe sie hier ein – oder markiere sie und drücke dann {0}.",
+            "No selected number found. Type it here – or select it and then press {0}."),
 
         // ---------- Call ----------
         ["Call.InvalidTitle"] = ("Keine gültige Rufnummer", "Not a valid phone number"),
@@ -167,13 +170,25 @@ public static class Loc
             "Digit dialed before external numbers, e.g. 9. Leave empty if your phone system doesn't need one."),
         ["Dialing.OutsideLineFrom"] = ("Nur bei Nummern ab", "Only for numbers with at least"),
         ["Dialing.Digits"] = ("Ziffern – kürzere sind interne Durchwahlen", "digits – shorter ones are internal extensions"),
+        ["Dialing.ShowAdvanced"] = ("Erweiterte Einstellungen anzeigen", "Show advanced settings"),
+        ["Dialing.HideAdvanced"] = ("Erweiterte Einstellungen ausblenden", "Hide advanced settings"),
+        ["Dialing.AdvancedHint"] = (
+            "Link-Arten und wie Rufnummern umgewandelt werden, z. B. für eine Amtsholung.",
+            "Link types and how phone numbers are converted, e.g. for an outside line prefix."),
+        ["Dialing.ResetTitle"] = ("Auf Standard zurücksetzen", "Reset to defaults"),
+        ["Dialing.ResetText"] = (
+            "Setzt alle Einstellungen auf dieser Seite zurück – auch die Tastenkombinationen. Dein Telefon bleibt verbunden.",
+            "Resets all settings on this page – including the key combinations. Your phone stays connected."),
+        ["Dialing.ResetButton"] = ("Zurücksetzen", "Reset"),
+        ["Dialing.ResetDone"] = ("Alles wieder wie am Anfang.", "Everything is back to the defaults."),
+        ["Dialing.ResetUndo"] = ("Rückgängig", "Undo"),
         ["Dialing.TryIt"] = ("Ausprobieren: So wird eine Nummer gewählt", "Try it: this is how a number gets dialed"),
 
         // ---------- Hotkey ----------
-        ["Hotkey.Title"] = ("Hotkey", "Hotkey"),
+        ["Hotkey.Title"] = ("Tastenkombinationen", "Key combinations"),
         ["Hotkey.Intro"] = (
-            "Nummer in einem beliebigen Programm markieren und Tastenkombination drücken – das Telefon wählt (je nach Einstellung oben nach Rückfrage).",
-            "Select a number in any application and press the key combination – the phone dials (asking first, depending on the setting above)."),
+            "Nummer in einem beliebigen Programm markieren (z. B. mit der Maus darüberziehen) und die Tastenkombination drücken – schon wählt das Telefon.",
+            "Select a number in any application (e.g. drag the mouse over it) and press the key combination – and the phone dials."),
         ["Hotkey.Enabled"] = ("Wählen per Tastenkombination", "Dial with a key combination"),
         ["Hotkey.Combination"] = ("Tastenkombination", "Key combination"),
         ["Hotkey.BoxHint"] = ("Ins Feld klicken und die neue Kombination drücken.", "Click the box and press the new combination."),
@@ -183,6 +198,9 @@ public static class Loc
         ["Hotkey.Saved"] = ("Gespeichert", "Saved"),
         ["Hotkey.InUse"] = ("Wird schon von einem anderen Programm verwendet", "Already used by another application"),
         ["Hotkey.NeedModifier"] = ("Bitte mit Strg, Alt oder Win kombinieren", "Please combine with Ctrl, Alt or Win"),
+        ["Hotkey.BlocksCharacter"] = (
+            "Damit tippst du „{0}“ – bitte eine andere Kombination wählen",
+            "This types \"{0}\" – please choose another combination"),
         ["Hotkey.ClipboardFallback"] = ("Kopierte Nummer übernehmen", "Use a copied number"),
         ["Hotkey.ClipboardFallbackHelp"] = (
             "Ist nichts markiert, wird eine Nummer aus der Zwischenablage ins Wählfenster übernommen.",
@@ -193,13 +211,15 @@ public static class Loc
             "Ends the call or the dialing – whichever application you are in."),
         ["Hotkey.UsedForDial"] = ("Schon zum Wählen vergeben", "Already used for dialing"),
         ["Hotkey.UsedForHangUp"] = ("Schon zum Auflegen vergeben", "Already used for hanging up"),
-        ["Hotkey.InUseTitle"] = ("Hotkey nicht verfügbar", "Hotkey not available"),
+        ["Hotkey.InUseTitle"] = ("Tastenkombination nicht verfügbar", "Key combination not available"),
         ["Hotkey.InUseText"] = (
             "{0} wird bereits von einem anderen Programm verwendet. Bitte wähle eine andere Tastenkombination.",
             "{0} is already used by another application. Please choose a different combination."),
 
         // ---------- Links ----------
-        ["Protocols.Title"] = ("Links", "Links"),
+        ["Protocols.Title"] = ("Telefon-Links", "Phone links"),
+        ["Protocols.TypesTitle"] = ("Link-Arten", "Link types"),
+        ["Protocols.TypesText"] = ("Welche Arten von Links Click to Call öffnet.", "Which kinds of links Click to Call opens."),
         ["Protocols.DefaultTitle"] = ("Telefon-Links mit Click to Call öffnen", "Open phone links with Click to Call"),
         ["Protocols.Tel"] = ("Telefonnummern auf Webseiten, in E-Mails, im CRM", "Phone numbers on websites, in e-mails, in CRMs"),
         ["Protocols.Callto"] = ("Ältere Variante, z. B. in manchen CRM-Systemen", "Older variant, e.g. in some CRM systems"),
@@ -214,8 +234,8 @@ public static class Loc
         ["General.LanguageSystem"] = ("Wie Windows", "Same as Windows"),
         ["General.Autostart"] = ("Mit Windows starten", "Start with Windows"),
         ["General.AutostartHelp"] = (
-            "Damit Links und Hotkey nach jedem Neustart sofort funktionieren. Die App startet unsichtbar im Infobereich.",
-            "So that links and the hotkey work right after every restart. The app starts hidden in the notification area."),
+            "Damit Telefon-Links und Tastenkombination nach jedem Neustart sofort funktionieren. Die App startet unsichtbar im Infobereich.",
+            "So that phone links and the key combination work right after every restart. The app starts hidden in the notification area."),
         ["General.Installed"] = ("Installiert: Version {0}", "Installed: version {0}"),
         ["General.UpdatesTitle"] = ("Updates", "Updates"),
         ["General.CheckUpdates"] = ("Automatisch nach neuen Versionen suchen", "Automatically check for new versions"),
@@ -292,7 +312,7 @@ public static class Loc
             "Dein Telefon hat mehrere Leitungen (Identitäten). Hier legst du fest, über welche standardmäßig gewählt wird.",
             "Your phone has several lines (identities). Choose which one is used for dialing by default."),
         ["Home.SetupTitle"] = ("Einrichtung", "Setup"),
-        ["Home.SetupSubtitle"] = ("In drei Schritten startklar – dauert etwa eine Minute.", "Ready in three steps – takes about a minute."),
+        ["Home.SetupSubtitle"] = ("In vier Schritten startklar – dauert etwa zwei Minuten.", "Ready in four steps – takes about two minutes."),
         ["Home.Next"] = ("Weiter", "Next"),
         ["Home.SkipStep"] = ("Überspringen", "Skip"),
         ["Home.Skipped"] = ("(übersprungen)", "(skipped)"),
@@ -315,6 +335,31 @@ public static class Loc
         ["Home.StepLinksTodo"] = (
             "Öffnet die Windows-Einstellungen – dort bei TEL „Click to Call“ auswählen.",
             "Opens the Windows settings – pick \"Click to Call\" for TEL there."),
+        ["Home.StepHotkeyShort"] = ("Tastenkombination", "Key combination"),
+        ["Home.StepHotkey"] = ("Nummern aus jedem Programm wählen", "Dial numbers from any application"),
+        ["Home.StepHotkeyText"] = (
+            "Aus E-Mails, PDFs oder Webseiten wählst du mit einer Tastenkombination. Probier es gleich hier aus – es wird niemand angerufen.",
+            "Dial from e-mails, PDFs or web pages with a key combination. Try it right here – nobody will be called."),
+        ["Home.StepHotkeySample"] = ("Max Mustermann\nMustermann GmbH\nTel. 030 12345678", "Max Mustermann\nMustermann GmbH\nPhone 030 12345678"),
+        ["Home.StepHotkeyHow1"] = (
+            "Nummer markieren: linke Maustaste gedrückt halten und über die Nummer ziehen",
+            "Select the number: hold down the left mouse button and drag over the number"),
+        ["Home.StepHotkeyHow2"] = ("Diese Tasten gleichzeitig drücken:", "Press these keys at the same time:"),
+        ["Home.StepHotkeyNothing"] = (
+            "Es war nichts markiert. Linke Maustaste gedrückt halten und über die Nummer ziehen, bis sie farbig hinterlegt ist – dann noch einmal {0} drücken.",
+            "Nothing was selected. Hold down the left mouse button and drag over the number until it is highlighted – then press {0} again."),
+        ["Home.StepHotkeyPartial"] = (
+            "Fast! Markiert war nur „{0}“. Bitte die ganze Nummer markieren und noch einmal {1} drücken.",
+            "Almost! Only \"{0}\" was selected. Please select the whole number and press {1} again."),
+        ["Home.StepHotkeyOff"] = ("Das Wählen per Tastenkombination ist ausgeschaltet.", "Dialing with a key combination is turned off."),
+        ["Home.TurnOn"] = ("Einschalten", "Turn on"),
+        ["Home.StepHotkeySuccessTitle"] = ("Klasse, genau so geht's!", "Great, that's exactly how it works!"),
+        ["Home.StepHotkeySuccessConfirm"] = (
+            "Erkannt: {0}. In anderen Programmen erscheint jetzt ein kleines Fenster mit der Nummer – Enter drücken, und dein Telefon wählt.",
+            "Recognized: {0}. In other applications a small window with the number appears now – press Enter and your phone dials."),
+        ["Home.StepHotkeySuccessDirect"] = (
+            "Erkannt: {0}. In anderen Programmen wählt dein Telefon jetzt sofort.",
+            "Recognized: {0}. In other applications your phone now dials right away."),
         ["Home.StepTest"] = ("Testanruf", "Test call"),
         ["Home.TestQuestion"] = ("Wählt dein Telefon jetzt {0}?", "Is your phone dialing {0} now?"),
         ["Home.TestYes"] = ("Ja, es wählt", "Yes, it's dialing"),
@@ -345,8 +390,8 @@ public static class Loc
         ["Home.HotkeyOff"] = ("Ausgeschaltet", "Turned off"),
         ["Home.TrayTitle"] = ("Immer griffbereit in der Taskleiste", "Always at hand in the taskbar"),
         ["Home.TrayDescription"] = (
-            "Rechtsklick auf das Symbol unten rechts: Nummer wählen, Wahlwiederholung, Auflegen – auch wenn dieses Fenster zu ist.",
-            "Right-click the icon in the bottom right corner: dial, redial, hang up – even when this window is closed."),
+            "Rechtsklick auf das Symbol unten rechts (evtl. hinter dem Pfeil ˄): Nummer wählen, Wahlwiederholung, Auflegen – auch wenn dieses Fenster zu ist.",
+            "Right-click the icon in the bottom right corner (maybe behind the ˄ arrow): dial, redial, hang up – even when this window is closed."),
         ["Home.Call"] = ("Anrufen", "Call"),
 
         // ---------- Tray ----------
@@ -356,12 +401,13 @@ public static class Loc
         ["Tray.Open"] = ("Click to Call öffnen", "Open Click to Call"),
         ["Tray.CheckUpdates"] = ("Nach Updates suchen", "Check for updates"),
         ["Tray.Exit"] = ("Beenden", "Exit"),
+        ["Tray.Tooltip"] = ("Click to Call – Nummer markieren, {0} drücken", "Click to Call – select a number, press {0}"),
 
         // ---------- Ready ----------
         ["Ready.Title"] = ("Click to Call läuft weiter", "Click to Call keeps running"),
         ["Ready.Background"] = (
-            "Die App wartet unten rechts im Infobereich der Taskleiste. Links und Hotkey funktionieren weiter.",
-            "The app waits in the notification area of the taskbar. Links and the hotkey keep working."),
+            "Die App wartet unten rechts in der Taskleiste (evtl. hinter dem Pfeil ˄). Telefon-Links und Tastenkombination funktionieren weiter.",
+            "The app waits in the bottom right corner of the taskbar (maybe behind the ˄ arrow). Phone links and the key combination keep working."),
     };
 }
 

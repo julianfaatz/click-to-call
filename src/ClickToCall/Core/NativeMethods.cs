@@ -6,7 +6,9 @@ internal static class NativeMethods
 {
     public const int WM_HOTKEY = 0x0312;
     public const uint MOD_NOREPEAT = 0x4000;
+    public const uint MAPVK_VK_TO_VSC = 0;
     public const uint MAPVK_VK_TO_CHAR = 2;
+    public const uint TOUNICODE_KEEP_STATE = 0x4; // don't change the keyboard state (dead keys), Windows 10 1607+
     public const int ASFW_ANY = -1;
 
     public const uint INPUT_KEYBOARD = 1;
@@ -17,6 +19,8 @@ internal static class NativeMethods
     public const int VK_MENU = 0x12;
     public const int VK_LWIN = 0x5B;
     public const int VK_RWIN = 0x5C;
+    public const int VK_LCONTROL = 0xA2;
+    public const int VK_RMENU = 0xA5;
 
     [DllImport("user32.dll", SetLastError = true)]
     public static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
@@ -29,6 +33,12 @@ internal static class NativeMethods
 
     [DllImport("user32.dll")]
     public static extern short GetAsyncKeyState(int vKey);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetKeyboardLayout(uint idThread);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    public static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState, [Out] char[] pwszBuff, int cchBuff, uint wFlags, IntPtr dwhkl);
 
     [DllImport("user32.dll", SetLastError = true)]
     public static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);

@@ -102,6 +102,7 @@ public sealed class SetupStepper : Grid
     {
         1 => Loc.T("Home.StepPhone"),
         2 => Loc.T("Home.StepLinksShort") + (progress.LinksSkipped ? " " + Loc.T("Home.Skipped") : ""),
+        3 => Loc.T("Home.StepHotkeyShort") + (progress.HotkeySkipped ? " " + Loc.T("Home.Skipped") : ""),
         _ => Loc.T("Home.StepTest"),
     };
 

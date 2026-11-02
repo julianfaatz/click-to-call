@@ -72,7 +72,7 @@ Andere Programme oder Skripte rufen die App einfach mit der Nummer auf:
 | „Das Telefon verweigert den Zugriff“ | Benutzer braucht Admin-Rechte, HTTP-Steuerung muss erlaubt sein. |
 | Yealink wählt nicht | Beim ersten Anruf am Telefon „Fernsteuerung erlauben“ bestätigen. Oder PC-IP unter *Features → Remote Control* → **Action URI Allow IP List** eintragen. |
 | Klick auf tel:-Link macht nichts | *Wählen → Links* aktivieren und in Windows „Click to Call“ für **TEL** auswählen. |
-| Hotkey geht nicht | Unter *Wählen → Hotkey* eine andere Kombination wählen. |
+| Tastenkombination geht nicht | Unter *Wählen → Tastenkombinationen* eine andere Kombination wählen. |
 
 Immer noch Probleme? In der App *Allgemein → Fehler melden* oder ein [Issue](https://github.com/julianfaatz/click-to-call/issues/new/choose) öffnen. Einstellungen und Protokoll liegen in `%APPDATA%\ClickToCall`.
 

@@ -116,8 +116,9 @@ public sealed class AppSettings : ObservableObject
             Hotkey = hotkey;
     }
 
-    /// <summary>When nothing is selected, prefill the dial window from the clipboard (if it looks like a number).</summary>
-    private bool _hotkeyUseClipboardFallback;
+    /// <summary>When nothing is selected, prefill the dial window from the clipboard (if it looks like a number).
+    /// On by default: many people copy a number instead of only selecting it, and it is never dialed without the dial window.</summary>
+    private bool _hotkeyUseClipboardFallback = true;
     public bool HotkeyUseClipboardFallback { get => _hotkeyUseClipboardFallback; set => Set(ref _hotkeyUseClipboardFallback, value); }
 
     // ---------- Protocols ----------
@@ -155,6 +156,14 @@ public sealed class AppSettings : ObservableObject
     private bool _setupLinksSkipped;
     public bool SetupLinksSkipped { get => _setupLinksSkipped; set => Set(ref _setupLinksSkipped, value); }
 
+    /// <summary>The user tried the hotkey in the setup step that practices it.</summary>
+    private bool _setupHotkeyTried;
+    public bool SetupHotkeyTried { get => _setupHotkeyTried; set => Set(ref _setupHotkeyTried, value); }
+
+    /// <summary>The user skipped the hotkey practice step.</summary>
+    private bool _setupHotkeySkipped;
+    public bool SetupHotkeySkipped { get => _setupHotkeySkipped; set => Set(ref _setupHotkeySkipped, value); }
+
     // ---------- Window ----------
 
     /// <summary>Last size of the app window (0 = default size).</summary>
@@ -174,6 +183,41 @@ public sealed class AppSettings : ObservableObject
 
     [JsonIgnore]
     public bool IsPhoneConfigured => !string.IsNullOrWhiteSpace(PhoneHost);
+
+    /// <summary>
+    /// Everything on the "Dialing" page back to the defaults: confirmation, notification, hotkeys, link types and
+    /// number formatting. The phone, its lines, the language and the setup progress stay.
+    /// </summary>
+    public void ResetDialingSettings() => CopyDialingSettingsFrom(new AppSettings { OwnCountryCode = CountryCodeForRegion() });
+
+    /// <summary>Takes over the settings of the "Dialing" page, e.g. to undo <see cref="ResetDialingSettings"/>.</summary>
+    public void CopyDialingSettingsFrom(AppSettings other)
+    {
+        ConfirmLinkCalls = other.ConfirmLinkCalls;
+        ConfirmHotkeyCalls = other.ConfirmHotkeyCalls;
+        ShowCallNotification = other.ShowCallNotification;
+        NotificationSeconds = other.NotificationSeconds;
+        ShowIdentitySelection = other.ShowIdentitySelection;
+
+        // Hotkeys off first: with swapped combinations one would still hold the other's keys while it is registered
+        HotkeyEnabled = false;
+        HangUpHotkeyEnabled = false;
+        Hotkey = other.Hotkey;
+        HangUpHotkey = other.HangUpHotkey;
+        HotkeyEnabled = other.HotkeyEnabled;
+        HangUpHotkeyEnabled = other.HangUpHotkeyEnabled;
+        HotkeyUseClipboardFallback = other.HotkeyUseClipboardFallback;
+
+        HandleTel = other.HandleTel;
+        HandleCallto = other.HandleCallto;
+        HandleSip = other.HandleSip;
+
+        ConvertOwnCountryCode = other.ConvertOwnCountryCode;
+        OwnCountryCode = other.OwnCountryCode;
+        ConvertPlusToZeros = other.ConvertPlusToZeros;
+        OutsideLinePrefix = other.OutsideLinePrefix;
+        OutsideLineMinLength = other.OutsideLineMinLength;
+    }
 
     public void AddRecentNumber(string number, int max = 20)
     {

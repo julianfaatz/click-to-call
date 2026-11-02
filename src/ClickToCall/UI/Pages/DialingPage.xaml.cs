@@ -6,11 +6,12 @@ using ClickToCall.Core;
 
 namespace ClickToCall.UI.Pages;
 
-/// <summary>Everything about dialing: confirmation, notification, hotkey, link types and number formatting.</summary>
+/// <summary>Everything about dialing: confirmation, notification, hotkeys, links; link types and number formatting under "advanced".</summary>
 public partial class DialingPage : UserControl, ISectionPage
 {
     private static readonly int[] SecondOptions = [5, 10, 15, 30, 60];
     private Window? _window; // Window.GetWindow() is already null in Unloaded
+    private AppSettings? _beforeReset; // for "undo"
 
     public DialingPage()
     {
@@ -23,6 +24,7 @@ public partial class DialingPage : UserControl, ISectionPage
                 _window.Activated += Window_Activated;
 
             FillSecondOptions();
+            ShowAdvanced(AdvancedPanel.IsVisible);
             IdentityCard.Visibility = Settings.Identities.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             RefreshLinkStatus();
             UpdateFormatting();
@@ -33,6 +35,8 @@ public partial class DialingPage : UserControl, ISectionPage
             if (_window is not null)
                 _window.Activated -= Window_Activated;
             _window = null;
+            _beforeReset = null;
+            ResetDonePanel.Visibility = Visibility.Collapsed;
         };
     }
 
@@ -45,7 +49,26 @@ public partial class DialingPage : UserControl, ISectionPage
         else if (section == "Links")
             LinksSection.BringIntoView(new Rect(0, 0, 1, 400));
         else if (section == "Numbers")
+        {
+            ShowAdvanced(true);
             NumbersSection.BringIntoView(new Rect(0, 0, 1, 400));
+        }
+    }
+
+    // ---------- Advanced ----------
+
+    private void AdvancedToggle_Click(object sender, RoutedEventArgs e)
+    {
+        ShowAdvanced(!AdvancedPanel.IsVisible);
+        if (AdvancedPanel.IsVisible)
+            Dispatcher.BeginInvoke(() => AdvancedPanel.BringIntoView(new Rect(0, 0, 1, 200)), System.Windows.Threading.DispatcherPriority.Loaded);
+    }
+
+    private void ShowAdvanced(bool show)
+    {
+        AdvancedPanel.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        AdvancedToggleText.Text = Loc.T(show ? "Dialing.HideAdvanced" : "Dialing.ShowAdvanced");
+        AdvancedToggleIcon.Text = show ? "" : ""; // chevron up / down
     }
 
     private void Settings_PropertyChanged(object? sender, PropertyChangedEventArgs e) => UpdateFormatting();
@@ -56,6 +79,29 @@ public partial class DialingPage : UserControl, ISectionPage
     {
         var options = SecondOptions.Contains(Settings.NotificationSeconds) ? SecondOptions : [.. SecondOptions, Settings.NotificationSeconds];
         SecondsBox.ItemsSource = options.Order().ToDictionary(s => s, s => Loc.T("Dialing.SecondsOption", s));
+    }
+
+    // ---------- Reset ----------
+
+    private void Reset_Click(object sender, RoutedEventArgs e)
+    {
+        _beforeReset = Settings.Clone();
+        Settings.ResetDialingSettings();
+        FillSecondOptions();
+        RefreshLinkStatus();
+
+        StatusText.Set(ResetDoneText, Loc.T("Dialing.ResetDone"), StatusText.Kind.Success);
+        ResetDonePanel.Visibility = Visibility.Visible;
+    }
+
+    private void UndoReset_Click(object sender, RoutedEventArgs e)
+    {
+        if (_beforeReset is not null)
+            Settings.CopyDialingSettingsFrom(_beforeReset);
+        _beforeReset = null;
+        FillSecondOptions();
+        RefreshLinkStatus();
+        ResetDonePanel.Visibility = Visibility.Collapsed;
     }
 
     // ---------- Links ----------

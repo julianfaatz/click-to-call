@@ -39,24 +39,62 @@ public sealed record Hotkey(HotkeyModifiers Modifiers, uint VirtualKey)
             or Key.RightShift or Key.LWin or Key.RWin or Key.System or Key.None)
             return null;
 
+        return new Hotkey(FromWpf(modifiers), (uint)KeyInterop.VirtualKeyFromKey(key));
+    }
+
+    /// <summary>
+    /// The character this combination types in the current keyboard layout: Ctrl + Alt is AltGr, e.g. @ for Q or € for E
+    /// on German keyboards. As a hotkey it would make that character impossible to type. Null if it types nothing.
+    /// </summary>
+    public string? BlockedCharacter()
+    {
+        if ((Modifiers & ~HotkeyModifiers.Shift) != (HotkeyModifiers.Control | HotkeyModifiers.Alt))
+            return null;
+
+        var state = new byte[256];
+        foreach (var vk in new[] { NativeMethods.VK_CONTROL, NativeMethods.VK_MENU, NativeMethods.VK_LCONTROL, NativeMethods.VK_RMENU })
+            state[vk] = 0x80;
+        if (Modifiers.HasFlag(HotkeyModifiers.Shift))
+            state[NativeMethods.VK_SHIFT] = 0x80;
+
+        var buffer = new char[4];
+        var scanCode = NativeMethods.MapVirtualKey(VirtualKey, NativeMethods.MAPVK_VK_TO_VSC);
+        var count = NativeMethods.ToUnicodeEx(VirtualKey, scanCode, state, buffer, buffer.Length,
+            NativeMethods.TOUNICODE_KEEP_STATE, NativeMethods.GetKeyboardLayout(0));
+        if (count < 0)
+            count = 1; // dead key (e.g. ~ before a letter): blocked as well
+
+        var text = new string(buffer, 0, Math.Min(count, buffer.Length));
+        // Without an AltGr character Windows returns nothing or a control character (Ctrl + W = 0x17)
+        return text.Length == 0 || text.Any(char.IsControl) || string.IsNullOrWhiteSpace(text) ? null : text;
+    }
+
+    public override string ToString() => string.Join(" + ", Keys());
+
+    /// <summary>The keys to press, e.g. "Ctrl", "Alt", "W" – to show them as keyboard keys.</summary>
+    public List<string> Keys() => [.. ModifierNames(Modifiers), KeyName(VirtualKey)];
+
+    /// <summary>Modifiers held down so far while recording a new combination, e.g. "Ctrl + Alt + …".</summary>
+    public static string PartialText(ModifierKeys modifiers) => string.Join(" + ", [.. ModifierNames(FromWpf(modifiers)), "…"]);
+
+    private static HotkeyModifiers FromWpf(ModifierKeys modifiers)
+    {
         var mods = HotkeyModifiers.None;
         if (modifiers.HasFlag(ModifierKeys.Control)) mods |= HotkeyModifiers.Control;
         if (modifiers.HasFlag(ModifierKeys.Alt)) mods |= HotkeyModifiers.Alt;
         if (modifiers.HasFlag(ModifierKeys.Shift)) mods |= HotkeyModifiers.Shift;
         if (modifiers.HasFlag(ModifierKeys.Windows)) mods |= HotkeyModifiers.Win;
-
-        return new Hotkey(mods, (uint)KeyInterop.VirtualKeyFromKey(key));
+        return mods;
     }
 
-    public override string ToString()
+    private static List<string> ModifierNames(HotkeyModifiers modifiers)
     {
         var parts = new List<string>();
-        if (Modifiers.HasFlag(HotkeyModifiers.Control)) parts.Add(Loc.T("Key.Ctrl"));
-        if (Modifiers.HasFlag(HotkeyModifiers.Alt)) parts.Add("Alt");
-        if (Modifiers.HasFlag(HotkeyModifiers.Shift)) parts.Add(Loc.T("Key.Shift"));
-        if (Modifiers.HasFlag(HotkeyModifiers.Win)) parts.Add("Win");
-        parts.Add(KeyName(VirtualKey));
-        return string.Join(" + ", parts);
+        if (modifiers.HasFlag(HotkeyModifiers.Control)) parts.Add(Loc.T("Key.Ctrl"));
+        if (modifiers.HasFlag(HotkeyModifiers.Alt)) parts.Add("Alt");
+        if (modifiers.HasFlag(HotkeyModifiers.Shift)) parts.Add(Loc.T("Key.Shift"));
+        if (modifiers.HasFlag(HotkeyModifiers.Win)) parts.Add("Win");
+        return parts;
     }
 
     private static string KeyName(uint virtualKey)

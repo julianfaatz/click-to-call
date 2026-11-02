@@ -74,7 +74,7 @@ Other programs or scripts just call the app with the number:
 | “The phone denied access” | The user needs admin rights and HTTP control must be allowed. |
 | Yealink does not dial | Confirm “Allow remote control” on the phone at the first call. Or add the PC's IP under *Features → Remote Control* → **Action URI Allow IP List**. |
 | Clicking a tel: link does nothing | Enable *Dialing → Links* and pick “Click to Call” for **TEL** in Windows. |
-| Hotkey does not work | Choose a different combination under *Dialing → Hotkey*. |
+| Key combination does not work | Choose a different combination under *Dialing → Key combinations*. |
 
 Still stuck? Use *General → Report a problem* in the app or open an [issue](https://github.com/julianfaatz/click-to-call/issues/new/choose). Settings and the log are in `%APPDATA%\ClickToCall`.
 

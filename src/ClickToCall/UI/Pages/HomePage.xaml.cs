@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using ClickToCall.Core;
 using ClickToCall.Core.Phones;
 using ClickToCall.Services;
@@ -39,6 +40,8 @@ public partial class HomePage : UserControl
             _window = Window.GetWindow(this);
             if (_window is not null)
                 _window.Activated += Window_Activated;
+            if (App.Services is not null)
+                App.Services.Calls.HotkeyPractice = HotkeyPractice;
         };
         Unloaded += (_, _) =>
         {
@@ -48,6 +51,8 @@ public partial class HomePage : UserControl
                 _window.Activated -= Window_Activated;
             _window = null;
             _statusCts?.Cancel();
+            if (App.Services?.Calls.HotkeyPractice == HotkeyPractice)
+                App.Services.Calls.HotkeyPractice = null;
         };
     }
 
@@ -90,8 +95,8 @@ public partial class HomePage : UserControl
         var hint = configured ? PhoneDrivers.For(Settings.Vendor).UsageHint(Settings.PhoneHost) : null;
         PhoneHintTip.Help = hint ?? "";
         PhoneHintTip.Visibility = hint is null ? Visibility.Collapsed : Visibility.Visible;
-        Step3HintText.Text = hint ?? "";
-        Step3Hint.Visibility = hint is null || TestHelpPanel.IsVisible ? Visibility.Collapsed : Visibility.Visible;
+        TestHintText.Text = hint ?? "";
+        TestHint.Visibility = hint is null || TestHelpPanel.IsVisible ? Visibility.Collapsed : Visibility.Visible;
         TestHelpVendor.Text = hint ?? "";
         TestHelpVendor.Visibility = hint is null ? Visibility.Collapsed : Visibility.Visible;
 
@@ -202,6 +207,7 @@ public partial class HomePage : UserControl
     private bool _justConnected;
     private bool _justCompleted;
     private bool _linksSettingsOpened;
+    private string? _practiceHint; // what went wrong at the last hotkey practice
 
     private void GoToStep(int step)
     {
@@ -210,6 +216,7 @@ public partial class HomePage : UserControl
             return; // steps can only be done in order
         _viewStep = step == next ? null : step;
         _justConnected = false;
+        _practiceHint = null;
         RefreshAll();
     }
 
@@ -231,7 +238,8 @@ public partial class HomePage : UserControl
         Step1Next.Visibility = current == 1 && Settings.IsPhoneConfigured && !ConnectForm.IsOpen ? Visibility.Visible : Visibility.Collapsed;
         ConnectedNote.Visibility = _justConnected ? Visibility.Visible : Visibility.Collapsed;
         Step2Card.Visibility = current == 2 ? Visibility.Visible : Visibility.Collapsed;
-        Step3Card.Visibility = current == 3 ? Visibility.Visible : Visibility.Collapsed;
+        HotkeyStepCard.Visibility = current == 3 ? Visibility.Visible : Visibility.Collapsed;
+        TestCard.Visibility = current == 4 ? Visibility.Visible : Visibility.Collapsed;
 
         if (!ready)
             Stepper.Update(progress, current);
@@ -245,6 +253,8 @@ public partial class HomePage : UserControl
         Step2NextButton.Visibility = linksDone ? Visibility.Visible : Visibility.Collapsed;
         Step2SkipButton.Visibility = linksDone ? Visibility.Collapsed : Visibility.Visible;
         Step2Button.Content = Loc.T(_linksSettingsOpened ? "Home.StepLinksButtonAgain" : "Home.StepLinksButton");
+
+        RefreshHotkeyStep();
 
         // Everyday use
         LinksTip.Description = Loc.T(linksDone ? "Home.LinksActive" : "Home.StepLinksTodo");
@@ -268,7 +278,9 @@ public partial class HomePage : UserControl
         {
             if (Step2Card.IsVisible)
                 (Step2NextButton.IsVisible ? Step2NextButton : Step2Button).Focus();
-            else if (Step3Card.IsVisible)
+            else if (HotkeyStepCard.IsVisible)
+                (HotkeyNextButton.IsVisible ? HotkeyNextButton : (Control)PracticeBox).Focus();
+            else if (TestCard.IsVisible)
                 TestNumberBox.Focus();
         }, System.Windows.Threading.DispatcherPriority.Input);
     }
@@ -291,6 +303,131 @@ public partial class HomePage : UserControl
         FocusStepAction();
     }
 
+    // ---------- Practicing the hotkey (setup step 3) ----------
+
+    /// <summary>The number in the practice text. Never dialed: the hotkey is taken over while this step is shown.</summary>
+    private const string PracticeNumber = "030 12345678";
+
+    private void RefreshHotkeyStep()
+    {
+        var tried = Settings.SetupHotkeyTried;
+        ShowKeys(HotkeyKeys, Settings.Hotkey);
+
+        HotkeySuccess.Visibility = tried ? Visibility.Visible : Visibility.Collapsed;
+        HotkeyNextButton.Visibility = tried ? Visibility.Visible : Visibility.Collapsed;
+        HotkeySkipButton.Visibility = tried ? Visibility.Collapsed : Visibility.Visible;
+        var practiceNumber = PhoneNumberNormalizer.Normalize(PracticeNumber, NormalizationOptions.From(Settings));
+        HotkeySuccessText.Text = Loc.T(Settings.ConfirmHotkeyCalls ? "Home.StepHotkeySuccessConfirm" : "Home.StepHotkeySuccessDirect", practiceNumber);
+
+        // Off or taken by another application: practicing makes no sense, say why and offer the fix
+        var registered = App.Services?.Hotkeys.IsRegistered(HotkeyAction.Dial) ?? true;
+        string? problem = tried ? null : _practiceHint, button = null;
+        if (!Settings.HotkeyEnabled)
+            (problem, button) = (Loc.T("Home.StepHotkeyOff"), Loc.T("Home.TurnOn"));
+        else if (!registered)
+            (problem, button) = (Loc.T("Hotkey.InUseText", Settings.Hotkey), Loc.T("Home.Change"));
+        HotkeyProblem.Visibility = problem is null ? Visibility.Collapsed : Visibility.Visible;
+        HotkeyProblemText.Text = problem ?? "";
+        HotkeyProblemButton.Content = button;
+        HotkeyProblemButton.Visibility = button is null ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    /// <summary>The key combination as keyboard keys: [Ctrl] + [Alt] + [W].</summary>
+    private static void ShowKeys(Panel target, Hotkey hotkey)
+    {
+        target.Children.Clear();
+        foreach (var key in hotkey.Keys())
+        {
+            if (target.Children.Count > 0)
+                target.Children.Add(new TextBlock { Text = "+", Margin = new Thickness(6, 0, 6, 0), VerticalAlignment = VerticalAlignment.Center });
+
+            var cap = new Border
+            {
+                MinWidth = 30,
+                Padding = new Thickness(8, 3, 8, 3),
+                CornerRadius = new CornerRadius(4),
+                BorderThickness = new Thickness(1, 1, 1, 3),
+                Child = new TextBlock { Text = key, FontWeight = FontWeights.SemiBold, HorizontalAlignment = HorizontalAlignment.Center },
+            };
+            cap.SetResourceReference(Border.BackgroundProperty, "ControlFillColorDefaultBrush");
+            cap.SetResourceReference(Border.BorderBrushProperty, "ControlStrongStrokeColorDefaultBrush");
+            target.Children.Add(cap);
+        }
+    }
+
+    /// <summary>Gets the selection when the hotkey is pressed while this step is in front – instead of dialing.</summary>
+    private bool HotkeyPractice(string selection)
+    {
+        if (_window?.IsActive != true || !HotkeyStepCard.IsVisible || Settings.SetupHotkeyTried)
+            return false;
+
+        var options = NormalizationOptions.From(Settings);
+        var found = PhoneNumberNormalizer.ExtractFromText(selection);
+        if (found.Length > 0 && PhoneNumberNormalizer.Normalize(found, options) == PhoneNumberNormalizer.Normalize(PracticeNumber, options))
+        {
+            Settings.SetupHotkeyTried = true;
+            _viewStep = 3; // stay here to see it worked, "Next" goes on
+            _practiceHint = null;
+            RefreshSetup();
+            Celebrate(HotkeySuccess);
+            _ = Dispatcher.BeginInvoke(() => HotkeyNextButton.Focus(), System.Windows.Threading.DispatcherPriority.Input);
+            return true;
+        }
+
+        _practiceHint = found.Length == 0
+            ? Loc.T("Home.StepHotkeyNothing", Settings.Hotkey)
+            : Loc.T("Home.StepHotkeyPartial", found, Settings.Hotkey);
+        RefreshSetup();
+        Nudge(HotkeyProblem);
+        return true;
+    }
+
+    private void HotkeyProblem_Click(object sender, RoutedEventArgs e)
+    {
+        if (!Settings.HotkeyEnabled)
+            Settings.HotkeyEnabled = true; // registered right away, the step refreshes itself
+        else
+            MainWindow.ShowSingle(AppPage.Dialing, "Hotkey");
+    }
+
+    private void SkipHotkey_Click(object sender, RoutedEventArgs e)
+    {
+        Settings.SetupHotkeySkipped = true;
+        _viewStep = null;
+        _practiceHint = null;
+        RefreshAll();
+        FocusStepAction();
+    }
+
+    /// <summary>A little pop for the success message – unless animations are turned off in Windows.</summary>
+    private static void Celebrate(FrameworkElement element)
+    {
+        if (!SystemParameters.ClientAreaAnimation)
+            return;
+
+        var scale = new ScaleTransform(0.9, 0.9);
+        element.RenderTransformOrigin = new Point(0.5, 0.5);
+        element.RenderTransform = scale;
+        var pop = new DoubleAnimation(0.9, 1, TimeSpan.FromMilliseconds(600)) { EasingFunction = new ElasticEase { Oscillations = 2, Springiness = 6 } };
+        scale.BeginAnimation(ScaleTransform.ScaleXProperty, pop);
+        scale.BeginAnimation(ScaleTransform.ScaleYProperty, pop);
+        element.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(200)));
+    }
+
+    /// <summary>A short shake: "not quite" – noticeable also when the same hint is shown again.</summary>
+    private static void Nudge(FrameworkElement element)
+    {
+        if (!SystemParameters.ClientAreaAnimation)
+            return;
+
+        var shift = new TranslateTransform();
+        element.RenderTransform = shift;
+        var shake = new DoubleAnimationUsingKeyFrames { Duration = TimeSpan.FromMilliseconds(360) };
+        foreach (var (x, ms) in new[] { (-6.0, 60), (6.0, 140), (-3.0, 220), (3.0, 290), (0.0, 360) })
+            shake.KeyFrames.Add(new EasingDoubleKeyFrame(x, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(ms))));
+        shift.BeginAnimation(TranslateTransform.XProperty, shake);
+    }
+
     private void CompleteSetup()
     {
         Settings.SetupCompleted = true;
@@ -299,7 +436,7 @@ public partial class HomePage : UserControl
         RefreshAll();
     }
 
-    // ---------- Test call (setup step 3) ----------
+    // ---------- Test call (setup step 4) ----------
 
     private void SkipTest_Click(object sender, RoutedEventArgs e) => CompleteSetup();
 
