@@ -4,93 +4,117 @@
              xmlns:loc="clr-namespace:ClickToCall.Core"
              xmlns:ui="clr-namespace:ClickToCall.UI"
              Visibility="Collapsed">
+    <UserControl.Resources>
+        <Style x:Key="ViewTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="ViewText" TargetType="TextBlock" BasedOn="{StaticResource CardDescription}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,4,0,0" />
+        </Style>
+        <Style x:Key="FieldHeader" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,16,0,6" />
+        </Style>
+        <Style x:Key="Message" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,12,0,0" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="AutomationProperties.LiveSetting" Value="Polite" />
+        </Style>
+    </UserControl.Resources>
+
+    <!-- One view at a time, each with one question and one main action: search, address, login, manufacturer -->
     <StackPanel Margin="0,20,0,0">
         <Border Margin="-24,0,-24,20" Style="{StaticResource Divider}" />
 
-        <Grid>
+        <!-- The phone being connected, above the login and the manufacturer selection -->
+        <Grid x:Name="TargetBar" Margin="0,0,0,20" Visibility="Collapsed">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="150" />
-                <ColumnDefinition Width="*" MaxWidth="320" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
-            <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Tr Phone.Host}" />
-            <TextBox x:Name="HostBox" Grid.Column="1" KeyDown="FormBox_KeyDown" />
-            <Button x:Name="ScanButton"
-                    Grid.Column="2"
-                    Margin="12,0,0,0"
+            <Button x:Name="BackButton"
+                    Margin="0,0,12,0"
+                    Padding="8,6"
                     VerticalAlignment="Center"
-                    Style="{StaticResource LinkButton}"
-                    Click="Scan_Click">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Margin="0,0,6,0" VerticalAlignment="Center" FontFamily="{StaticResource IconFont}" Text="&#xE721;" />
-                    <TextBlock x:Name="ScanButtonText" VerticalAlignment="Center" Text="{loc:Tr Home.Scan}" />
-                </StackPanel>
+                    Click="Back_Click"
+                    ToolTip="{loc:Tr Home.Back}"
+                    AutomationProperties.Name="{loc:Tr Home.Back}">
+                <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE72B;" />
             </Button>
-            <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="2,6,0,0" Style="{StaticResource Hint}" Text="{loc:Tr Phone.HostHelp}" />
-
-            <ui:PhoneScanPanel x:Name="ScanPanel" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,12,0,0" />
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal">
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" FontFamily="{StaticResource IconFont}" FontSize="16" Text="&#xE717;" />
+                <TextBlock x:Name="TargetModel" VerticalAlignment="Center" FontWeight="SemiBold" />
+                <TextBlock x:Name="TargetAddress"
+                           Margin="8,0,0,0"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
         </Grid>
 
-        <!-- Only shown when the manufacturer could not be recognized, or to change it later -->
-        <Grid x:Name="VendorPanel" Margin="0,16,0,0" Visibility="Collapsed">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="150" />
-                <ColumnDefinition Width="*" MaxWidth="320" />
-            </Grid.ColumnDefinitions>
-            <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Tr Phone.Vendor}" />
-            <ComboBox x:Name="VendorBox" Grid.Column="1" DisplayMemberPath="Name" />
+        <Grid x:Name="Views">
+            <!-- Search the network -->
+            <ui:PhoneScanPanel x:Name="SearchView" />
+
+            <!-- Enter the address -->
+            <StackPanel x:Name="ManualView" Visibility="Collapsed">
+                <TextBlock x:Name="ManualTitle" Style="{StaticResource ViewTitle}" />
+                <TextBlock Style="{StaticResource ViewText}" Text="{loc:Tr Phone.HostHelp}" />
+
+                <TextBlock Style="{StaticResource FieldHeader}" Text="{loc:Tr Phone.Host}" />
+                <TextBox x:Name="HostBox" Width="280" HorizontalAlignment="Left" KeyDown="HostBox_KeyDown" />
+
+                <!-- Only to change it later; a new phone is recognized automatically -->
+                <StackPanel x:Name="VendorPanel" Visibility="Collapsed">
+                    <TextBlock Style="{StaticResource FieldHeader}" Text="{loc:Tr Phone.Vendor}" />
+                    <ComboBox x:Name="VendorBox" Width="280" HorizontalAlignment="Left" DisplayMemberPath="Name" />
+                </StackPanel>
+
+                <StackPanel Margin="0,20,0,0" Orientation="Horizontal">
+                    <Button x:Name="ManualConnectButton"
+                            MinWidth="110"
+                            Style="{DynamicResource AccentButtonStyle}"
+                            Click="ManualConnect_Click"
+                            Content="{loc:Tr Home.DoConnect}" />
+                    <Button Margin="24,0,0,0"
+                            VerticalAlignment="Center"
+                            Style="{StaticResource LinkButton}"
+                            Click="Scan_Click"
+                            Content="{loc:Tr Home.Scan}" />
+                </StackPanel>
+                <TextBlock x:Name="ManualMessage" Style="{StaticResource Message}" />
+            </StackPanel>
+
+            <!-- Log in to the phone's web interface -->
+            <StackPanel x:Name="LoginView" Visibility="Collapsed">
+                <TextBlock Style="{StaticResource ViewTitle}" Text="{loc:Tr Home.LoginTitle}" />
+                <TextBlock Style="{StaticResource ViewText}" Text="{loc:Tr Home.NeedsLogin}" />
+
+                <TextBlock Style="{StaticResource FieldHeader}" Text="{loc:Tr Phone.Username}" />
+                <TextBox x:Name="UserBox" Width="280" HorizontalAlignment="Left" KeyDown="LoginBox_KeyDown" />
+                <TextBlock Style="{StaticResource FieldHeader}" Text="{loc:Tr Phone.Password}" />
+                <PasswordBox x:Name="PasswordBox" Width="280" HorizontalAlignment="Left" KeyDown="LoginBox_KeyDown" />
+
+                <Button x:Name="LoginButton"
+                        Margin="0,20,0,0"
+                        MinWidth="110"
+                        HorizontalAlignment="Left"
+                        Style="{DynamicResource AccentButtonStyle}"
+                        Click="Login_Click"
+                        Content="{loc:Tr Home.SignIn}" />
+                <TextBlock x:Name="LoginMessage" Style="{StaticResource Message}" />
+            </StackPanel>
+
+            <!-- The manufacturer was not recognized -->
+            <StackPanel x:Name="VendorView" Visibility="Collapsed">
+                <TextBlock Style="{StaticResource ViewTitle}" Text="{loc:Tr Home.VendorTitle}" />
+                <TextBlock Style="{StaticResource ViewText}" Text="{loc:Tr Home.VendorUnknown}" />
+                <StackPanel x:Name="VendorButtons" Margin="0,20,0,0" Orientation="Horizontal" />
+                <TextBlock x:Name="VendorMessage" Style="{StaticResource Message}" />
+            </StackPanel>
         </Grid>
-
-        <!-- Only shown when the phone asks for a login -->
-        <StackPanel x:Name="CredentialsPanel" Margin="0,16,0,0" Visibility="Collapsed">
-            <Border Margin="0,0,0,12"
-                    Padding="12,10"
-                    CornerRadius="4"
-                    Background="{DynamicResource SystemFillColorAttentionBackgroundBrush}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Margin="0,1,10,0" FontFamily="{StaticResource IconFont}" Text="&#xE72E;" />
-                    <TextBlock Grid.Column="1" TextWrapping="Wrap" Text="{loc:Tr Home.NeedsLogin}" />
-                </Grid>
-            </Border>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150" />
-                    <ColumnDefinition Width="*" MaxWidth="320" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="8" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <TextBlock Style="{StaticResource FieldLabel}" Text="{loc:Tr Phone.Username}" />
-                <TextBox x:Name="UserBox" Grid.Column="1" KeyDown="FormBox_KeyDown" />
-                <TextBlock Grid.Row="2" Style="{StaticResource FieldLabel}" Text="{loc:Tr Phone.Password}" />
-                <PasswordBox x:Name="PasswordBox" Grid.Row="2" Grid.Column="1" KeyDown="FormBox_KeyDown" />
-            </Grid>
-        </StackPanel>
-
-        <StackPanel Margin="150,16,0,0" Orientation="Horizontal">
-            <Button x:Name="DoConnectButton"
-                    MinWidth="110"
-                    Style="{DynamicResource AccentButtonStyle}"
-                    Click="Connect_Click"
-                    Content="{loc:Tr Home.DoConnect}" />
-            <Button x:Name="CancelConnectButton"
-                    MinWidth="90"
-                    Margin="8,0,0,0"
-                    Click="Cancel_Click"
-                    Content="{loc:Tr Common.Cancel}" />
-        </StackPanel>
-        <TextBlock x:Name="ConnectMessage" Margin="150,10,0,0" TextWrapping="Wrap" Visibility="Collapsed" />
     </StackPanel>
 </UserControl>

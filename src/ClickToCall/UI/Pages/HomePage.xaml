@@ -85,6 +85,8 @@
                             <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE72C;" />
                         </Button>
                         <Button x:Name="ChangeButton" Click="ShowConnectForm_Click" Content="{loc:Tr Home.Change}" />
+                        <!-- Same place as "Change": closes the connect form again -->
+                        <Button x:Name="CancelChangeButton" Click="CancelChange_Click" Content="{loc:Tr Common.Cancel}" />
                     </StackPanel>
                 </Grid>
 
@@ -105,9 +107,19 @@
                 <!-- Connect form -->
                 <ui:PhoneConnectForm x:Name="ConnectForm" />
 
-                <!-- Setup: phone already connected, user came back to step 1 -->
-                <StackPanel x:Name="Step1Next" Margin="76,20,0,0" Orientation="Horizontal" Visibility="Collapsed">
-                    <Button MinWidth="110" Style="{DynamicResource AccentButtonStyle}" Click="Next_Click" Content="{loc:Tr Home.Next}" />
+                <!-- Setup: phone connected (just now, or the user came back to step 1) -->
+                <StackPanel x:Name="Step1Next" Margin="76,20,0,0" Visibility="Collapsed">
+                    <TextBlock x:Name="ConnectedNote"
+                               Margin="0,0,0,16"
+                               TextWrapping="Wrap"
+                               Visibility="Collapsed"
+                               AutomationProperties.LiveSetting="Polite" />
+                    <Button x:Name="Step1NextButton"
+                            MinWidth="110"
+                            HorizontalAlignment="Left"
+                            Style="{DynamicResource AccentButtonStyle}"
+                            Click="Next_Click"
+                            Content="{loc:Tr Home.Next}" />
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -120,7 +132,28 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Border Style="{StaticResource StepIconCircle}">
-                    <TextBlock Style="{StaticResource StepIcon}" Text="&#xE71B;" />
+                    <!-- A phone number link being clicked -->
+                    <Canvas Width="56" Height="56">
+                        <TextBlock Canvas.Left="6"
+                                   Canvas.Top="13"
+                                   FontFamily="{StaticResource IconFont}"
+                                   FontSize="14"
+                                   Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                   Text="&#xE717;" />
+                        <TextBlock Canvas.Left="22"
+                                   Canvas.Top="7"
+                                   FontSize="17"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                   TextDecorations="Underline"
+                                   Text="123" />
+                        <TextBlock Canvas.Left="25"
+                                   Canvas.Top="27"
+                                   FontFamily="{StaticResource IconFont}"
+                                   FontSize="24"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                   Text="&#xE815;" />
+                    </Canvas>
                 </Border>
                 <StackPanel Grid.Column="1">
                     <TextBlock Style="{StaticResource StepTitle}" Text="{loc:Tr Home.StepLinks}" />
@@ -143,11 +176,7 @@
                     </StackPanel>
 
                     <!-- Already done (user came back to this step) -->
-                    <TextBlock x:Name="Step2Done"
-                               Margin="0,20,0,0"
-                               Foreground="{DynamicResource SystemFillColorSuccessBrush}"
-                               Text="{loc:Tr Home.StepLinksDone}"
-                               Visibility="Collapsed" />
+                    <TextBlock x:Name="Step2Done" Margin="0,20,0,0" Visibility="Collapsed" />
 
                     <TextBlock x:Name="Step2Waiting"
                                Margin="0,16,0,0"
@@ -255,7 +284,7 @@
                                FontFamily="{StaticResource IconFont}"
                                FontSize="16"
                                Foreground="{DynamicResource SystemFillColorSuccessBrush}"
-                               Text="&#xE930;" />
+                               Text="&#xEC61;" />
                     <StackPanel Grid.Column="1">
                         <TextBlock FontWeight="SemiBold" Text="{loc:Tr Home.DoneTitle}" />
                         <TextBlock Margin="0,2,0,0" TextWrapping="Wrap" Text="{loc:Tr Home.DoneText}" />
@@ -272,7 +301,7 @@
                 </StackPanel>
             </ui:SettingCard>
 
-            <ui:SettingCard x:Name="LinksTip" Icon="&#xE71B;" Title="{loc:Tr Home.LinksTitle}">
+            <ui:SettingCard x:Name="LinksTip" Icon="&#xE815;" Title="{loc:Tr Home.LinksTitle}">
                 <Button x:Name="LinksTipButton" MinWidth="110" Style="{DynamicResource AccentButtonStyle}" Click="Links_Click" Content="{loc:Tr Home.LinksSet}" />
             </ui:SettingCard>
 

@@ -24,7 +24,7 @@ The screenshots show the German UI; the app is also available in English.
 - 📞 `tel:`, `callto:` and `sip:` links open on the phone (browser, Outlook, CRM …)
 - ⌨️ Select a number and press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>W</kbd> – works in PDFs and e-mails, too
 - Numbers are normalized: `+49 (0)30 123 456-78` → `03012345678`, optionally with an outside line prefix
-- Confirmation before dialing, hang-up button, redial, line selection
+- Confirmation before dialing, hang up by button or <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>, redial, line selection
 - Finds the phone on the network by itself
 - Runs in the notification area, one-click updates
 - German and English

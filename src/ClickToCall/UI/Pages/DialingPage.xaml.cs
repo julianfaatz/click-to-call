@@ -24,7 +24,6 @@ public partial class DialingPage : UserControl, ISectionPage
 
             FillSecondOptions();
             IdentityCard.Visibility = Settings.Identities.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-            ShowHotkey();
             RefreshLinkStatus();
             UpdateFormatting();
         };
@@ -57,76 +56,6 @@ public partial class DialingPage : UserControl, ISectionPage
     {
         var options = SecondOptions.Contains(Settings.NotificationSeconds) ? SecondOptions : [.. SecondOptions, Settings.NotificationSeconds];
         SecondsBox.ItemsSource = options.Order().ToDictionary(s => s, s => Loc.T("Dialing.SecondsOption", s));
-    }
-
-    // ---------- Hotkey ----------
-
-    private void ShowHotkey()
-    {
-        HotkeyBox.Text = Settings.Hotkey.ToString();
-        var available = App.Services?.Hotkeys.IsAvailable(Settings.Hotkey) ?? true;
-        StatusText.Set(HotkeyStatus,
-            Loc.T(available ? "Hotkey.Available" : "Hotkey.InUse"),
-            available ? StatusText.Kind.Success : StatusText.Kind.Error);
-    }
-
-    // While recording, the active global hotkey must not fire
-    private void HotkeyBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-    {
-        if (App.Services is not null)
-            App.Services.HotkeyRecording = true;
-        HotkeyStatus.Text = Loc.T("Hotkey.Recording");
-        HotkeyStatus.ClearValue(TextBlock.ForegroundProperty);
-    }
-
-    private void HotkeyBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-    {
-        if (App.Services is not null)
-            App.Services.HotkeyRecording = false;
-        ShowHotkey();
-    }
-
-    private void HotkeyBox_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        e.Handled = true;
-        var key = e.Key == Key.System ? e.SystemKey : e.Key;
-
-        if (key is Key.Tab)
-        {
-            MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-            return;
-        }
-
-        if (key is Key.Escape)
-        {
-            Keyboard.ClearFocus();
-            return;
-        }
-
-        var hotkey = Hotkey.FromWpf(Keyboard.Modifiers, key);
-        if (hotkey is null)
-            return; // only a modifier so far
-
-        // Shift alone would swallow e.g. the capital letter system wide
-        if ((hotkey.Modifiers & ~HotkeyModifiers.Shift) == HotkeyModifiers.None)
-        {
-            StatusText.Set(HotkeyStatus, Loc.T("Hotkey.NeedModifier"), StatusText.Kind.Error);
-            return;
-        }
-
-        Settings.Hotkey = hotkey;
-        HotkeyBox.Text = hotkey.ToString();
-
-        var available = App.Services?.Hotkeys.IsAvailable(hotkey) ?? true;
-        StatusText.Set(HotkeyStatus,
-            Loc.T(available ? "Hotkey.Saved" : "Hotkey.InUse"),
-            available ? StatusText.Kind.Success : StatusText.Kind.Error);
-    }
-
-    private void ResetHotkey_Click(object sender, RoutedEventArgs e)
-    {
-        Settings.Hotkey = Hotkey.Default;
-        ShowHotkey();
     }
 
     // ---------- Links ----------

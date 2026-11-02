@@ -22,6 +22,7 @@ public partial class HomePage : UserControl
     public HomePage()
     {
         InitializeComponent();
+        StatusText.Set(Step2Done, Loc.T("Home.StepLinksDone"), StatusText.Kind.Success);
         ConnectForm.Connected += ConnectForm_Connected;
         ConnectForm.Cancelled += RefreshAll;
         Stepper.StepClicked += GoToStep;
@@ -83,6 +84,7 @@ public partial class HomePage : UserControl
         StatusPill.Visibility = configured ? Visibility.Visible : Visibility.Collapsed;
         ChangeButton.Visibility = configured && !ConnectForm.IsOpen ? Visibility.Visible : Visibility.Collapsed;
         RecheckButton.Visibility = configured && !ConnectForm.IsOpen ? Visibility.Visible : Visibility.Collapsed;
+        CancelChangeButton.Visibility = configured && ConnectForm.IsOpen ? Visibility.Visible : Visibility.Collapsed;
 
         // e.g. Yealink: the PC has to be allowed to control the phone
         var hint = configured ? PhoneDrivers.For(Settings.Vendor).UsageHint(Settings.PhoneHost) : null;
@@ -163,18 +165,27 @@ public partial class HomePage : UserControl
 
     private void ShowConnectForm_Click(object sender, RoutedEventArgs e) => OpenConnectForm();
 
+    private void CancelChange_Click(object sender, RoutedEventArgs e) => ConnectForm.Cancel();
+
     private void OpenConnectForm()
     {
+        _justConnected = false;
         ConnectForm.Open();
         RefreshAll();
     }
 
     private async void ConnectForm_Connected(ConnectResult result)
     {
-        _viewStep = null; // continue with the next setup step
+        // During the setup: confirm it right here and let the user go on with "Next" (and pick a line first if there are several)
+        if (!SetupProgress.Current().IsReady)
+        {
+            _viewStep = 1;
+            _justConnected = true;
+            StatusText.Set(ConnectedNote, Loc.T("Home.ConnectedText", result.Model), StatusText.Kind.Success);
+            _ = Dispatcher.BeginInvoke(() => Step1NextButton.Focus(), System.Windows.Threading.DispatcherPriority.Input);
+        }
         RefreshAll();
         SetStatus(PhoneState.Online);
-        ToastWindow.ShowToast(Loc.T("Home.ConnectedTitle"), Loc.T("Home.ConnectedText", result.Model), ToastKind.Success, TimeSpan.FromSeconds(5));
 
         await PhoneSetup.LoadIdentitiesAsync();
         RefreshLines();
@@ -188,6 +199,7 @@ public partial class HomePage : UserControl
 
     /// <summary>Step the user explicitly went back to (null = the next open step).</summary>
     private int? _viewStep;
+    private bool _justConnected;
     private bool _justCompleted;
     private bool _linksSettingsOpened;
 
@@ -197,6 +209,7 @@ public partial class HomePage : UserControl
         if (step > next)
             return; // steps can only be done in order
         _viewStep = step == next ? null : step;
+        _justConnected = false;
         RefreshAll();
     }
 
@@ -216,6 +229,7 @@ public partial class HomePage : UserControl
 
         PhoneCard.Visibility = ready || current == 1 ? Visibility.Visible : Visibility.Collapsed;
         Step1Next.Visibility = current == 1 && Settings.IsPhoneConfigured && !ConnectForm.IsOpen ? Visibility.Visible : Visibility.Collapsed;
+        ConnectedNote.Visibility = _justConnected ? Visibility.Visible : Visibility.Collapsed;
         Step2Card.Visibility = current == 2 ? Visibility.Visible : Visibility.Collapsed;
         Step3Card.Visibility = current == 3 ? Visibility.Visible : Visibility.Collapsed;
 
@@ -242,7 +256,21 @@ public partial class HomePage : UserControl
     private void Next_Click(object sender, RoutedEventArgs e)
     {
         _viewStep = null;
+        _justConnected = false;
         RefreshAll();
+        FocusStepAction();
+    }
+
+    /// <summary>Keyboard focus to the main action of the step now shown – the clicked button is gone.</summary>
+    private void FocusStepAction()
+    {
+        _ = Dispatcher.BeginInvoke(() =>
+        {
+            if (Step2Card.IsVisible)
+                (Step2NextButton.IsVisible ? Step2NextButton : Step2Button).Focus();
+            else if (Step3Card.IsVisible)
+                TestNumberBox.Focus();
+        }, System.Windows.Threading.DispatcherPriority.Input);
     }
 
     private void Links_Click(object sender, RoutedEventArgs e)
@@ -260,6 +288,7 @@ public partial class HomePage : UserControl
         Settings.SetupLinksSkipped = true;
         _viewStep = null;
         RefreshAll();
+        FocusStepAction();
     }
 
     private void CompleteSetup()

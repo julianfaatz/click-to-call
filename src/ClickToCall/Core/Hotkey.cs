@@ -13,11 +13,23 @@ public enum HotkeyModifiers : uint
     Win = 0x8,
 }
 
+/// <summary>What a global hotkey does.</summary>
+public enum HotkeyAction
+{
+    Dial,
+    HangUp,
+}
+
 /// <summary>A global hotkey: modifiers plus a Win32 virtual key code.</summary>
 public sealed record Hotkey(HotkeyModifiers Modifiers, uint VirtualKey)
 {
     /// <summary>Ctrl + Alt + W ("Wählen").</summary>
     public static Hotkey Default { get; } = new(HotkeyModifiers.Control | HotkeyModifiers.Alt, 0x57);
+
+    /// <summary>Ctrl + Alt + A ("Auflegen"). Not Q, E or M: Ctrl + Alt is AltGr on German keyboards (@, €, µ).</summary>
+    public static Hotkey DefaultHangUp { get; } = new(HotkeyModifiers.Control | HotkeyModifiers.Alt, 0x41);
+
+    public static Hotkey DefaultFor(HotkeyAction action) => action == HotkeyAction.HangUp ? DefaultHangUp : Default;
 
     public bool IsValid => VirtualKey != 0 && Modifiers != HotkeyModifiers.None;
 

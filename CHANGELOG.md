@@ -8,10 +8,14 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 
 ### Hinzugefügt
 
+- Auflegen per Tastenkombination (Standard <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>) – funktioniert in jedem Programm, lässt sich unter *Wählen → Hotkey* ändern oder abschalten und steht im Menü des Infobereichs
 - Das Protokoll hält fest, woran das manuelle Verbinden scheitert und welche Geräte die Telefonsuche gefunden, aber nicht als Telefon erkannt hat (Server, Login, Seitentitel) – damit lassen sich nicht erkannte Telefone eingrenzen
 
 ### Geändert
 
+- Telefon verbinden: Statt eines immer länger werdenden Formulars zeigt die Einrichtung eine Ansicht nach der anderen – Suche, IP-Adresse, Anmeldung, Hersteller. Gefundene Telefone erscheinen schon während der Suche als Kacheln, die Anmeldung erscheint an Ort und Stelle statt unterhalb des Radars, Fehler stehen direkt an der Aktion. Nach dem Verbinden bestätigt die Karte den Erfolg und es geht mit „Weiter“ zum nächsten Schritt
+- Erfolgs- und Fehlermeldungen zeigen ein Windows-Symbol statt „✓“ / „✗“
+- Neues Symbol für „Telefonnummern anklickbar machen“: eine unterstrichene Nummer, auf die getippt wird
 - Yealink T4xS (z. B. T48S): Die Erkennung nutzt zusätzlich die Modellangabe der Weboberfläche, falls die Startseite „Yealink“ nicht nennt
 
 ## [0.9.3] - 2026-10-24
