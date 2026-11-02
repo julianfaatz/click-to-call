@@ -5,10 +5,13 @@ namespace ClickToCall.Tests;
 
 public class SetupProgressTests
 {
-    private static AppSettings Settings(bool phone = false, bool linksSkipped = false, bool completed = false) => new()
+    private static AppSettings Settings(bool phone = false, bool linksSkipped = false, bool hotkeyTried = false,
+        bool hotkeySkipped = false, bool completed = false) => new()
     {
         PhoneHost = phone ? "192.168.1.50" : "",
         SetupLinksSkipped = linksSkipped,
+        SetupHotkeyTried = hotkeyTried,
+        SetupHotkeySkipped = hotkeySkipped,
         SetupCompleted = completed,
     };
 
@@ -32,13 +35,32 @@ public class SetupProgressTests
     }
 
     [Fact]
-    public void Skipped_links_lead_to_the_test_call_but_do_not_count_as_done()
+    public void Skipped_links_lead_to_the_hotkey_but_do_not_count_as_done()
     {
         var progress = new SetupProgress(Settings(phone: true, linksSkipped: true), linksDone: false);
 
         Assert.Equal(3, progress.NextOpenStep);
         Assert.True(progress.LinksSkipped);
         Assert.False(progress.IsDone(2));
+    }
+
+    [Fact]
+    public void Continues_with_the_test_call_once_the_hotkey_was_tried()
+    {
+        var progress = new SetupProgress(Settings(phone: true, hotkeyTried: true), linksDone: true);
+
+        Assert.Equal(4, progress.NextOpenStep);
+        Assert.True(progress.IsDone(3));
+    }
+
+    [Fact]
+    public void Skipped_hotkey_leads_to_the_test_call_but_does_not_count_as_done()
+    {
+        var progress = new SetupProgress(Settings(phone: true, hotkeySkipped: true), linksDone: true);
+
+        Assert.Equal(4, progress.NextOpenStep);
+        Assert.True(progress.HotkeySkipped);
+        Assert.False(progress.IsDone(3));
     }
 
     [Fact]
@@ -53,9 +75,9 @@ public class SetupProgressTests
     [Fact]
     public void Is_ready_after_the_test_call()
     {
-        var progress = new SetupProgress(Settings(phone: true, completed: true), linksDone: true);
+        var progress = new SetupProgress(Settings(phone: true, hotkeyTried: true, completed: true), linksDone: true);
 
         Assert.True(progress.IsReady);
-        Assert.True(progress.IsDone(3));
+        Assert.True(progress.IsDone(4));
     }
 }

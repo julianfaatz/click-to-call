@@ -14,10 +14,23 @@ public partial class HotkeyRecorder : UserControl
     public HotkeyRecorder()
     {
         InitializeComponent();
-        Loaded += (_, _) => ShowCurrent();
+        Loaded += (_, _) =>
+        {
+            Settings.PropertyChanged += Settings_PropertyChanged;
+            ShowCurrent();
+        };
+        Unloaded += (_, _) => Settings.PropertyChanged -= Settings_PropertyChanged;
+        IsEnabledChanged += (_, _) => ShowCurrent(); // the hotkey was switched on or off
     }
 
     private static AppSettings Settings => SettingsStore.Current;
+
+    // Changed elsewhere, e.g. reset to the defaults – not while the user is recording here
+    private void Settings_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(AppSettings.Hotkey) or nameof(AppSettings.HangUpHotkey) && !Box.IsKeyboardFocused)
+            ShowCurrent();
+    }
 
     private HotkeyAction Other => Action == HotkeyAction.Dial ? HotkeyAction.HangUp : HotkeyAction.Dial;
 
@@ -30,6 +43,20 @@ public partial class HotkeyRecorder : UserControl
 
     private void ShowAvailability(Hotkey hotkey, string okKey)
     {
+        // Switched off: "active" would be wrong, "in use" irrelevant
+        if (!IsEnabled)
+        {
+            StatusText.Set(Status, "", StatusText.Kind.Neutral);
+            return;
+        }
+
+        // e.g. Ctrl + Alt + Q from an older version or the defaults on another keyboard layout
+        if (hotkey.BlockedCharacter() is { } blocked)
+        {
+            StatusText.Set(Status, Loc.T("Hotkey.BlocksCharacter", blocked), StatusText.Kind.Error);
+            return;
+        }
+
         var available = App.Services?.Hotkeys.IsAvailable(hotkey) ?? true;
         StatusText.Set(Status, Loc.T(available ? okKey : "Hotkey.InUse"), available ? StatusText.Kind.Success : StatusText.Kind.Error);
     }
@@ -68,7 +95,10 @@ public partial class HotkeyRecorder : UserControl
 
         var hotkey = Hotkey.FromWpf(Keyboard.Modifiers, key);
         if (hotkey is null)
-            return; // only a modifier so far
+        {
+            Box.Text = Hotkey.PartialText(Keyboard.Modifiers); // only modifiers so far: show what is held down
+            return;
+        }
 
         // Shift alone would swallow e.g. the capital letter system wide
         if ((hotkey.Modifiers & ~HotkeyModifiers.Shift) == HotkeyModifiers.None)
@@ -84,9 +114,23 @@ public partial class HotkeyRecorder : UserControl
             return;
         }
 
+        // Ctrl + Alt is AltGr: Ctrl + Alt + Q would make @ impossible to type on a German keyboard
+        if (hotkey.BlockedCharacter() is { } blocked)
+        {
+            StatusText.Set(Status, Loc.T("Hotkey.BlocksCharacter", blocked), StatusText.Kind.Error);
+            return;
+        }
+
         Settings.SetHotkey(Action, hotkey);
         Box.Text = hotkey.ToString();
         ShowAvailability(hotkey, "Hotkey.Saved");
+    }
+
+    /// <summary>All keys released without a complete combination: show the saved one again.</summary>
+    private void Box_PreviewKeyUp(object sender, KeyEventArgs e)
+    {
+        if (Keyboard.Modifiers == ModifierKeys.None && Box.Text.EndsWith('…'))
+            Box.Text = Settings.HotkeyFor(Action).ToString();
     }
 
     private void Reset_Click(object sender, RoutedEventArgs e)

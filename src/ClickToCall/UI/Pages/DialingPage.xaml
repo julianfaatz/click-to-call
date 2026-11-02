@@ -80,80 +80,111 @@
 
         <ui:SettingCard x:Name="DefaultAppCard" Icon="&#xE815;" Title="{loc:Tr Protocols.DefaultTitle}">
             <Button x:Name="DefaultAppButton" MinWidth="110" Click="OpenDefaultApps_Click" />
-            <ui:SettingCard.Footer>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="12" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="12" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Width="70" VerticalAlignment="Center" FontWeight="SemiBold" Text="tel:" />
-                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource CardDescription}" Text="{loc:Tr Protocols.Tel}" />
-                    <TextBlock x:Name="TelStatus" Grid.Column="2" Margin="12,0,16,0" FontSize="12" VerticalAlignment="Center" />
-                    <CheckBox Grid.Column="3" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding HandleTel}" />
-
-                    <TextBlock Grid.Row="2" VerticalAlignment="Center" FontWeight="SemiBold" Text="callto:" />
-                    <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource CardDescription}" Text="{loc:Tr Protocols.Callto}" />
-                    <TextBlock x:Name="CalltoStatus" Grid.Row="2" Grid.Column="2" Margin="12,0,16,0" FontSize="12" VerticalAlignment="Center" />
-                    <CheckBox Grid.Row="2" Grid.Column="3" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding HandleCallto}" />
-
-                    <TextBlock Grid.Row="4" VerticalAlignment="Center" FontWeight="SemiBold" Text="sip:" />
-                    <TextBlock Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource CardDescription}" Text="{loc:Tr Protocols.Sip}" />
-                    <TextBlock x:Name="SipStatus" Grid.Row="4" Grid.Column="2" Margin="12,0,16,0" FontSize="12" VerticalAlignment="Center" />
-                    <CheckBox Grid.Row="4" Grid.Column="3" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding HandleSip}" />
-                </Grid>
-            </ui:SettingCard.Footer>
         </ui:SettingCard>
 
-        <!-- ===== Number formatting ===== -->
-        <TextBlock x:Name="NumbersSection" Style="{StaticResource SectionHeader}" Text="{loc:Tr Dialing.NormalizeTitle}" />
-
-        <ui:SettingCard x:Name="CountryCard" Icon="&#xE909;" Title="{loc:Tr Dialing.ConvertOwnCountry}">
+        <!-- ===== Advanced: rarely needed, collapsed so the page stays simple ===== -->
+        <Button x:Name="AdvancedToggle"
+                Margin="2,28,0,0"
+                HorizontalAlignment="Left"
+                Style="{StaticResource LinkButton}"
+                Click="AdvancedToggle_Click">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Margin="0,0,4,0" VerticalAlignment="Center" Text="+" />
-                <TextBox Width="60" Margin="0,0,16,0" IsEnabled="{Binding ConvertOwnCountryCode}" Text="{Binding OwnCountryCode, UpdateSourceTrigger=PropertyChanged}" />
-                <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding ConvertOwnCountryCode}" />
+                <TextBlock x:Name="AdvancedToggleText" VerticalAlignment="Center" />
+                <TextBlock x:Name="AdvancedToggleIcon"
+                           Margin="8,0,0,0"
+                           VerticalAlignment="Center"
+                           FontFamily="{StaticResource IconFont}"
+                           FontSize="10" />
             </StackPanel>
-        </ui:SettingCard>
+        </Button>
+        <TextBlock Margin="2,4,0,0" Style="{StaticResource Hint}" Text="{loc:Tr Dialing.AdvancedHint}" />
 
-        <ui:SettingCard Icon="&#xE774;" Title="{loc:Tr Dialing.PlusToZeros}" Description="{loc:Tr Dialing.PlusToZerosHelp}">
-            <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding ConvertPlusToZeros}" />
-        </ui:SettingCard>
+        <StackPanel x:Name="AdvancedPanel" Margin="0,16,0,0" Visibility="Collapsed">
+            <ui:SettingCard Icon="&#xE71B;" Title="{loc:Tr Protocols.TypesTitle}" Description="{loc:Tr Protocols.TypesText}">
+                <ui:SettingCard.Footer>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="12" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-        <ui:SettingCard Icon="&#xE80F;" Title="{loc:Tr Dialing.OutsideLine}" Description="{loc:Tr Dialing.OutsideLineHint}">
-            <TextBox Width="60" Text="{Binding OutsideLinePrefix, UpdateSourceTrigger=PropertyChanged}" />
-            <ui:SettingCard.Footer>
+                        <TextBlock Width="70" VerticalAlignment="Center" FontWeight="SemiBold" Text="tel:" />
+                        <TextBlock Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource CardDescription}" Text="{loc:Tr Protocols.Tel}" />
+                        <TextBlock x:Name="TelStatus" Grid.Column="2" Margin="12,0,16,0" FontSize="12" VerticalAlignment="Center" />
+                        <CheckBox Grid.Column="3" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding HandleTel}" />
+
+                        <TextBlock Grid.Row="2" VerticalAlignment="Center" FontWeight="SemiBold" Text="callto:" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource CardDescription}" Text="{loc:Tr Protocols.Callto}" />
+                        <TextBlock x:Name="CalltoStatus" Grid.Row="2" Grid.Column="2" Margin="12,0,16,0" FontSize="12" VerticalAlignment="Center" />
+                        <CheckBox Grid.Row="2" Grid.Column="3" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding HandleCallto}" />
+
+                        <TextBlock Grid.Row="4" VerticalAlignment="Center" FontWeight="SemiBold" Text="sip:" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource CardDescription}" Text="{loc:Tr Protocols.Sip}" />
+                        <TextBlock x:Name="SipStatus" Grid.Row="4" Grid.Column="2" Margin="12,0,16,0" FontSize="12" VerticalAlignment="Center" />
+                        <CheckBox Grid.Row="4" Grid.Column="3" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding HandleSip}" />
+                    </Grid>
+                </ui:SettingCard.Footer>
+            </ui:SettingCard>
+
+            <!-- ===== Number formatting ===== -->
+            <TextBlock x:Name="NumbersSection" Style="{StaticResource SectionHeader}" Text="{loc:Tr Dialing.NormalizeTitle}" />
+
+            <ui:SettingCard x:Name="CountryCard" Icon="&#xE909;" Title="{loc:Tr Dialing.ConvertOwnCountry}">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="{loc:Tr Dialing.OutsideLineFrom}" />
-                    <TextBox Width="60" Margin="8,0" Text="{Binding OutsideLineMinLength, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock VerticalAlignment="Center" Text="{loc:Tr Dialing.Digits}" />
+                    <TextBlock Margin="0,0,4,0" VerticalAlignment="Center" Text="+" />
+                    <TextBox Width="60" Margin="0,0,16,0" IsEnabled="{Binding ConvertOwnCountryCode}" Text="{Binding OwnCountryCode, UpdateSourceTrigger=PropertyChanged}" />
+                    <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding ConvertOwnCountryCode}" />
                 </StackPanel>
-            </ui:SettingCard.Footer>
-        </ui:SettingCard>
+            </ui:SettingCard>
 
-        <Border Margin="0,8,0,0" Style="{StaticResource Card}" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}">
-            <StackPanel>
-                <TextBlock Margin="0,0,0,8" Style="{StaticResource CardDescription}" Text="{loc:Tr Dialing.TryIt}" />
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" MaxWidth="260" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="TryInput" Text="+49 (0)30 123 456-78" TextChanged="TryInput_TextChanged" />
-                    <TextBlock Grid.Column="1" Margin="16,0" VerticalAlignment="Center" FontFamily="{StaticResource IconFont}" Text="&#xE72A;" />
-                    <TextBlock x:Name="TryOutput" Grid.Column="2" VerticalAlignment="Center" FontSize="18" FontWeight="SemiBold" />
-                </Grid>
-            </StackPanel>
-        </Border>
+            <ui:SettingCard Icon="&#xE774;" Title="{loc:Tr Dialing.PlusToZeros}" Description="{loc:Tr Dialing.PlusToZerosHelp}">
+                <CheckBox Style="{StaticResource ToggleSwitch}" IsChecked="{Binding ConvertPlusToZeros}" />
+            </ui:SettingCard>
+
+            <ui:SettingCard Icon="&#xE80F;" Title="{loc:Tr Dialing.OutsideLine}" Description="{loc:Tr Dialing.OutsideLineHint}">
+                <TextBox Width="60" Text="{Binding OutsideLinePrefix, UpdateSourceTrigger=PropertyChanged}" />
+                <ui:SettingCard.Footer>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="{loc:Tr Dialing.OutsideLineFrom}" />
+                        <TextBox Width="60" Margin="8,0" Text="{Binding OutsideLineMinLength, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock VerticalAlignment="Center" Text="{loc:Tr Dialing.Digits}" />
+                    </StackPanel>
+                </ui:SettingCard.Footer>
+            </ui:SettingCard>
+
+            <Border Margin="0,8,0,0" Style="{StaticResource Card}" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}">
+                <StackPanel>
+                    <TextBlock Margin="0,0,0,8" Style="{StaticResource CardDescription}" Text="{loc:Tr Dialing.TryIt}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MaxWidth="260" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="TryInput" Text="+49 (0)30 123 456-78" TextChanged="TryInput_TextChanged" />
+                        <TextBlock Grid.Column="1" Margin="16,0" VerticalAlignment="Center" FontFamily="{StaticResource IconFont}" Text="&#xE72A;" />
+                        <TextBlock x:Name="TryOutput" Grid.Column="2" VerticalAlignment="Center" FontSize="18" FontWeight="SemiBold" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- ===== Reset: a way back for anyone who changed too much ===== -->
+        <ui:SettingCard Margin="0,28,0,4" Icon="&#xE777;" Title="{loc:Tr Dialing.ResetTitle}" Description="{loc:Tr Dialing.ResetText}">
+            <Button MinWidth="110" Click="Reset_Click" Content="{loc:Tr Dialing.ResetButton}" />
+        </ui:SettingCard>
+        <StackPanel x:Name="ResetDonePanel" Margin="2,6,0,0" Orientation="Horizontal" Visibility="Collapsed">
+            <TextBlock x:Name="ResetDoneText" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+            <Button Margin="16,0,0,0" VerticalAlignment="Center" Style="{StaticResource LinkButton}" Click="UndoReset_Click" Content="{loc:Tr Dialing.ResetUndo}" />
+        </StackPanel>
     </StackPanel>
 </UserControl>

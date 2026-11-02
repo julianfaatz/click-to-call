@@ -12,6 +12,7 @@ public partial class DialWindow : Window
     private static DialWindow? _current;
     private readonly Action<string, string?> _onDial;
     private bool _closing;
+    private bool _noSelection;
 
     private DialWindow(Action<string, string?> onDial)
     {
@@ -54,12 +55,15 @@ public partial class DialWindow : Window
     }
 
     /// <summary>Shows the dial window (or reuses an open one) prefilled with a number.</summary>
-    public static void ShowFor(string number, bool fromLink, Action<string, string?> onDial)
+    /// <param name="noSelection">Opened with the hotkey, but nothing usable was selected.</param>
+    public static void ShowFor(string number, bool fromLink, Action<string, string?> onDial, bool noSelection = false)
     {
         var window = _current ?? new DialWindow(onDial);
         _current = window;
 
         window.HeaderText.Text = Loc.T(fromLink ? "Dial.TitleLink" : "Dial.Title");
+        window._noSelection = noSelection;
+        window.NoSelectionText.Text = Loc.T("Dial.NoSelection", SettingsStore.Current.Hotkey);
         window.NumberBox.Text = number;
         window.UpdatePreview();
 
@@ -102,6 +106,7 @@ public partial class DialWindow : Window
         var normalized = PhoneNumberNormalizer.Normalize(input, NormalizationOptions.From(SettingsStore.Current));
 
         DialButton.IsEnabled = normalized.Length > 0;
+        NoSelectionText.Visibility = _noSelection && input.Trim().Length == 0 ? Visibility.Visible : Visibility.Collapsed;
         RecentPanel.Visibility = input.Trim().Length == 0 && RecentList.Children.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         if (normalized.Length == 0 || normalized == input.Trim())
         {

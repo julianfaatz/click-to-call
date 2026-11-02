@@ -36,6 +36,10 @@ public sealed class TrayIcon : IDisposable
         var settings = SettingsStore.Current;
         var menu = new Forms.ContextMenuStrip();
 
+        // Hovering the icon is a reminder of how to dial
+        var tooltip = settings.HotkeyEnabled ? Loc.T("Tray.Tooltip", settings.Hotkey) : ProtocolRegistration.RegisteredAppName;
+        _icon.Text = tooltip.Length <= 127 ? tooltip : ProtocolRegistration.RegisteredAppName;
+
         var dial = new Forms.ToolStripMenuItem(Loc.T("Tray.Dial"), null, (_, _) => _services.Calls.ShowDialWindow())
         {
             Font = new System.Drawing.Font(menu.Font, System.Drawing.FontStyle.Bold),

@@ -11,6 +11,12 @@ public sealed class CallController
     private string? _pendingNumber;
     private bool _hotkeyBusy;
 
+    /// <summary>
+    /// Practicing the hotkey in the setup: gets the selected text instead of dialing it.
+    /// Returns false if it does not take the press (e.g. its window is not in front) – then it dials as usual.
+    /// </summary>
+    public Func<string, bool>? HotkeyPractice { get; set; }
+
     /// <summary>Raised when the phone is not configured yet and the user tried to call.</summary>
     public event EventHandler? SetupRequired;
 
@@ -51,6 +57,9 @@ public sealed class CallController
         try
         {
             var selection = await SelectionGrabber.GetSelectedTextAsync();
+            if (HotkeyPractice?.Invoke(selection) == true)
+                return;
+
             var text = PhoneNumberNormalizer.ExtractFromText(selection);
 
             // Like a link without confirmation – but only for a selection that is exactly one plain number.
@@ -68,7 +77,7 @@ public sealed class CallController
                     text = clipboard;
             }
 
-            ShowDialWindow(text, fromLink: false);
+            ShowDialWindow(text, fromLink: false, noSelection: text.Length == 0);
         }
         finally
         {
@@ -76,12 +85,13 @@ public sealed class CallController
         }
     }
 
-    public void ShowDialWindow(string prefill = "", bool fromLink = false)
+    /// <param name="noSelection">From the hotkey without a selected number: the window explains how it works.</param>
+    public void ShowDialWindow(string prefill = "", bool fromLink = false, bool noSelection = false)
     {
         if (!EnsureConfigured(prefill))
             return;
 
-        DialWindow.ShowFor(prefill, fromLink, (number, identity) => _ = DialAsync(number, identity));
+        DialWindow.ShowFor(prefill, fromLink, (number, identity) => _ = DialAsync(number, identity), noSelection);
     }
 
     public void Redial()

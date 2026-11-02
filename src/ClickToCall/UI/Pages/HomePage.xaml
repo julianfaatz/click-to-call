@@ -194,8 +194,103 @@
             </Grid>
         </Border>
 
-        <!-- ===== Step 3: test call ===== -->
-        <Border x:Name="Step3Card" Style="{StaticResource StepCard}" Visibility="Collapsed">
+        <!-- ===== Step 3: practice the hotkey (nothing is dialed) ===== -->
+        <Border x:Name="HotkeyStepCard" Style="{StaticResource StepCard}" Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource StepIconCircle}">
+                    <TextBlock Style="{StaticResource StepIcon}" Text="&#xE765;" />
+                </Border>
+                <StackPanel Grid.Column="1">
+                    <TextBlock Style="{StaticResource StepTitle}" Text="{loc:Tr Home.StepHotkey}" />
+                    <TextBlock Style="{StaticResource StepText}" Text="{loc:Tr Home.StepHotkeyText}" />
+
+                    <!-- Something like an e-mail signature to select the number in -->
+                    <TextBox x:Name="PracticeBox"
+                             Width="300"
+                             Margin="0,20,0,0"
+                             Padding="14,10"
+                             HorizontalAlignment="Left"
+                             FontSize="15"
+                             IsReadOnly="True"
+                             IsReadOnlyCaretVisible="False"
+                             TextWrapping="Wrap"
+                             Text="{loc:Tr Home.StepHotkeySample}" />
+
+                    <StackPanel x:Name="HotkeyInstructions" Margin="0,16,0,0">
+                        <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                            <Border Style="{StaticResource InstructionNumber}"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="1" /></Border>
+                            <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{loc:Tr Home.StepHotkeyHow1}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Style="{StaticResource InstructionNumber}" VerticalAlignment="Center"><TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" Text="2" /></Border>
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="{loc:Tr Home.StepHotkeyHow2}" />
+                            <!-- The key combination as keyboard keys, filled in code -->
+                            <StackPanel x:Name="HotkeyKeys" VerticalAlignment="Center" Orientation="Horizontal" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Not quite: nothing or only a part selected, or the hotkey is off / taken -->
+                    <Border x:Name="HotkeyProblem"
+                            Margin="0,16,0,0"
+                            Padding="12,10"
+                            CornerRadius="4"
+                            Background="{DynamicResource SystemFillColorCautionBackgroundBrush}"
+                            Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="0,1,10,0" FontFamily="{StaticResource IconFont}" Text="&#xE946;" />
+                            <TextBlock x:Name="HotkeyProblemText" Grid.Column="1" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                            <Button x:Name="HotkeyProblemButton"
+                                    Grid.Column="2"
+                                    Margin="12,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Click="HotkeyProblem_Click" />
+                        </Grid>
+                    </Border>
+
+                    <!-- It worked -->
+                    <Border x:Name="HotkeySuccess"
+                            Margin="0,16,0,0"
+                            Padding="16,12"
+                            CornerRadius="6"
+                            Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}"
+                            Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="0,0,14,0"
+                                       VerticalAlignment="Center"
+                                       FontFamily="{StaticResource IconFont}"
+                                       FontSize="28"
+                                       Foreground="{DynamicResource SystemFillColorSuccessBrush}"
+                                       Text="&#xEC61;" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock FontSize="15" FontWeight="SemiBold" Text="{loc:Tr Home.StepHotkeySuccessTitle}" />
+                                <TextBlock x:Name="HotkeySuccessText" Margin="0,2,0,0" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Margin="0,24,0,0" Orientation="Horizontal">
+                        <Button x:Name="HotkeyNextButton" MinWidth="110" Style="{DynamicResource AccentButtonStyle}" Click="Next_Click" Content="{loc:Tr Home.Next}" Visibility="Collapsed" />
+                        <Button x:Name="HotkeySkipButton" VerticalAlignment="Center" Style="{StaticResource LinkButton}" Click="SkipHotkey_Click" Content="{loc:Tr Home.SkipStep}" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ===== Step 4: test call ===== -->
+        <Border x:Name="TestCard" Style="{StaticResource StepCard}" Visibility="Collapsed">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -208,7 +303,7 @@
                     <TextBlock Style="{StaticResource StepTitle}" Text="{loc:Tr Home.StepTest}" />
                     <TextBlock Style="{StaticResource StepText}" Text="{loc:Tr Home.StepTestText}" />
 
-                    <Border x:Name="Step3Hint"
+                    <Border x:Name="TestHint"
                             Margin="0,16,0,0"
                             Padding="12,10"
                             CornerRadius="4"
@@ -220,7 +315,7 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Margin="0,1,10,0" FontFamily="{StaticResource IconFont}" Text="&#xE946;" />
-                            <TextBlock x:Name="Step3HintText" Grid.Column="1" TextWrapping="Wrap" />
+                            <TextBlock x:Name="TestHintText" Grid.Column="1" TextWrapping="Wrap" />
                         </Grid>
                     </Border>
 

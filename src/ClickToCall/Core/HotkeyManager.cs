@@ -56,6 +56,9 @@ public sealed class HotkeyManager : IDisposable
             Unregister(action);
     }
 
+    /// <summary>The hotkey for this action is active, i.e. switched on and not taken by another application.</summary>
+    public bool IsRegistered(HotkeyAction action) => _registered.ContainsKey(action);
+
     /// <summary>Checks whether a hotkey could be registered (i.e. is not used by another app).</summary>
     public bool IsAvailable(Hotkey hotkey)
     {

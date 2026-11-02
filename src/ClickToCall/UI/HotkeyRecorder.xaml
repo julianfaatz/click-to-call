@@ -13,7 +13,8 @@
                      Cursor="Hand"
                      GotKeyboardFocus="Box_GotKeyboardFocus"
                      LostKeyboardFocus="Box_LostKeyboardFocus"
-                     PreviewKeyDown="Box_PreviewKeyDown" />
+                     PreviewKeyDown="Box_PreviewKeyDown"
+                     PreviewKeyUp="Box_PreviewKeyUp" />
             <Button Margin="8,0,0,0" Click="Reset_Click" ToolTip="{loc:Tr Hotkey.Reset}">
                 <TextBlock FontFamily="{StaticResource IconFont}" Text="&#xE7A7;" />
             </Button>
