@@ -22,6 +22,21 @@ public static class PhoneConnector
     public static async Task<ConnectResult> ConnectAsync(
         PhoneVendor? vendor, string host, string username, string password, bool preferHttps, CancellationToken ct = default)
     {
+        var result = await TryConnectAsync(vendor, host, username, password, preferHttps, ct);
+
+        // The user only sees a short message: the log tells which step failed and why
+        Log.Info($"Connect {HttpPhoneClient.NormalizeHost(host)} ({vendor?.ToString() ?? "recognize vendor"}, {(username.Length > 0 ? "with" : "without")} login): "
+            + result.Status
+            + (result.Model.Length == 0 && vendor is null && result.Vendor is { } found ? $", {found}" : "")
+            + (result.Model.Length > 0 ? $", {result.Model}" : "")
+            + (result.Status == ConnectStatus.Connected ? $" via {Scheme(result.UseHttps)}" : "")
+            + (result.Error is { } error ? $" - {Describe(error)}" : ""));
+        return result;
+    }
+
+    private static async Task<ConnectResult> TryConnectAsync(
+        PhoneVendor? vendor, string host, string username, string password, bool preferHttps, CancellationToken ct)
+    {
         host = HttpPhoneClient.NormalizeHost(host);
         if (!Uri.TryCreate($"http://{host}/", UriKind.Absolute, out _))
             return new ConnectResult(ConnectStatus.Failed, vendor, false, "", new PhoneException(PhoneErrorKind.InvalidAddress, host));
@@ -59,6 +74,7 @@ public static class PhoneConnector
             }
             catch (PhoneException ex) when (ex.Kind is PhoneErrorKind.Unreachable or PhoneErrorKind.Timeout or PhoneErrorKind.Certificate)
             {
+                Log.Info($"Connect {host} via {Scheme(https)}: {Describe(ex)}");
                 lastError = ex; // try the other scheme
             }
             catch (PhoneException ex)
@@ -69,4 +85,8 @@ public static class PhoneConnector
 
         return new ConnectResult(ConnectStatus.Failed, vendor, false, "", lastError);
     }
+
+    private static string Scheme(bool https) => https ? "HTTPS" : "HTTP";
+
+    private static string Describe(PhoneException ex) => ex.Detail is { } detail ? $"{ex.Kind} ({detail})" : ex.Kind.ToString();
 }

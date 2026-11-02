@@ -11,6 +11,10 @@ public sealed partial class YealinkDriver : IPhoneDriver
 
     public string? Detect(string probeText)
     {
+        // The web interface of the T4xS (firmware 66.x) names the model in a script variable – with or without "Yealink" on the page
+        if (PhoneTypeRegex().Match(probeText) is { Success: true } phoneType)
+            return "Yealink " + phoneType.Groups[1].Value.ToUpperInvariant();
+
         if (!probeText.Contains("yealink", StringComparison.OrdinalIgnoreCase))
             return null;
 
@@ -27,6 +31,10 @@ public sealed partial class YealinkDriver : IPhoneDriver
     // "Yealink SIP-T46U", "Yealink T54W", "Yealink W70B"
     [GeneratedRegex(@"yealink\W{0,3}(?:sip-?)?([A-Z]{1,2}\d{2,3}[A-Z]{0,2})\b", RegexOptions.IgnoreCase)]
     private static partial Regex ModelRegex();
+
+    // g_phonetype = "T48S"
+    [GeneratedRegex(@"\bg_phonetype\s*=\s*[""']([A-Z]{1,2}\d{2,3}[A-Z]{0,2})[""']", RegexOptions.IgnoreCase)]
+    private static partial Regex PhoneTypeRegex();
 }
 
 /// <summary>

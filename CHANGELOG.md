@@ -6,6 +6,14 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 
 ## [Unreleased]
 
+### Hinzugefügt
+
+- Das Protokoll hält fest, woran das manuelle Verbinden scheitert und welche Geräte die Telefonsuche gefunden, aber nicht als Telefon erkannt hat (Server, Login, Seitentitel) – damit lassen sich nicht erkannte Telefone eingrenzen
+
+### Geändert
+
+- Yealink T4xS (z. B. T48S): Die Erkennung nutzt zusätzlich die Modellangabe der Weboberfläche, falls die Startseite „Yealink“ nicht nennt
+
 ## [0.9.3] - 2026-10-24
 
 ### Behoben

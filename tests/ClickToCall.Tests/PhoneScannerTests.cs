@@ -46,6 +46,38 @@ public class PhoneScannerTests
     }
 
     [Fact]
+    public async Task Identifies_a_phone_by_its_start_page()
+    {
+        // T48S web interface: model only in a script variable
+        using var server = new FakeHttpServer(_ => new FakeResponse(200, "<html><script>var g_phonetype = \"T48S\";</script></html>"));
+
+        var (status, phone) = await PhoneScanner.IdentifyAsync(server.Host);
+
+        Assert.Equal(ProbeStatus.Found, status);
+        Assert.Equal(new FoundPhone(server.Host, "Yealink T48S", PhoneVendor.Yealink), phone);
+    }
+
+    [Fact]
+    public async Task Reports_devices_it_does_not_recognize()
+    {
+        using var server = new FakeHttpServer(_ => new FakeResponse(200, "<title>FRITZ!Box</title>"));
+
+        var (status, phone) = await PhoneScanner.IdentifyAsync(server.Host);
+
+        Assert.Equal(ProbeStatus.UnknownDevice, status);
+        Assert.Null(phone);
+    }
+
+    [Fact]
+    public void Summarizes_a_probe_for_the_log()
+    {
+        var response = new ProbeResponse("http://192.168.1.5/", 401, "embedded", "Digest realm=\"Phone\"", Body: "<title>\n  Login\n</title>");
+
+        Assert.Equal("http://192.168.1.5/: 401, server \"embedded\", login \"Digest realm=\"Phone\"\", title \"Login\", 24 chars", response.ToString());
+        Assert.Equal("http://192.168.1.5/: timeout", new ProbeResponse("http://192.168.1.5/", Error: "timeout").ToString());
+    }
+
+    [Fact]
     public void Does_not_scan_common_networks_twice()
     {
         // 192.168.0.0/22 already covers 192.168.0.x – 192.168.3.x

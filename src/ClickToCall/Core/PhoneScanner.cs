@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 
 namespace ClickToCall.Core;
 
@@ -25,6 +26,49 @@ public enum ProbeStatus
 /// <param name="Phone">Set once for every phone found.</param>
 public sealed record ScanUpdate(double Fraction, string Network, IPAddress? Device = null, FoundPhone? Phone = null);
 
+/// <summary>What a device answered on its web page, or why it did not answer.</summary>
+/// <param name="Url">The page that answered, after redirects.</param>
+internal sealed partial record ProbeResponse(
+    string Url, int Status = 0, string Server = "", string Authenticate = "", string Location = "", string Body = "", string? Error = null)
+{
+    public bool Answered => Error is null;
+
+    /// <summary>Server header, login realm and page: what the drivers recognize a phone by.</summary>
+    public string Text => string.Join(' ', Server, Authenticate, Body);
+
+    /// <summary>For the log: enough to see why a phone was not recognized, without the whole page.</summary>
+    public override string ToString()
+    {
+        if (!Answered)
+            return $"{Url}: {Error}";
+
+        var title = TitleRegex().Match(Body) is { Success: true } match ? Shorten(WebUtility.HtmlDecode(match.Groups[1].Value)) : "";
+        var parts = new List<string> { $"{Url}: {Status}" };
+        if (Server.Length > 0)
+            parts.Add($"server \"{Server}\"");
+        if (Authenticate.Length > 0)
+            parts.Add($"login \"{Shorten(Authenticate)}\"");
+        if (Location.Length > 0)
+            parts.Add($"redirect to {Location}");
+        // Single page web interfaces often have no meaningful title: then the start of the page tells more
+        parts.Add(title.Length > 0 ? $"title \"{title}\"" : $"page \"{Shorten(Body, 200)}\"");
+        parts.Add($"{Body.Length} chars");
+        return string.Join(", ", parts);
+    }
+
+    private static string Shorten(string text, int maxLength = 80)
+    {
+        text = WhitespaceRegex().Replace(text, " ").Trim();
+        return text.Length <= maxLength ? text : text[..maxLength] + "…";
+    }
+
+    [GeneratedRegex("<title>(.*?)</title>", RegexOptions.IgnoreCase | RegexOptions.Singleline)]
+    private static partial Regex TitleRegex();
+
+    [GeneratedRegex(@"\s+")]
+    private static partial Regex WhitespaceRegex();
+}
+
 /// <summary>
 /// Looks for supported phones in the local network(s) and the default networks of common routers
 /// by asking each address for its web page.
@@ -42,6 +86,7 @@ public static class PhoneScanner
             .DistinctBy(t => t.Ip)
             .ToList();
         var found = new ConcurrentBag<FoundPhone>();
+        var unrecognized = new ConcurrentBag<(IPAddress Ip, ProbeResponse Response)>();
         var done = 0;
         var lastPercent = -1;
 
@@ -70,6 +115,9 @@ public static class PhoneScanner
         var phones = found.OrderBy(p => ToUInt32(IPAddress.Parse(p.Address))).ToList();
         Log.Info($"Network scan: {targets.Count} addresses in {string.Join(", ", networks.Select(n => $"{n.Network}/{n.PrefixLength}"))}, "
             + $"found {(phones.Count == 0 ? "nothing" : string.Join(", ", phones.Select(p => p.DisplayName)))}");
+        // So a phone that was not found can be told apart from one that answered unexpectedly
+        foreach (var (ip, response) in unrecognized.OrderBy(d => ToUInt32(d.Ip)))
+            Log.Info($"Network scan: not recognized {ip}: {response}");
 #if DEBUG
         if (MockPhone.Address is { } mock)
         {
@@ -90,9 +138,12 @@ public static class PhoneScanner
             if (url is null)
                 return;
 
-            var phone = Recognize(await ProbeAsync(http, url, token)) is { } recognized ? recognized with { Address = ip.ToString() } : null;
+            var response = await ProbeAsync(http, url, token);
+            var phone = Recognize(response) is { } recognized ? recognized with { Address = ip.ToString() } : null;
             if (phone is not null)
                 found.Add(phone);
+            else
+                unrecognized.Add((ip, response));
             progress?.Report(new ScanUpdate(Volatile.Read(ref done) / (double)targets.Count, network, ip, phone));
         }
     }
@@ -106,13 +157,13 @@ public static class PhoneScanner
     {
         using var http = CreateProbeClient(TimeSpan.FromSeconds(3));
         // Some phones only listen on HTTPS
-        var text = await ProbeAsync(http, $"http://{host}/", ct) ?? await ProbeAsync(http, $"https://{host}/", ct);
-        if (text is null)
-            return (ProbeStatus.Unreachable, null);
+        var plain = await ProbeAsync(http, $"http://{host}/", ct);
+        var response = plain.Answered ? plain : await ProbeAsync(http, $"https://{host}/", ct);
+        var phone = Recognize(response);
+        var status = !response.Answered ? ProbeStatus.Unreachable : phone is null ? ProbeStatus.UnknownDevice : ProbeStatus.Found;
 
-        return Recognize(text) is { } phone
-            ? (ProbeStatus.Found, phone with { Address = host })
-            : (ProbeStatus.UnknownDevice, null);
+        Log.Info($"Identify {host}: {(phone?.Model ?? status.ToString())} - {(response == plain ? "" : plain + "; ")}{response}");
+        return (status, phone is null ? null : phone with { Address = host });
     }
 
     /// <summary>
@@ -148,22 +199,21 @@ public static class PhoneScanner
     };
 
     /// <summary>The phone (without address) if a driver recognizes the device, otherwise null.</summary>
-    private static FoundPhone? Recognize(string? probeText)
+    private static FoundPhone? Recognize(ProbeResponse response)
     {
-        if (probeText is null)
+        if (!response.Answered)
             return null;
 
         foreach (var driver in PhoneDrivers.All)
         {
-            if (driver.Detect(probeText) is { } model)
+            if (driver.Detect(response.Text) is { } model)
                 return new FoundPhone("", model, driver.Vendor);
         }
 
         return null;
     }
 
-    /// <returns>Server header, login realm and page of the device, or null if nothing answers.</returns>
-    private static async Task<string?> ProbeAsync(HttpClient http, string url, CancellationToken ct, int redirects = 0)
+    private static async Task<ProbeResponse> ProbeAsync(HttpClient http, string url, CancellationToken ct, int redirects = 0)
     {
         try
         {
@@ -177,18 +227,20 @@ public static class PhoneScanner
                     return await ProbeAsync(http, target.ToString(), ct, redirects + 1);
             }
 
-            return string.Join(' ',
+            return new ProbeResponse(url, (int)response.StatusCode,
                 response.Headers.Server.ToString(),
                 response.Headers.WwwAuthenticate.ToString(),
+                response.Headers.Location?.ToString() ?? "",
                 await response.Content.ReadAsStringAsync(ct));
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
             throw;
         }
-        catch
+        catch (Exception ex)
         {
-            return null;
+            // e.g. a TLS handshake the phone does not support: worth seeing in the log
+            return new ProbeResponse(url, Error: ex is TaskCanceledException ? "timeout" : (ex.InnerException ?? ex).Message);
         }
     }
 
