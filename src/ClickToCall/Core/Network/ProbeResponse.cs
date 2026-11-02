@@ -5,18 +5,26 @@ namespace ClickToCall.Core.Network;
 
 /// <summary>What a device answered on its web page, or why it did not answer.</summary>
 /// <param name="Url">The page that answered, after redirects.</param>
+/// <param name="Previous">The response that redirected here, if any.</param>
 public sealed partial record ProbeResponse(
-    string Url, int Status = 0, string Server = "", string Authenticate = "", string Location = "", string Body = "", string? Error = null)
+    string Url, int Status = 0, string Server = "", string Authenticate = "", string Location = "", string Body = "", string? Error = null,
+    ProbeResponse? Previous = null)
 {
-    public bool Answered => Error is null;
+    /// <summary>The device answered – possibly only with a redirect to a page that then did not answer.</summary>
+    public bool Answered => Error is null || Previous is { Answered: true };
 
-    /// <summary>Server header, login realm and page: what a device can be recognized by.</summary>
-    public string Text => string.Join(' ', Server, Authenticate, Body);
+    /// <summary>
+    /// Server header, login realm, redirect and page of all responses: what a device can be recognized by.
+    /// Some only name themselves in the redirect to their login page.
+    /// </summary>
+    public string Text => string.Join(' ', Previous?.Text ?? "", Server, Authenticate, Location, Body);
 
     /// <summary>For the log: enough to see why a phone was not recognized, without the whole page.</summary>
-    public override string ToString()
+    public override string ToString() => Previous is null ? Summary() : $"{Previous} -> {Summary()}";
+
+    private string Summary()
     {
-        if (!Answered)
+        if (Error is not null)
             return $"{Url}: {Error}";
 
         var title = TitleRegex().Match(Body) is { Success: true } match ? Shorten(WebUtility.HtmlDecode(match.Groups[1].Value)) : "";

@@ -47,6 +47,21 @@ public class PhoneScannerTests
     }
 
     [Fact]
+    public async Task Identifies_a_phone_by_its_redirect_even_if_the_target_does_not_answer()
+    {
+        // Yealink T48S (issue #4): HTTP redirects to the HTTPS login page. Here HTTPS fails (the fake server only speaks HTTP).
+        string? host = null;
+        using var server = new FakeHttpServer(_ => new FakeResponse(302, "<html><body><div id=\"_RES_INFO_\"></div></body></html>",
+            ExtraHeaders: $"Location: https://{host}/servlet?m=mod_listener&p=login&q=loginForm&jumpto=status\r\n"));
+        host = server.Host;
+
+        var (status, phone) = await PhoneScanner.IdentifyAsync(server.Host);
+
+        Assert.Equal(ProbeStatus.Found, status);
+        Assert.Equal(PhoneVendor.Yealink, phone?.Vendor);
+    }
+
+    [Fact]
     public async Task Reports_devices_it_does_not_recognize()
     {
         using var server = new FakeHttpServer(_ => new FakeResponse(200, "<title>FRITZ!Box</title>"));

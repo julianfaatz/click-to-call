@@ -23,4 +23,16 @@ public class ProbeResponseTests
     [Fact]
     public void Tells_why_a_device_did_not_answer() =>
         Assert.Equal("http://192.168.1.5/: timeout", new ProbeResponse("http://192.168.1.5/", Error: "timeout").ToString());
+
+    [Fact]
+    public void Keeps_a_redirect_whose_target_does_not_answer()
+    {
+        var redirect = new ProbeResponse("http://192.168.2.9/", 302, Location: "https://192.168.2.9/login");
+        var response = new ProbeResponse("https://192.168.2.9/login", Error: "TLS failed", Previous: redirect);
+
+        Assert.True(response.Answered);
+        Assert.Contains("https://192.168.2.9/login", response.Text);
+        Assert.Equal("http://192.168.2.9/: 302, redirect to https://192.168.2.9/login, page \"\", 0 chars -> https://192.168.2.9/login: TLS failed",
+            response.ToString());
+    }
 }

@@ -18,6 +18,10 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 - Neues Symbol für „Telefonnummern anklickbar machen“: eine unterstrichene Nummer, auf die getippt wird
 - Yealink T4xS (z. B. T48S): Die Erkennung nutzt zusätzlich die Modellangabe der Weboberfläche, falls die Startseite „Yealink“ nicht nennt
 
+### Behoben
+
+- Yealink T4xS (z. B. T48S): Telefone, deren Startseite nur auf die HTTPS-Anmeldeseite weiterleitet, werden jetzt erkannt – auch wenn die Anmeldeseite selbst nicht antwortet
+
 ## [0.9.3] - 2026-10-24
 
 ### Behoben
