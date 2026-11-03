@@ -180,7 +180,7 @@
 
         <!-- ===== Reset: a way back for anyone who changed too much ===== -->
         <ui:SettingCard Margin="0,28,0,4" Icon="&#xE777;" Title="{loc:Tr Dialing.ResetTitle}" Description="{loc:Tr Dialing.ResetText}">
-            <Button MinWidth="110" Click="Reset_Click" Content="{loc:Tr Dialing.ResetButton}" />
+            <Button x:Name="ResetButton" MinWidth="110" Click="Reset_Click" Content="{loc:Tr Dialing.ResetButton}" />
         </ui:SettingCard>
         <StackPanel x:Name="ResetDonePanel" Margin="2,6,0,0" Orientation="Horizontal" Visibility="Collapsed">
             <TextBlock x:Name="ResetDoneText" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
