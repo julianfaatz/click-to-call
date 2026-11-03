@@ -6,29 +6,31 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 
 ## [Unreleased]
 
+## [0.9.4] - 2026-11-03
+
 ### Hinzugefügt
 
-- Einrichtung mit neuem Schritt „Tastenkombination“: Nummer in einer Beispiel-Signatur markieren, <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>W</kbd> drücken – die App erkennt es und lobt, ohne wirklich zu wählen. Ist nichts oder nur ein Teil markiert, erklärt sie, was zu tun ist
-- Wählfenster: Wurde per Tastenkombination keine Nummer markiert, erklärt ein Hinweis, wie es gedacht ist
-- Beim Festlegen einer Tastenkombination zeigt das Feld schon die gedrückten Tasten („Strg + Alt + …“). Kombinationen, die ein Zeichen tippen (z. B. <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>Q</kbd> = @ auf deutschen Tastaturen), werden abgelehnt
-- Der Tooltip des Symbols im Infobereich nennt die Tastenkombination zum Wählen
-- „Auf Standard zurücksetzen“ unten auf der Seite „Wählen“: setzt Rückfrage, Benachrichtigung, Tastenkombinationen, Link-Arten und Rufnummern-Format zurück, das Telefon bleibt verbunden. Mit „Rückgängig“ lässt es sich sofort zurücknehmen
 - Auflegen per Tastenkombination (Standard <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd>) – funktioniert in jedem Programm, lässt sich unter *Wählen → Tastenkombinationen* ändern oder abschalten und steht im Menü des Infobereichs
+- Einrichtung mit neuem Schritt „Tastenkombination“: Nummer in einer Beispiel-Signatur markieren, <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>W</kbd> drücken – die App erkennt es und lobt, ohne wirklich zu wählen. Ist nichts oder nur ein Teil markiert, erklärt sie, was zu tun ist
+- „Auf Standard zurücksetzen“ unten auf der Seite „Wählen“: setzt Rückfrage, Benachrichtigung, Tastenkombinationen, Link-Arten und Rufnummern-Format zurück, das Telefon bleibt verbunden. Mit „Rückgängig“ lässt es sich sofort zurücknehmen
+- Wählfenster: Wurde per Tastenkombination keine Nummer markiert, erklärt ein Hinweis, wie es gedacht ist
+- Beim Festlegen einer Tastenkombination zeigt das Feld schon die gedrückten Tasten („Strg + Alt + …“). Abgelehnt werden Kombinationen, die schon die andere Aktion (Wählen bzw. Auflegen) nutzt, und solche, die ein Zeichen tippen (z. B. <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>Q</kbd> = @ auf deutschen Tastaturen)
+- Der Tooltip des Symbols im Infobereich nennt die Tastenkombination zum Wählen
 - Das Protokoll hält fest, woran das manuelle Verbinden scheitert und welche Geräte die Telefonsuche gefunden, aber nicht als Telefon erkannt hat (Server, Login, Seitentitel) – damit lassen sich nicht erkannte Telefone eingrenzen
 
 ### Geändert
 
 - Telefon verbinden: Statt eines immer länger werdenden Formulars zeigt die Einrichtung eine Ansicht nach der anderen – Suche, IP-Adresse, Anmeldung, Hersteller. Gefundene Telefone erscheinen schon während der Suche als Kacheln, die Anmeldung erscheint an Ort und Stelle statt unterhalb des Radars, Fehler stehen direkt an der Aktion. Nach dem Verbinden bestätigt die Karte den Erfolg und es geht mit „Weiter“ zum nächsten Schritt
+- Zugangsdaten gehen nur an das Telefon, zu dem sie gehören: Gespeicherte werden nur an ihr eigenes Telefon geschickt, eingetippte erst nach „Anmelden“
 - Erfolgs- und Fehlermeldungen zeigen ein Windows-Symbol statt „✓“ / „✗“
 - Neues Symbol für „Telefonnummern anklickbar machen“: eine unterstrichene Nummer, auf die getippt wird
 - „Kopierte Nummer übernehmen“ ist für neue Installationen eingeschaltet: Ist nichts markiert, steht eine kopierte Nummer im Wählfenster (gewählt wird erst nach Bestätigung)
 - Seite „Wählen“ aufgeräumt: Link-Arten (tel:, callto:, sip:) und Rufnummern-Format stehen unter „Erweiterte Einstellungen anzeigen“
 - Texte: „Tastenkombination“ statt „Hotkey“; Hinweis, dass das Symbol im Infobereich hinter dem Pfeil ˄ liegen kann
-- Yealink T4xS (z. B. T48S): Die Erkennung nutzt zusätzlich die Modellangabe der Weboberfläche, falls die Startseite „Yealink“ nicht nennt
 
 ### Behoben
 
-- Yealink T4xS (z. B. T48S): Telefone, deren Startseite nur auf die HTTPS-Anmeldeseite weiterleitet, werden jetzt erkannt – auch wenn die Anmeldeseite selbst nicht antwortet
+- Yealink T4xS (z. B. T48S): Die Telefonsuche erkennt Telefone, deren Startseite nur auf die HTTPS-Anmeldeseite weiterleitet – auch wenn die Anmeldeseite selbst nicht antwortet – oder „Yealink“ nicht nennt, aber das Modell angibt
 - Yealink: Bricht das Telefon die HTTPS-Verbindung mit Windows ab, verbindet die App jetzt über HTTP, über das auch das Wählen funktioniert. Ein falsches Passwort zeigt sich dann erst beim ersten Anruf
 - Yealink: Verlangt das Telefon eine Digest-Anmeldung, meldet die App nicht mehr fälschlich „Benutzername oder Passwort falsch“
 
@@ -76,7 +78,8 @@ Erste öffentliche Version.
 - Update-Hinweis und Installation neuer Versionen per Klick
 - Installer ohne Admin-Rechte und portable ZIP
 
-[Unreleased]: https://github.com/julianfaatz/click-to-call/compare/v0.9.3...HEAD
+[Unreleased]: https://github.com/julianfaatz/click-to-call/compare/v0.9.4...HEAD
+[0.9.4]: https://github.com/julianfaatz/click-to-call/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/julianfaatz/click-to-call/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/julianfaatz/click-to-call/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/julianfaatz/click-to-call/compare/v0.9.0...v0.9.1

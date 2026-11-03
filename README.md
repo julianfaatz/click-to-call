@@ -50,7 +50,7 @@ Voraussetzung ist die HTTP-Fernsteuerung des Telefons: bei Snom über `command.h
 
 <table>
   <tr>
-    <td><img src="docs/waehlen1.png" alt="Einstellungen: Wählen und Hotkey"></td>
+    <td><img src="docs/waehlen1.png" alt="Einstellungen: Wählen und Tastenkombinationen"></td>
     <td><img src="docs/waehlen2.png" alt="Einstellungen: Links und Rufnummern"></td>
   </tr>
 </table>

@@ -63,7 +63,7 @@ Ein weiterer Hersteller braucht einen eigenen Treiber und Client in `Core/Phones
 
 Versionsnummern folgen [Semantic Versioning](https://semver.org/lang/de/): Fehlerbehebungen erhöhen die letzte Stelle (0.9.**1**), neue Funktionen die mittlere (0.**10**.0).
 
-1. In [CHANGELOG.md](CHANGELOG.md) die Einträge unter `[Unreleased]` in einen Abschnitt `## [x.y.z] - JJJJ-MM-TT` verschieben, die Links am Ende ergänzen und committen.
+1. In [CHANGELOG.md](CHANGELOG.md) die Einträge unter `[Unreleased]` in einen Abschnitt `## [x.y.z] - JJJJ-MM-TT` verschieben, die Links am Ende ergänzen, `<Version>` in [ClickToCall.csproj](src/ClickToCall/ClickToCall.csproj) anpassen und committen.
 2. Tag setzen und pushen:
 
    ```powershell
