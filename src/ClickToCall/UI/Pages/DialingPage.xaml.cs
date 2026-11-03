@@ -68,6 +68,7 @@ public partial class DialingPage : UserControl, ISectionPage
     {
         AdvancedPanel.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
         AdvancedToggleText.Text = Loc.T(show ? "Dialing.HideAdvanced" : "Dialing.ShowAdvanced");
+        System.Windows.Automation.AutomationProperties.SetName(AdvancedToggle, AdvancedToggleText.Text); // content is not plain text
         AdvancedToggleIcon.Text = show ? "" : ""; // chevron up / down
     }
 
@@ -92,6 +93,8 @@ public partial class DialingPage : UserControl, ISectionPage
 
         StatusText.Set(ResetDoneText, Loc.T("Dialing.ResetDone"), StatusText.Kind.Success);
         ResetDonePanel.Visibility = Visibility.Visible;
+        // At the very bottom of the page: make sure the confirmation and "undo" are in sight
+        Dispatcher.BeginInvoke(() => ResetDonePanel.BringIntoView(), System.Windows.Threading.DispatcherPriority.Loaded);
     }
 
     private void UndoReset_Click(object sender, RoutedEventArgs e)
@@ -102,6 +105,7 @@ public partial class DialingPage : UserControl, ISectionPage
         FillSecondOptions();
         RefreshLinkStatus();
         ResetDonePanel.Visibility = Visibility.Collapsed;
+        ResetButton.Focus(); // the clicked "undo" is gone
     }
 
     // ---------- Links ----------
