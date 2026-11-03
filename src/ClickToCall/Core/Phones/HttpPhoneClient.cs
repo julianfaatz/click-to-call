@@ -33,7 +33,8 @@ public abstract class HttpPhoneClient : IPhoneClient
         var hasLogin = !string.IsNullOrEmpty(connection.Username);
         var handler = new HttpClientHandler
         {
-            Credentials = hasLogin && !sendBasicAuthUpfront ? CreateCredentials(baseAddress, connection) : null,
+            // With the login sent up front, a phone may still ask for Digest instead: then the handler answers that
+            Credentials = hasLogin ? CreateCredentials(baseAddress, connection, digestOnly: sendBasicAuthUpfront) : null,
             PreAuthenticate = true,
             UseProxy = false,
             // .NET drops a preset Authorization header on redirects, so we follow them ourselves then
@@ -67,14 +68,13 @@ public abstract class HttpPhoneClient : IPhoneClient
     /// on redirects, but keeps a <see cref="CredentialCache"/> (it is tied to URIs). Without that, a phone that
     /// redirects after command.htm dials, but the redirected page answers "Unauthorized".
     /// </summary>
-    private static CredentialCache CreateCredentials(Uri baseAddress, PhoneConnection connection)
+    private static CredentialCache CreateCredentials(Uri baseAddress, PhoneConnection connection, bool digestOnly)
     {
         var credential = new NetworkCredential(connection.Username, connection.Password);
-        return new CredentialCache
-        {
-            { baseAddress, "Basic", credential },
-            { baseAddress, "Digest", credential },
-        };
+        var credentials = new CredentialCache { { baseAddress, "Digest", credential } };
+        if (!digestOnly)
+            credentials.Add(baseAddress, "Basic", credential);
+        return credentials;
     }
 
     /// <summary>"http://192.168.1.50/" → "192.168.1.50".</summary>
@@ -112,6 +112,24 @@ public abstract class HttpPhoneClient : IPhoneClient
     protected Task<string> GetStringAsync(string relativeUrl, CancellationToken ct) =>
         SendAsync(() => new HttpRequestMessage(HttpMethod.Get, relativeUrl), ct);
 
+    /// <summary>Whether anything answers at the address – an error page or a login request count, too.</summary>
+    protected async Task<bool> AnswersAsync(Uri url, CancellationToken ct)
+    {
+        try
+        {
+            await SendAsync(() => new HttpRequestMessage(HttpMethod.Get, url), ct);
+            return true;
+        }
+        catch (PhoneException ex) when (ex.Kind is PhoneErrorKind.Unreachable or PhoneErrorKind.Timeout or PhoneErrorKind.Certificate)
+        {
+            return ex.RedirectedTo is not null;
+        }
+        catch (PhoneException)
+        {
+            return true;
+        }
+    }
+
     protected Task<string> PostFormAsync(string relativeUrl, IEnumerable<KeyValuePair<string, string>> form, CancellationToken ct) =>
         SendAsync(() => new HttpRequestMessage(HttpMethod.Post, relativeUrl) { Content = new FormUrlEncodedContent(form) }, ct);
 
@@ -146,7 +164,7 @@ public abstract class HttpPhoneClient : IPhoneClient
                     var target = location.IsAbsoluteUri ? location : new Uri(BaseAddress, location);
                     // A phone set to HTTPS only redirects there: the caller tries HTTPS itself (see PhoneConnector)
                     if (target.Scheme != BaseAddress.Scheme || target.Authority != BaseAddress.Authority || redirects >= MaxRedirects)
-                        throw new PhoneException(PhoneErrorKind.Unreachable, $"Redirected to {target}");
+                        throw new PhoneException(PhoneErrorKind.Unreachable, $"Redirected to {target}") { RedirectedTo = target };
 
                     request = createRequest();
                     request.RequestUri = target;

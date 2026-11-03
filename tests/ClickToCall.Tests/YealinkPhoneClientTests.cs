@@ -75,13 +75,42 @@ public class YealinkPhoneClientTests
     }
 
     [Fact]
-    public async Task Redirect_to_https_lets_the_connector_try_https()
+    public async Task Redirect_to_another_address_that_answers_lets_the_connector_switch()
     {
-        using var server = new FakeHttpServer(_ => new FakeResponse(302, ExtraHeaders: "Location: https://127.0.0.1/\r\n"));
+        // Stands in for the usual HTTPS-only web interface
+        using var target = new FakeHttpServer(_ => new FakeResponse(200, "<title>Yealink T54W</title>"));
+        using var server = new FakeHttpServer(_ => new FakeResponse(302, ExtraHeaders: $"Location: http://{target.Host}/\r\n"));
         using var client = Client(server);
 
         var ex = await Assert.ThrowsAsync<PhoneException>(() => client.TestConnectionAsync());
         Assert.Equal(PhoneErrorKind.Unreachable, ex.Kind);
+        Assert.Equal(new Uri($"http://{target.Host}/"), ex.RedirectedTo);
+    }
+
+    [Fact]
+    public async Task Stays_on_http_if_the_https_it_redirects_to_does_not_answer()
+    {
+        // T48S (issue #4): the start page redirects to HTTPS, which fails (here: the fake server only speaks HTTP)
+        string? host = null;
+        using var server = new FakeHttpServer(_ => new FakeResponse(302,
+            ExtraHeaders: $"Location: https://{host}/servlet?m=mod_listener&p=login&q=loginForm&jumpto=status\r\n"));
+        host = server.Host;
+        using var client = Client(server);
+
+        Assert.Equal("Yealink", await client.TestConnectionAsync());
+    }
+
+    [Fact]
+    public async Task Answers_a_digest_login_request()
+    {
+        using var server = new FakeHttpServer(r => r.Headers.TryGetValue("Authorization", out var auth) && auth.StartsWith("Digest ")
+            ? new FakeResponse(200, "OK")
+            : new FakeResponse(401, ExtraHeaders: "WWW-Authenticate: Digest realm=\"Phone\", nonce=\"abc\", qop=\"auth\"\r\n"));
+        using var client = Client(server);
+
+        await client.DialAsync("123");
+
+        Assert.StartsWith("Digest ", server.Requests[^1].Headers["Authorization"]);
     }
 
     [Fact]
@@ -144,5 +173,22 @@ public class YealinkPhoneClientTests
         var result = await PhoneConnector.ConnectAsync(null, server.Host, "", "", preferHttps: false);
 
         Assert.Equal(ConnectStatus.UnknownVendor, result.Status);
+    }
+
+    [Fact]
+    public async Task Connector_connects_a_phone_whose_https_does_not_answer_over_http()
+    {
+        // Issue #4: recognized only by the redirect to the HTTPS login page, connected and dialing over HTTP
+        string? host = null;
+        using var server = new FakeHttpServer(r => r.Target.StartsWith("/servlet?key=")
+            ? new FakeResponse(200, "OK")
+            : new FakeResponse(302, ExtraHeaders: $"Location: https://{host}/servlet?m=mod_listener&p=login&q=loginForm&jumpto=status\r\n"));
+        host = server.Host; // HTTPS to the fake server fails like the TLS handshake with the real phone
+
+        var result = await PhoneConnector.ConnectAsync(null, server.Host, "admin", "1234", preferHttps: false);
+
+        Assert.Equal(ConnectStatus.Connected, result.Status);
+        Assert.Equal(PhoneVendor.Yealink, result.Vendor);
+        Assert.False(result.UseHttps);
     }
 }
