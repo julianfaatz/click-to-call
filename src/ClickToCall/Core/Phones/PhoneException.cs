@@ -20,6 +20,9 @@ public sealed class PhoneException(PhoneErrorKind kind, string? detail = null, E
     public PhoneErrorKind Kind { get; } = kind;
     public string? Detail { get; } = detail;
 
+    /// <summary>The phone answered, but redirected to another address (e.g. HTTPS) – the caller may try that one.</summary>
+    public Uri? RedirectedTo { get; init; }
+
     public string UserMessage => Kind switch
     {
         PhoneErrorKind.HttpError => Loc.T("Error.HttpError", Detail ?? "?"),

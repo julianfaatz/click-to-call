@@ -29,6 +29,8 @@ Der Abschnitt einer Version wird beim Release automatisch als Release-Text auf G
 ### Behoben
 
 - Yealink T4xS (z. B. T48S): Telefone, deren Startseite nur auf die HTTPS-Anmeldeseite weiterleitet, werden jetzt erkannt – auch wenn die Anmeldeseite selbst nicht antwortet
+- Yealink: Bricht das Telefon die HTTPS-Verbindung mit Windows ab, verbindet die App jetzt über HTTP, über das auch das Wählen funktioniert. Ein falsches Passwort zeigt sich dann erst beim ersten Anruf
+- Yealink: Verlangt das Telefon eine Digest-Anmeldung, meldet die App nicht mehr fälschlich „Benutzername oder Passwort falsch“
 
 ## [0.9.3] - 2026-10-24
 

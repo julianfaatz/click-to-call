@@ -34,7 +34,22 @@ public sealed partial class YealinkPhoneClient(PhoneConnection connection, TimeS
         if (!_hasLogin)
             throw new PhoneException(PhoneErrorKind.Unauthorized);
 
-        var html = await GetStringAsync("", ct);
+        string html;
+        try
+        {
+            html = await GetStringAsync("", ct);
+        }
+        catch (PhoneException ex) when (ex.RedirectedTo is not null)
+        {
+            // Usually the web interface is HTTPS only: the connector then uses HTTPS
+            if (await AnswersAsync(ex.RedirectedTo, ct))
+                throw;
+
+            // T48S (#4): redirects to HTTPS, but breaks off the TLS handshake with Windows. The Action URI still works
+            // over HTTP – only the login cannot be checked without the web interface: a wrong one shows on the first call.
+            return "Yealink";
+        }
+
         await CheckLoginAsync(ct);
 
         var title = TitleRegex().Match(html);
